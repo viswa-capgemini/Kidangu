@@ -21,14 +21,14 @@
 }
 
 /* Sidebar Toggle Button */
-.toggle-button {
+/* .toggle-button {
   background: transparent;
   border: none;
   color: white;
   font-size: 24px;
   cursor: pointer;
   margin-right: 10px;
-}
+} */
 
 /* Logo (also toggles sidebar) */
 .logo {
@@ -112,3 +112,93 @@
   top: 15px;
   right: 15px;
 }
+.panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #333;
+  color: white;
+  padding: 15px 20px;
+}
+
+/* Main Content Layout */
+.main-content {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - 60px); /* Adjust based on navbar height */
+}
+
+/* Left Half: Two Columns */
+.left-half {
+  display: grid;
+  grid-template-columns: 1fr;
+  width: 20%;
+  padding: 10px;
+  border-right: 2px solid #ccc;
+}
+
+.column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f4f4f4;
+  height: 100%;
+  border: 1px solid #ddd;
+}
+
+/* Right Half (Remaining Space) */
+.right-half {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e0e0e0;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.image-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 10px;
+  margin-top: 0 !important; /* Ensure no extra margin above */
+}
+
+.image-box {
+  background-color: #fff;
+  padding: 5px;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 6px; /* Smaller border radius */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  width: 120px; /* Reduce width */
+  height: 120px; /* Reduce height */
+  /* display: flex; */
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.image-box img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+.draggable-image {
+  width: 100px;
+  height: 100px;
+  cursor: grab;
+  border: 1px solid #ccc;
+  padding: 5px;
+  background: white;
+}
+
+/* .image-box p {
+  margin-top: 5px;
+  font-size: 14px;
+} */
