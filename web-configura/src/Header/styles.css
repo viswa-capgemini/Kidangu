@@ -1,60 +1,114 @@
-body {
-  font-family: Helvetica;
-  margin: 0;
+/* Container */
+.navbar-sidebar-container {
+  width: 100%;
+  position: relative;
 }
 
+/* Navbar Styles */
 .navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #333;
-  color: #fff;
-  padding: 1rem;
+  background: #333;
+  color: white;
+  padding: 15px 20px;
 }
 
-.navbar-left .logo {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #fff;
-  text-decoration: none;
-}
-
-.navbar-center .nav-links {
-  list-style-type: none;
+/* Left Section (☰ + Logo) */
+.navbar-left {
   display: flex;
-  margin: 0;
+  align-items: center;
+}
+
+/* Sidebar Toggle Button */
+.toggle-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+/* Logo (also toggles sidebar) */
+.logo {
+  color: white;
+  text-decoration: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+/* Center Section */
+.nav-links {
+  list-style: none;
+  display: flex;
   padding: 0;
+  margin: 0;
 }
 
-.navbar-center .nav-links li {
-  margin-right: 1rem;
+.nav-links li {
+  margin: 0 15px;
 }
 
-.navbar-center .nav-links a {
-  color: #fff;
+.nav-links li a {
+  color: white;
   text-decoration: none;
 }
 
+/* Right Section */
 .navbar-right {
   display: flex;
   align-items: center;
 }
 
-.navbar-right .cart-icon,
-.navbar-right .user-icon {
-  color: #fff;
+.cart-icon, .user-icon {
+  color: white;
   text-decoration: none;
-  margin-left: 1rem;
-  position: relative;
+  margin-left: 15px;
+  font-size: 18px;
 }
 
-.navbar-right .cart-count {
-  background-color: #f44336;
-  color: #fff;
-  border-radius: 50%;
-  padding: 0.2rem 0.5rem;
-  font-size: 0.8rem;
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  left: -250px;
+  top: 0;
+  width: 250px;
+  height: 100vh;
+  background: #222;
+  color: white;
+  padding-top: 20px;
+  transition: left 0.3s ease-in-out;
+}
+
+.sidebar.open {
+  left: 0;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 15px;
+  text-align: left;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+}
+
+/* Close Button inside Sidebar */
+.close-button {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
   position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
+  top: 15px;
+  right: 15px;
 }
