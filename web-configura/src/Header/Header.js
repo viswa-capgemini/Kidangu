@@ -61,7 +61,7 @@ const Header = () => {
         </div>
 
         {/* Right Half with Konva Stage */}
-        <div className="right-half">
+        <div className="right-half">.
           <Stage width={500} height={400} className="konva-stage">
             <Layer>
               {/* <Rect
