@@ -11,7 +11,6 @@ const Header = () => {
 
   return (
     <div className="navbar-sidebar-container">
-      {/* Header / Navbar */}
       <nav className="navbar">
         <div className="navbar-left">
           <a href="#" className="logo">
