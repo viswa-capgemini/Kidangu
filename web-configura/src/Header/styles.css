@@ -135,6 +135,7 @@
   width: 20%;
   padding: 10px;
   border-right: 2px solid #ccc;
+  background-color: #e7e6e6;
 }
 
 .column {
@@ -153,11 +154,13 @@
   width: 70%;
   align-items: center;
   justify-content: center;
-  background-color: #e0e0e0;
+  background-color: #ffffff;
   margin-top: 10px;
   margin-bottom: 10px;
   margin-left: 10px;
   margin-right: 10px;
+  overflow-x: scroll;
+  position: relative;
 }
 
 .image-grid {
@@ -205,6 +208,18 @@
   align-items: center;
   justify-content: center;
   padding: 10px;
+  background-color: #e7e6e6;
+}
+
+.edit-pallet {
+  justify-content: center;
+  align-items: center;
+  width: 120px;
+  font-weight: 500;
+  /* display: "flex";
+  background-color: "rgba(255, 255, 255, 0.8)";
+  border-radius: "5px";
+  box-shadow: "0px 2px 5px rgba(0,0,0,0.2)" */
 }
 
 /* .image-box p {
