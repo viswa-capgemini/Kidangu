@@ -539,98 +539,249 @@
 // export default Sidebar;
 
 import React, { useState, useRef, useEffect } from "react";
+import { Canvas, useThree, useLoader } from "@react-three/fiber";
+import { Image } from "@react-three/drei";
+
+const Stand = ({ poleHeight }) => {  // Shift left by setting default position
+
+  return (
+    <group position={[-1, -0.6, 0]}>
+      {/* Vertical Poles */}
+      <mesh position={[-3, 0.8, 0]}>
+        <planeGeometry args={[0.05, poleHeight]} />
+        <meshStandardMaterial color="#648ed1" />
+      </mesh>
+      <mesh position={[0, 0.8, 0]}>
+        <planeGeometry args={[0.05, poleHeight]} />
+        <meshStandardMaterial color="#648ed1" />
+      </mesh>
+
+      {/* Top Bars */}
+      <mesh position={[-1.5, -0.2, 0]}>
+        <planeGeometry args={[2.95, 0.07]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+      <mesh position={[-1.5, 0.4, 0]}>
+        <planeGeometry args={[2.95, 0.07]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+      <mesh position={[-1.5, 1, 0]}>
+        <planeGeometry args={[2.95, 0.07]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+      <mesh position={[-1.5, 1.6, 0]}>
+        <planeGeometry args={[2.95, 0.07]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+      <mesh position={[-1.5, 2.2, 0]}>
+        <planeGeometry args={[2.95, 0.07]} />
+        <meshStandardMaterial color="orange" />
+      </mesh>
+
+      {/* "1000" Image Placed in Between the Top Bars */}
+      <Image
+        position={[-2.1, 1.3, 0]} // Adjust position between bars
+        scale={[1, 0.5, 1]}
+        url="/box.png" // Path to the uploaded "1000" image
+      />
+      <Image
+        position={[-0.9, 1.3, 0]} // Adjust position between bars
+        scale={[1, 0.5, 1]}
+        url="/box.png" // Path to the uploaded "1000" image
+      />
+
+      {/* Ground Line */}
+      <mesh position={[-1.5, -0.80, 0]}>
+        <planeGeometry args={[3.6, 0.03]} />
+        <meshStandardMaterial color="black" />
+      </mesh>
+    </group>
+  );
+};
+
+const SideView = ({ poleHeight }) => {
+  return (
+    <group position={[3, -0.6, 0]}>
+      {/* Vertical Poles */}
+      <mesh position={[-1.5, 0.8, 0]}>
+        <planeGeometry args={[0.05, poleHeight]} />
+        <meshStandardMaterial color="#648ed1" />
+      </mesh>
+      <mesh position={[0, 0.8, 0]}>
+        <planeGeometry args={[0.05, poleHeight]} />
+        <meshStandardMaterial color="#648ed1" />
+      </mesh>
+
+      {/* X Bracing */}
+      <mesh position={[-0.75, 0.80, 0]} rotation={[0, 0, Math.PI / 2.77]}>
+        <planeGeometry args={[3.5, 0.05]} />  {/* Diagonal Bar 1 */}
+        <meshStandardMaterial color="gray" />
+      </mesh>
+      <mesh position={[-0.75, 0.80, 0]} rotation={[0, 0, -Math.PI / 2.77]}>
+        <planeGeometry args={[3.5, 0.05]} />  {/* Diagonal Bar 2 */}
+        <meshStandardMaterial color="gray" />
+      </mesh>
+
+      {/* Ground Line */}
+      <mesh position={[-0.75, -0.80, 0]}>
+        <planeGeometry args={[2.7, 0.03]} />
+        <meshStandardMaterial color="black" />
+      </mesh>
+    </group>
+  )
+}
 
 const Sidebar = () => {
-    const [showPallet, setShowPallet] = useState(true);
-    const [levels, setLevels] = useState(1);
-    const [selectedLevel, setSelectedLevel] = useState(null);
+  const [showPallet, setShowPallet] = useState(true);
+  const [showLevelWise, setShowLevelWise] = useState(false);
+  const [showUnderPass, setShowUnderPass] = useState(false);
+  const [showMaterialOnGround, setShowMaterialOnGround] = useState(false);
+  const [showLevelSame, setShowLevelSame] = useState(false);
+  const [rackLoad, setRackLoad] = useState("1000");
+  const [clearHeight, setClearHeight] = useState("11800");
+  const [bracing, setBracing] = useState("X Bracing");
+  const [levels, setLevels] = useState(1);
+  // const [selectedLevel, setSelectedLevel] = useState(null);
+  const [selectedLevel, setSelectedLevel] = useState(5);
+  const [selectedRowValue, setSelectedRowValue] = useState(0);
+  const [selectedUpright, setSelectedUpright] = useState("");
+  const [selectedBracing, setSelectedBracing] = useState("");
+  const [frontView, setFrontView] = useState([{ id: 1, position: [0, 0, 0] }]);
+  const [sideView, setSideView] = useState([{ id: 1, position: [2, 0, 0] }]);
+  const [poleHeight, setPoleHeight] = useState(3.2);
 
-    const levelData = {
-        1: { height: "852", load: "2000", depth: "1000", span: "2700" },
-        2: { height: "900", load: "1800", depth: "1100", span: "2500" },
-        3: { height: "950", load: "2200", depth: "1200", span: "2600" },
-        4: { height: "800", load: "1900", depth: "1000", span: "2400" },
-    };
+  const handleChange = (event) => {
+    const value = parseInt(event.target.value, 10);
+    setSelectedLevel(value);
+    setSelectedRowValue(0); // Reset to default 0 when changing levels handleChangeUpright
+  };
 
-    const handleLevelChange = (event) => {
-        const level = event.target.value;
-        setSelectedLevel(level ? parseInt(level, 10) : null);
-    };
+  const handleChangeUpright = (event) => {
+    setSelectedUpright(event.target.value);
+  };
 
-    const handleToggleShowPallet = () => setShowPallet(prev => !prev);
+  const handleChangeBracing = (event) => {
+    setSelectedBracing(event.target.value);
+  };
 
-    const handleChange = (event) => {
-        setLevels(parseInt(event.target.value, 10));
-    };
+  const levelDimensions = [
+    { height: 2.5, width: 1.2, depth: 0.8 },
+    { height: 2.8, width: 1.5, depth: 1.0 },
+    { height: 3.0, width: 1.8, depth: 1.2 },
+    { height: 3.2, width: 2.0, depth: 1.4 },
+  ];
 
-    return (
-        <div style={{display: 'flex'}}>
-            <div style={{ padding: '1rem', maxWidth: '400px', border: '1px solid #ddd' }}>
-            <h3>Advanced properties</h3>
-            <p><strong>A(M) {}x{}x{}</strong></p>
-            
-                <div style={{ marginBottom: '0.5rem' }}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showPallet}
-                            onChange={handleToggleShowPallet}
-                        />
-                        Show pallet
-                    </label>
-                </div>
-                <div style={{ marginBottom: '0.5rem', marginLeft: '0.2rem' }}>
-                    <label>
-                        <input
-                            type="radio"
-                            checked={showPallet}
-                            onChange={handleToggleShowPallet}
-                        />
-                        Level Wise
-                    </label>
-                </div>
-                <div style={{ marginBottom: '0.5rem' }}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showPallet}
-                            onChange={handleToggleShowPallet}
-                        />
-                        Underpass
-                    </label>
-                </div>
-                <div style={{ marginBottom: '0.5rem' }}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showPallet}
-                            onChange={handleToggleShowPallet}
-                        />
-                        Material on ground
-                    </label>
-                </div>
-                <div style={{ marginBottom: '0.5rem' }}>
-                    <label>
-                        <input
-                            type="checkbox"
-                            checked={showPallet}
-                            onChange={handleToggleShowPallet}
-                        />
-                        All levels are same
-                    </label>
-                </div>
-                {/* <div style={{ marginBottom: '0.5rem' }}>
-                    <label>
-                        Number of Levels
-                    </label>
-                    <select name="levels" id="levels" onChange={handleChange}>
-                        <option value="volvo">1</option>
-                        <option value="saab">2</option>
-                        <option value="opel">3</option>
-                        <option value="audi">4</option>
-                    </select>
-                </div> */}
-                <div style={{ marginBottom: "1rem" }}>
+  const uprightData = {
+    1: { name: "GXL 90-1.6", load: "2000", depth: "1000", span: "2700" },
+    2: { name: "GXL 90-1.8", load: "1800", depth: "1100", span: "2500" },
+    3: { name: "GXL 90-2.0", load: "2200", depth: "1200", span: "2600" },
+    4: { name: "GXL 90-2.2", load: "1900", depth: "1000", span: "2400" },
+  }
+
+  const bracingMaterialData = {
+    1: { name: "GI" },
+    2: { name: "MS" },
+    3: { name: "SS" },
+    4: { name: "Aluminium" },
+  }
+
+  const handleLevelChange = (event) => {
+    const level = event.target.value;
+    setSelectedLevel(level ? parseInt(level, 10) : null);
+  };
+
+  const handleToggleShowPallet = () => setShowPallet(prev => !prev);
+
+  const handleToggleLevelWise = () => setShowLevelWise(prev => !prev);
+
+  const handleToggleUnderPass = () => setShowUnderPass(prev => !prev);
+
+  const handleToggleMaterialOnGround = () => setShowMaterialOnGround(prev => !prev);
+
+  const handleToggleLevelSame = () => setShowLevelSame(prev => !prev);
+
+  const handleRackLoad = (event) => {
+    setRackLoad(event.target.value); // Update state when input changes handleClearHeight
+  };
+
+  const handleClearHeight = (event) => {
+    setClearHeight(event.target.value); // Update state when input changes handleClearHeight
+  };
+
+  const handleBracing = (event) => {
+    setBracing(event.target.value); // Update state when input changes handleClearHeight
+  };
+
+  const handleSelectLevel = (event) => {
+    const index = parseInt(event.target.value, 10);
+    setSelectedLevel(index);
+    setPoleHeight(levelDimensions[index].height);
+  };
+  // const handleChange = (event) => {
+  //     setLevels(parseInt(event.target.value, 10));
+  // };
+
+  return (
+    <div style={{
+      display: 'flex',
+      flex: 1
+    }}>
+      <div className="left-half" style={{ display: 'grid', width: '30%', gridTemplateColumns: '1fr', height: '100vh', backgroundColor: '#f1f1f1' }}>
+        <div style={{ padding: '1rem', maxWidth: '400px', border: '1px solid #ddd' }}>
+          <h3>Advanced properties</h3>
+          <p><strong>A(M) { }x{ }x{ }</strong></p>
+
+          <div style={{ marginBottom: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showPallet}
+                onChange={handleToggleShowPallet}
+              />
+              Show pallet
+            </label>
+          </div>
+          <div style={{ marginBottom: '0.5rem', marginLeft: '0.2rem' }}>
+            <label>
+              <input
+                type="radio"
+                checked={showLevelWise}
+                onChange={handleToggleLevelWise}
+              />
+              Level Wise
+            </label>
+          </div>
+          <div style={{ marginBottom: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showUnderPass}
+                onChange={handleToggleUnderPass}
+              />
+              Underpass
+            </label>
+          </div>
+          <div style={{ marginBottom: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showMaterialOnGround}
+                onChange={handleToggleMaterialOnGround}
+              />
+              Material on ground
+            </label>
+          </div>
+          <div style={{ marginBottom: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showLevelSame}
+                onChange={handleToggleLevelSame}
+              />
+              All levels are same
+            </label>
+          </div>
+          {/* <div style={{ marginBottom: "1rem" }}>
                 <label htmlFor="levels" style={{ marginRight: "8px" }}>
                     Select Level:
                 </label>
@@ -649,8 +800,8 @@ const Sidebar = () => {
                         </option>
                     ))}
                 </select>
-            </div>
-            {selectedLevel && (
+            </div> */}
+          {/* {selectedLevel && (
                 <table style={{ width: "100%", borderCollapse: "collapse" }}>
                     <tbody>
                         <tr>
@@ -687,10 +838,145 @@ const Sidebar = () => {
                         </tr>
                     </tbody>
                 </table>
-            )}
+            )} */}
+          <div style={{ marginBottom: "0.5rem" }}>
+            <label>Number of Levels</label>
+            <select name="levels" id="levels" onChange={handleChange} value={selectedLevel}>
+              {Array.from({ length: 5 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+
+            <div style={{ marginTop: "1rem", display: "flex", gap: "10px" }}>
+              {Array.from({ length: selectedLevel + 1 }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setSelectedRowValue(i)}
+                  style={{
+                    padding: "8px 12px",
+                    cursor: "pointer",
+                    background: selectedRowValue === i ? "blue" : "lightgray",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "4px",
+                  }}
+                >
+                  {i}
+                </button>
+              ))}
             </div>
+          </div>
+
+          {/* Select Dropdown for Level Dimensions */}
+      <label>Select Level:</label>
+      <select onChange={handleSelectLevel} value={selectedLevel || ""}>
+        <option value="" disabled>Select a level</option>
+        {levelDimensions.map((level, index) => (
+          <option key={index} value={index}>
+            Level {index} - H: {level.height}, W: {level.width}, D: {level.depth}
+          </option>
+        ))}
+      </select>
+
+      {/* Display Selected Level Dimensions */}
+      {selectedLevel !== null && (
+        <div style={{ marginTop: "1rem", fontSize: "16px", fontWeight: "bold" }}>
+          <p>Level {selectedLevel + 1}</p>
+          <label>Height:</label>
+          <input type="text" readOnly /><br />
+          <label>Width:</label>
+          <input type="text"  readOnly /><br />
+          <label>Depth:</label>
+          <input type="text"  readOnly /><br />
         </div>
-    )
+      )}
+          {/* <div style={{ marginBottom: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showPallet}
+                onChange={handleToggleShowPallet}
+              />
+              Hide Beam or Shelf name in PDF
+            </label>
+          </div> */}
+          <div style={{ marginBottom: '0.5rem' }}>
+            <label>Level Accessories</label>
+          </div>
+          <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
+            <label>
+              Rack Load(Kg)
+            </label>
+            <input
+              type="text"
+              value={rackLoad}
+              onChange={handleRackLoad}
+            />
+          </div>
+          <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
+            <label>
+              Clear available height
+            </label>
+            <input
+              type="text"
+              value={clearHeight}
+              onChange={handleClearHeight}
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
+            <label htmlFor="upright">Upright</label>
+            <select name="upright" id="upright" onChange={handleChangeUpright} value={selectedUpright}>
+              {/* <option value="">Select Upright</option> */}
+              {Object.entries(uprightData).map(([key, { name }]) => (
+                <option key={key} value={key}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div style={{ display: 'flex', marginBottom: '0.5rem' }}>
+            <label>
+              Bracing
+            </label>
+            <input
+              type="text"
+              value={bracing}
+              onChange={handleBracing}
+            />
+          </div>
+          <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
+            <label htmlFor="bracing">Bracing Material</label>
+            <select name="bracing" id="bracing" onChange={handleChangeBracing} value={selectedBracing}>
+              {/* <option value="">Select Bracing</option> */}
+              {Object.entries(bracingMaterialData).map(([key, { name }]) => (
+                <option key={key} value={key}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+      <div className="right-half" style={{ display: 'flex', width: '90%', gridTemplateColumns: '1fr', height: '100vh', backgroundColor: '#f1f1f1' }}>
+        <Canvas style={{ overflowX: "auto" }}>
+          <ambientLight intensity={0.5} />
+          <directionalLight position={[10, 10, 10]} intensity={1} />
+          {/* <CameraController stands={stands} /> */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]}>
+            <gridHelper args={[20, 100]} />
+          </mesh>
+          {frontView.map((stand) => (
+            <Stand key={stand.id} poleHeight={poleHeight} position={stand.position} />
+          ))}
+          {sideView.map((stand) => (
+            <SideView key={stand.id} poleHeight={poleHeight} position={stand.position} />
+          ))}
+        </Canvas>
+      </div>
+    </div>
+  )
 }
 
 export default Sidebar;
