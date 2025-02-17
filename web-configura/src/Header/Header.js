@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Stage, Layer, Rect, Image as KonvaImage, Text, Group } from "react-konva";
 import useImage from "use-image";
 import "./styles.css";
+import metadata from "../metadata.json";
 import sprs from "../assets/productimages/sprs-image.avif";
 import mts from "../assets/productimages/mts-image.png"
 import canti from "../assets/productimages/cantilever.webp"
@@ -556,15 +557,17 @@ const Header = () => {
                   <h3>Properties of {selectedRect.id}</h3>
                   <p><strong>A(M) {heightData[selectedHeight]?.name}x{widthData[selectedWidth]?.name}x{depthData[selectedDepth]?.name}</strong></p>
                   <div className="property-list">
-                    <div>
+                    <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label>
-                        ID:<input type="text" value={selectedRect.id} readOnly />
+                        ID:
                       </label>
+                      <input type="text" value={selectedRect.id} readOnly />
                     </div>
-                    <div>
+                    <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label>
-                        Name:<input type="text" value={selectedRect.fullName} />
+                        Name:
                       </label>
+                      <input type="text" value={selectedRect.fullName} />
                     </div>
                     <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label htmlFor="height">Height:</label>

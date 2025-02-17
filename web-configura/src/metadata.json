@@ -1,0 +1,34 @@
+{
+    "heightData": [
+      { "id": 1, "name": "300", "partNo": "GXL 90-1.6", "fullName": "GXL 90-3m", "cost": "10" },
+      { "id": 2, "name": "400", "partNo": "GXL 90-1.8", "fullName": "GXL 90-4m", "cost": "20" },
+      { "id": 3, "name": "500", "partNo": "GXL 90-2.0", "fullName": "GXL 90-5m", "cost": "30" }
+    ],
+    "widthData": [
+      { "id": 1, "name": "100", "partNo": "GB 100", "fullName": "GB-1m", "cost": "5" },
+      { "id": 2, "name": "200", "partNo": "GB 200", "fullName": "GB-2m", "cost": "10" },
+      { "id": 3, "name": "300", "partNo": "GB 300", "fullName": "GB-3m", "cost": "15" }
+    ],
+    "depthData": [
+      { "id": 1, "name": "80", "partNo": "GD 80", "fullName": "GD-0.8m", "cost": "12" },
+      { "id": 2, "name": "100", "partNo": "GD 100", "fullName": "GD-1m", "cost": "24" },
+      { "id": 3, "name": "120", "partNo": "GD 120", "fullName": "GD-1.2m", "cost": "36" }
+    ],
+    "rackLoad": [
+      { "id": 1, "name": "500" },
+      { "id": 2, "name": "1000" },
+      { "id": 3, "name": "1500" }
+    ],
+    "uprightData": [
+      { "id": 1, "name": "GXL 90-1.6", "partNo": "GXL 90-1.6", "load": "500", "depth": "1000", "span": "2700" },
+      { "id": 2, "name": "GXL 90-1.8", "partNo": "GXL 90-1.8", "load": "1000", "depth": "1100", "span": "2500" },
+      { "id": 3, "name": "GXL 90-2.0", "partNo": "GXL 90-2.0", "load": "1500", "depth": "1200", "span": "2600" }
+    ],
+    "bracingMaterialData": [
+      { "id": 1, "name": "GI" },
+      { "id": 2, "name": "MS" },
+      { "id": 3, "name": "SS" },
+      { "id": 4, "name": "Aluminium" }
+    ]
+  }
+  

@@ -331,6 +331,7 @@ td[rowspan] {
 }
 
 .properties-panel {
+  display: flex;
   flex: 40%;
   padding: 10px;
   border-bottom: 2px solid #ccc;
@@ -339,6 +340,20 @@ td[rowspan] {
   flex-direction: column;
   gap: 10px;
   overflow-y: auto;
+}
+
+.property-list label, input {
+  font-weight: bold;
+  display:inline-block;
+    width:250px;
+    /* display: table-cell; */
+}
+
+.property-list div {
+  display: "flex";
+  margin-bottom: "0.5rem";
+  align-items: "center";
+  gap: "10px";
 }
 
 .canvas {
