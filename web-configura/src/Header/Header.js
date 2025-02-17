@@ -388,6 +388,15 @@ const Header = () => {
     });
   };
 
+  const downloadJSON = (jsonString) => {
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "product-data.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 
   // const fbx = useLoader(FBXLoader, "demo.fbx");
   // console.log("fbx", fbx, fbx.children[10].name)
@@ -728,59 +737,58 @@ const Header = () => {
               <>
                 <p><strong>Total SPRs:</strong> {countsRef.current.spr}</p>
                 <table>
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Part No</th>
-      <th>Part Name</th>
-      <th>Quantity</th>
-      <th>Price</th>
-      <th>Total Price</th>
-    </tr>
-  </thead>
-  <tbody>
-    {JSON.parse(saveJSON.current).map((item, index) => {
-      // Calculate the total cost for the "Total Price" column for this item
-      const totalItemPrice = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Part No</th>
+                      <th>Part Name</th>
+                      <th>Quantity</th>
+                      <th>Price</th>
+                      <th>Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {JSON.parse(saveJSON.current).map((item, index) => {
+                      // Calculate the total cost for the "Total Price" column for this item
+                      const totalItemPrice = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
 
-      return (
-        <React.Fragment key={index}>
-          {item.parts.map((part, partIndex) => (
-            <tr key={partIndex}>
-              {partIndex === 0 && (
-                <td rowSpan={item.parts.length}>{item.id}</td>
-              )}
-              <td>{part.partNo}</td>
-              <td>{part.partName}</td>
-              <td>{part.quantity}</td>
-              <td>${part.price}</td>
-              {partIndex === 0 && (
-                <td rowSpan={item.parts.length}>${totalItemPrice.toFixed(2)}</td>
-              )}
-            </tr>
-          ))}
-        </React.Fragment>
-      );
-    })}
-    {/* Row for the total cost of the last column */}
-    <tr>
-      <td colSpan={5} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Cost:</td>
-      <td>
-        ${
-          // Calculate the grand total for all the items
-          JSON.parse(saveJSON.current).reduce((total, item) => {
-            const itemTotal = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
-            return total + itemTotal;
-          }, 0).toFixed(2)
-        }
-      </td>
-    </tr>
-  </tbody>
-</table>
-
-
-
-
+                      return (
+                        <React.Fragment key={index}>
+                          {item.parts.map((part, partIndex) => (
+                            <tr key={partIndex}>
+                              {partIndex === 0 && (
+                                <td rowSpan={item.parts.length}>{item.id}</td>
+                              )}
+                              <td>{part.partNo}</td>
+                              <td>{part.partName}</td>
+                              <td>{part.quantity}</td>
+                              <td>${part.price}</td>
+                              {partIndex === 0 && (
+                                <td rowSpan={item.parts.length}>${totalItemPrice.toFixed(2)}</td>
+                              )}
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      );
+                    })}
+                    {/* Row for the total cost of the last column */}
+                    <tr>
+                      <td colSpan={5} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Cost:</td>
+                      <td>
+                        ${
+                          // Calculate the grand total for all the items
+                          JSON.parse(saveJSON.current).reduce((total, item) => {
+                            const itemTotal = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
+                            return total + itemTotal;
+                          }, 0).toFixed(2)
+                        }
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div className="downloadJSON">
+                  <button onClick={() => downloadJSON((saveJSON.current))}>Download BOM</button>
+                </div>
                 {/* <p><strong>Total Cantilevers:</strong> { }</p> */}
               </>
             ) : (

@@ -477,3 +477,14 @@ td[rowspan] {
   border-top: 1px solid #ccc;
 }
 
+.downloadJSON {
+  padding: 10px 20px;
+}
+.downloadJSON button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
