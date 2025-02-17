@@ -159,7 +159,6 @@
   margin-bottom: 10px;
   margin-left: 10px;
   margin-right: 10px;
-  overflow-x: scroll;
   position: relative;
 }
 
@@ -203,13 +202,88 @@
 }
 
 .right-half {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  background-color: #e7e6e6;
+  width: 100%;
+  max-width: 400px; /* Keep it compact */
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  position: absolute;
+  right: 10px;
+  top: 70px; /* Adjusted to avoid navbar overlap */
+  overflow-y: auto;
+  max-height: calc(100vh - 80px); /* Ensure it doesn’t overflow */
 }
+
+.product-details h1 {
+  font-size: 18px;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.product-details label {
+  font-size: 14px;
+  font-weight: bold;
+  display: block;
+  margin-top: 8px;
+  color: #555;
+}
+
+.product-details p {
+  font-size: 14px;
+  color: #222;
+  margin: 5px 0;
+  background: #f8f9fa;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 8px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+th {
+  background: #007bff;
+  color: white;
+  font-weight: bold;
+}
+
+tbody tr:nth-child(even) {
+  background: #f2f2f2;
+}
+
+tbody tr:hover {
+  background: #ddd;
+}
+
+td[rowspan] {
+  background: #e9ecef;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .right-half {
+    max-width: 300px;
+    right: 5px;
+    top: 60px;
+    max-height: calc(100vh - 60px);
+  }
+
+  table {
+    font-size: 12px;
+  }
+}
+
 
 .edit-pallet {
   justify-content: center;
@@ -226,3 +300,165 @@
   margin-top: 5px;
   font-size: 14px;
 } */
+
+.konva-stage {
+  border: 1px solid #ccc;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: grid;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: row;
+  width: 80vw;
+  height: 80vh;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.properties-panel {
+  flex: 40%;
+  padding: 10px;
+  border-bottom: 2px solid #ccc;
+  background-color: #e7e6e6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.canvas {
+  flex: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  position: relative;
+
+  /* Centering the Canvas */
+  margin: auto; /* Centers it horizontally */
+  height: 80vh; /* Takes full height */
+}
+
+
+.view-groups {
+  display: flex;
+  justify-content: center; /* Centers the grid */
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.view-groups-grid {
+  display: flex; /* Makes the views appear in a row */
+  gap: 20px; /* Adds space between the views */
+}
+
+.view-groups-box {
+  width: 50px; /* Adjust as needed */
+  height: 50px; /* Adjust as needed */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  background-color: #f8f8f8;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-groups-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 5px;
+}
+
+.view-groups-box.active {
+  background-color: lightorange;
+  border: 2px solid orange;
+}
+
+.cost {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.cost table {
+  width: 80%;
+  border-collapse: collapse;
+  background: #fff;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.cost th, .cost td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.cost th {
+  background-color: #007bff;
+  color: white;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.cost tbody tr:nth-child(even) {
+  background-color: #f8f9fa;
+}
+
+.cost tbody tr:hover {
+  background-color: #e9ecef;
+  transition: 0.3s ease-in-out;
+}
+
+.cost td {
+  font-size: 16px;
+  color: #333;
+}
+
+@media (max-width: 768px) {
+  .cost table {
+    width: 100%;
+  }
+
+  .cost th, .cost td {
+    padding: 10px;
+    font-size: 14px;
+  }
+}
+
+.button-container {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  background: white;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+

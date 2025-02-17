@@ -541,8 +541,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
 import { Image } from "@react-three/drei";
+import { TextureLoader } from 'three';
 
 const Stand = ({ poleHeight }) => {  // Shift left by setting default position
+
+  // const texture = useLoader(TextureLoader, '/path/to/your-image.jpg');
 
   return (
     <group position={[-1, -0.6, 0]}>
