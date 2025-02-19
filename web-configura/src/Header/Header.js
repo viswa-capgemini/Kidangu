@@ -26,6 +26,9 @@ import sideStand80 from "../assets/racking/depth/stand-side-30-w8.png";
 import sideStand100 from "../assets/racking/depth/stand-side-40-w11.png";
 import sideStand120 from "../assets/racking/depth/stand-side-40-w11.png";
 
+// svg image of the converted png
+import rightView from "../assets/frontview1.svg"
+
 const GRID_SIZE = 50; // Cell size
 
 const Stand = ({ position, selectedHeight, selectedWidth }) => {
@@ -34,9 +37,9 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
   const selectedImageHeight = selectedHeight;
   const selectedImageWidth = selectedWidth;
   const standFront = {
-    1: useLoader(TextureLoader, standFront30),
-    2: useLoader(TextureLoader, standFront40),
-    3: useLoader(TextureLoader, standFront50),
+    1: useLoader(TextureLoader, rightView),
+    2: useLoader(TextureLoader, rightView),
+    3: useLoader(TextureLoader, rightView),
   };
 
   const beamFront = {
@@ -46,7 +49,7 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
   };
 
   const heights = {
-    1: 3,  // Height for standFront30
+    1: 1,  // Height for standFront30
     2: 4,  // Height for standFront40
     3: 5,  // Height for standFront50
   };
