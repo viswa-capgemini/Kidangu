@@ -27,7 +27,9 @@ import sideStand100 from "../assets/racking/depth/stand-side-40-w11.png";
 import sideStand120 from "../assets/racking/depth/stand-side-40-w11.png";
 
 // svg image of the converted png
-import rightView from "../assets/frontview1.svg"
+// import rightView from "../assets/viewer-right-view.svg"
+import rightView from "../assets/rightview.png"
+import frontview1 from "../assets/frontview1.svg"
 
 const GRID_SIZE = 50; // Cell size
 
@@ -49,7 +51,7 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
   };
 
   const heights = {
-    1: 1,  // Height for standFront30
+    1: 3,  // Height for standFront30
     2: 4,  // Height for standFront40
     3: 5,  // Height for standFront50
   };
@@ -59,6 +61,12 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
     2: 0.3,  // Width for beamFrontEmpty200
     3: 0.5,  // Width for beamFrontEmpty300
   };
+
+  const svgHeight = {
+    1: 300,
+    2: 350,
+    3: 400
+  }
 
   const toggleDropdown = (e) => {
     e.stopPropagation();
@@ -70,13 +78,14 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
   return (
     <group position={position}>
       {/* Vertical Poles */}
+      
       <mesh position={[-3, heights[selectedImageHeight] / 5, 0]}>
-        <planeGeometry args={[0.1, heights[selectedImageHeight]]} />
-        <meshBasicMaterial map={standFront[selectedImageHeight]} />
+        <planeGeometry args={[4, heights[selectedImageHeight]]} />
+        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent={true} alphaTest={0.5} depthWrite={false}/>
       </mesh>
       <mesh position={[widths[selectedWidth], heights[selectedImageHeight] / 5, 0]}>
         <planeGeometry args={[0.1, heights[selectedImageHeight]]} />
-        <meshBasicMaterial map={standFront[selectedImageHeight]} />
+        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent={true} alphaTest={0.5} depthWrite={false}/>
       </mesh>
 
       {/* Top Bars */}
@@ -89,6 +98,12 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
         <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
         <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent={true} alphaTest={0.5} depthWrite={false} />
       </mesh>
+
+      <Html>
+      <svg x="100px" y="-100px" height="320" width="700" xmlns="http://www.w3.org/1999/svg">
+  <image height="400" width="700" href={rightView} />
+</svg>
+      </Html>
 
 
       {/* Centered Edit Label */}
@@ -458,6 +473,10 @@ const Header = () => {
         </div>
       </nav>
 
+      <svg height="1000" width="900" xmlns="http://www.w3.org/2000/svg">
+  <image height="1000" width="900" href={rightView} />
+</svg>
+
       {/* Main Content Area */}
       <div className="main-content">
         <div className="left-half">
@@ -485,6 +504,12 @@ const Header = () => {
               <div className="image-grid">
                 <div className="image-box">
                   <img src={aisleSpace} alt="Aisle Space" onClick={() => handleImageClick('grey', 'space', 'Aisle Space')} />
+                </div>
+                <div className="image-box" onClick={() => handleImageClick('brown', 'door', 'Door')}>
+                  <img src={door} alt="Door" />
+                </div>
+                <div className="image-box" onClick={() => handleImageClick('brown', 'pillar', 'Pillar')}>
+                  <img src={pillar} alt="Pillar" />
                 </div>
                 <div className="image-box" onClick={() => handleImageClick('brown', 'door', 'Door')}>
                   <img src={door} alt="Door" />
