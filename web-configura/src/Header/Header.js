@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Stage, Layer, Rect, Image as KonvaImage, Text, Group } from "react-konva";
 import useImage from "use-image";
 import "./styles.css";
-import metadata from "../metadata.json";
 import sprs from "../assets/productimages/sprs-image.avif";
 import mts from "../assets/productimages/mts-image.png"
 import canti from "../assets/productimages/cantilever.webp"
@@ -25,19 +24,27 @@ import beamFrontEmpty300 from "../assets/racking/width/beam-front-empty-36.png";
 import sideStand80 from "../assets/racking/depth/stand-side-30-w8.png";
 import sideStand100 from "../assets/racking/depth/stand-side-40-w11.png";
 import sideStand120 from "../assets/racking/depth/stand-side-40-w11.png";
+import imageAI from "../assets/canvas_image.svg"
 
 // svg image of the converted png
 // import rightView from "../assets/viewer-right-view.svg"
 import rightView from "../assets/rightview.png"
 import frontview1 from "../assets/frontview1.svg"
+import box from "../assets/racking/box-front.png"
 
 const GRID_SIZE = 50; // Cell size
 
-const Stand = ({ position, selectedHeight, selectedWidth }) => {
-
+const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const selectedImageHeight = selectedHeight;
   const selectedImageWidth = selectedWidth;
+
+  const mesh1Ref = useRef();
+  const mesh2Ref = useRef();
+  const topBar1Ref = useRef();
+  const topBar2Ref = useRef();
+  const rackRefs = useRef([]);
+
   const standFront = {
     1: useLoader(TextureLoader, rightView),
     2: useLoader(TextureLoader, rightView),
@@ -49,6 +56,12 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
     2: useLoader(TextureLoader, beamFrontEmpty200),
     3: useLoader(TextureLoader, beamFrontEmpty300),
   };
+
+  const rackLoader = {
+    1: useLoader(TextureLoader, box),
+    2: useLoader(TextureLoader, box),
+    3: useLoader(TextureLoader, box),
+  }
 
   const heights = {
     1: 3,  // Height for standFront30
@@ -68,43 +81,69 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
     3: 400
   }
 
+  const rackPositions = [
+    [-2.45, 1.8],
+    [-1.45, 1.8],
+    [-0.45, 1.8],
+    [-2.45, 0.3],
+    [-1.45, 0.3],
+    [-0.45, 0.3],
+  ];
+
+  useEffect(() => {
+    // Log positions of individual meshes
+    if (mesh1Ref.current) console.log("Mesh 1 Position:", mesh1Ref.current.position);
+    if (mesh2Ref.current) console.log("Mesh 2 Position:", mesh2Ref.current.position);
+    if (topBar1Ref.current) console.log("Top Bar 1 Position:", topBar1Ref.current.position);
+    if (topBar2Ref.current) console.log("Top Bar 2 Position:", topBar2Ref.current.position);
+
+    // Log all rack positions
+    rackRefs.current.forEach((ref, index) => {
+      if (ref) console.log(`Rack ${index} Position:`, ref.position);
+    });
+  }, [selectedImageHeight, selectedWidth, selectedHeight, rackPositions]);
+
   const toggleDropdown = (e) => {
     e.stopPropagation();
     setShowDropdown(true);
   };
 
-  console.log(selectedHeight, selectedImageHeight, standFront[selectedImageHeight], heights[selectedImageHeight])
+  // Expose mesh positions to the parent component
+  useImperativeHandle(ref, () => ({
+    getMeshPositions: () => ({
+      mesh1: mesh1Ref.current?.position.toArray() || [0, 0, 0],
+      mesh2: mesh2Ref.current?.position.toArray() || [0, 0, 0],
+      topBar1: topBar1Ref.current?.position.toArray() || [0, 0, 0],
+      topBar2: topBar2Ref.current?.position.toArray() || [0, 0, 0],
+    }),
+  }));
 
   return (
     <group position={position}>
-      {/* Vertical Poles */}
-      
-      <mesh position={[-3, heights[selectedImageHeight] / 5, 0]}>
+      {/* Left Mesh */}
+      <mesh ref={mesh1Ref} position={[-2.9, heights[selectedImageHeight] / 5, 0]}>
         <planeGeometry args={[4, heights[selectedImageHeight]]} />
-        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent={true} alphaTest={0.5} depthWrite={false}/>
+        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
       </mesh>
-      <mesh position={[widths[selectedWidth], heights[selectedImageHeight] / 5, 0]}>
-        <planeGeometry args={[0.1, heights[selectedImageHeight]]} />
-        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent={true} alphaTest={0.5} depthWrite={false}/>
+
+      {/* Right Mesh */}
+      <mesh ref={mesh2Ref} position={[widths[selectedWidth] + 0.1, heights[selectedImageHeight] / 5, 0]}>
+        <planeGeometry args={[4, heights[selectedImageHeight]]} />
+        <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
       </mesh>
 
       {/* Top Bars */}
-      <mesh position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight], 0]}>
+      <mesh ref={topBar1Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight], 0]}>
         <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-        <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent={true} alphaTest={0.5} depthWrite={false} />
+        <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
       </mesh>
 
-      <mesh position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight] + 1.5, 0]}>
+      <mesh ref={topBar2Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight] + 1.5, 0]}>
         <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-        <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent={true} alphaTest={0.5} depthWrite={false} />
+        <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
       </mesh>
 
-      <Html>
-      <svg x="100px" y="-100px" height="320" width="700" xmlns="http://www.w3.org/1999/svg">
-  <image height="400" width="700" href={rightView} />
-</svg>
-      </Html>
-
+      
 
       {/* Centered Edit Label */}
       {/* <Html position={[-1.5, 2.7, 0]} center style={{ pointerEvents: "visible" }} onPointerDown={(e) => e.stopPropagation()}>
@@ -126,7 +165,7 @@ const Stand = ({ position, selectedHeight, selectedWidth }) => {
             </Html> */}
     </group>
   );
-};
+});
 
 const SideView = ({ position, selectedDepth }) => {
 
@@ -150,6 +189,14 @@ const SideView = ({ position, selectedDepth }) => {
           depthWrite={false} />
       </mesh>
     </group>
+  )
+}
+
+const FrontView = () => {
+  return (
+    <svg height="1000" width="900" xmlns="http://www.w3.org/2000/svg">
+                    <image height="1000" width="900" href={rightView} />
+                  </svg>
   )
 }
 
@@ -196,11 +243,13 @@ const Header = () => {
   const [selectedDepth, setSelectedDepth] = useState(1);
   const [selectedUpright, setSelectedUpright] = useState(null);
   const [selectedBracing, setSelectedBracing] = useState(null);
-  const [selectedRackLoad, setSelectedRackLoad] = useState(null);
+  const [selectedRackLoad, setSelectedRackLoad] = useState(1);
   const [selectedView, setSelectedView] = useState("stand");
+  const [selectedElevation, setSelectedElevation] = useState(1);
   // const [saveJSON, setSaveJSON] = useState(null);
   const saveJSON = useRef(null);
   const countsRef = useRef({ spr: 0, canti: 0, space: 0 });
+  const standRef = useRef();
 
   const heightData = {
     1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10' },
@@ -222,8 +271,8 @@ const Header = () => {
 
   const rackLoad = {
     1: { name: "500" },
-    2: { name: "1000" },
-    3: { name: "1500" },
+    2: { name: "750" },
+    3: { name: "1000" },
   }
 
   const uprightData = {
@@ -239,31 +288,67 @@ const Header = () => {
     4: { name: "Aluminium" },
   }
 
+  const elevationData = {
+    1: { name: "Custom" },
+    2: { name: "SKU" },
+    3: { name: "Pallet" },
+    4: { name: "MHE" },
+  }
+
   const handleRectClick = (rect) => {
     setSelectedRect(rect);
     setModalVisible(true);
   };
 
   const handleSaveAndClose = () => {
+    const meshPositions = standRef.current?.getMeshPositions() || {};
+
     const jsonData = {
       id: selectedRect.id,
+      productGroup: selectedRect.fullName,
       parts: [
         {
           partNo: heightData[selectedHeight]?.partNo || "N/A",
           partName: heightData[selectedHeight]?.fullName || "N/A",
-          quantity: 4,
-          price: heightData[selectedHeight]?.cost || 0
+          productGroup: selectedRect.fullName,
+          filePathCloud: "",
+          "3D model File name": "",
+          price: heightData[selectedHeight]?.cost || 0,
+          startPartCoordinates: meshPositions.mesh1 || [0, 0, 0],
+        },
+        {
+          partNo: heightData[selectedHeight]?.partNo || "N/A",
+          partName: heightData[selectedHeight]?.fullName || "N/A",
+          productGroup: selectedRect.fullName,
+          filePathCloud: "",
+          "3D model File name": "",
+          price: heightData[selectedHeight]?.cost || 0,
+          startPartCoordinates: meshPositions.mesh2 || [0, 0, 0],
         },
         {
           partNo: widthData[selectedWidth]?.partNo || "N/A",
           partName: widthData[selectedWidth]?.fullName || "N/A",
-          quantity: 1,
-          price: widthData[selectedWidth]?.cost || 0
+          productGroup: selectedRect.fullName,
+          filePathCloud: "",
+          "3D model File name": "",
+          price: widthData[selectedWidth]?.cost || 0,
+          startPartCoordinates: meshPositions.topBar1 || [0, 0, 0],
+        },
+        {
+          partNo: widthData[selectedWidth]?.partNo || "N/A",
+          partName: widthData[selectedWidth]?.fullName || "N/A",
+          productGroup: selectedRect.fullName,
+          filePathCloud: "",
+          "3D model File name": "",
+          price: widthData[selectedWidth]?.cost || 0,
+          startPartCoordinates: meshPositions.topBar2 || [0, 0, 0],
         },
         {
           partNo: depthData[selectedDepth]?.partNo || "N/A",
           partName: depthData[selectedDepth]?.fullName || "N/A",
-          quantity: 7,
+          productGroup: selectedRect.fullName,
+          filePathCloud: "",
+          "3D model File name": "",
           price: depthData[selectedDepth]?.cost || 0
         }
       ],
@@ -273,6 +358,9 @@ const Header = () => {
         (depthData[selectedDepth]?.cost || 0) * 7
       ).toFixed(2)
     };
+    
+    console.log(jsonData);
+    
 
     saveJSON.current = ((prevSaveJSON) => {
       const updatedSaveJSON = prevSaveJSON ? JSON.parse(prevSaveJSON) : [];
@@ -322,6 +410,10 @@ const Header = () => {
     setSelectedView(view);
   };
 
+  const handleElevationChange = (event) => {
+    setSelectedElevation(event.target.value);
+  }
+
 
   const handleDragMove = (index, e) => {
     const newRects = [...rects];
@@ -347,6 +439,9 @@ const Header = () => {
 
   const handleImageClick = (color, name, fullName) => {
     const margin = 10;
+    const rowHeight = rectSize + margin; // Fixed row height
+    const rowMap = { spr: 0, canti: 1, rack: 2, space: 3 }; // Define fixed row positions
+
     setRects((prevRects) => {
       let count = prevRects.filter(rect => rect.name.startsWith(name)).length;
       let newId = `${name}${count + 1}`; // Ensure uniqueness like spr1, spr2, canti1, canti2
@@ -473,9 +568,9 @@ const Header = () => {
         </div>
       </nav>
 
-      <svg height="1000" width="900" xmlns="http://www.w3.org/2000/svg">
+      {/* <svg height="1000" width="900" xmlns="http://www.w3.org/2000/svg">
   <image height="1000" width="900" href={rightView} />
-</svg>
+</svg> */}
 
       {/* Main Content Area */}
       <div className="main-content">
@@ -517,14 +612,14 @@ const Header = () => {
               </div>
             </div>
           </div>
-          <div className="product-accessories">
+          {/* <div className="product-accessories">
             <h4>Rack Protection</h4>
             <select name="rack-protection" id="rack-protection">
               <option value="40-high">40 cm high</option>
               <option value="80-high">80 cm high</option>
             </select><br />
             <button onClick={addStand} style={{ marginBottom: "10px" }}>Add Stand</button>
-          </div>
+          </div> */}
         </div>
 
         {/* Center Half with Full-Sized Grid */}
@@ -605,6 +700,16 @@ const Header = () => {
                         Name:
                       </label>
                       <input type="text" value={selectedRect.fullName} />
+                    </div>
+                    <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
+                      <label htmlFor="elevation">Elevation type:</label>
+                      <select name="elevation" id="elevation" onChange={handleElevationChange} value={selectedElevation}>
+                        {Object.entries(elevationData).map(([key, { name }]) => (
+                          <option key={key} value={key}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label htmlFor="height">Height:</label>
@@ -740,9 +845,12 @@ const Header = () => {
                 </div>
                 <div className="canvas">
                   <Canvas>
-                    {selectedView === "stand" && <Stand position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} />}
+                    {selectedView === "stand" && <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} />}
                     {selectedView === "sideView" && <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
                   </Canvas>
+
+                  {/* {selectedView === "stand" && <FrontView />} */}
+                  
 
                   <div className="button-container">
                     <button onClick={handleSaveAndClose}>Save and Close</button>
