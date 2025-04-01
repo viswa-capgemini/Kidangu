@@ -3,12 +3,29 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@aws-amplify/storage": "^6.7.15",
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/s3-request-presigner": "^3.772.0",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
+    "@mui/icons-material": "^6.4.7",
+    "@mui/material": "^6.4.7",
     "@react-three/drei": "^9.121.4",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "@types/forge-viewer": "^7.89.1",
+    "aws-amplify": "^6.13.5",
+    "aws-sdk": "^2.1692.0",
+    "axios": "^1.8.3",
+    "config": "^3.3.12",
+    "express": "^4.21.2",
+    "express-formidable": "^1.2.0",
+    "forge-apis": "^0.9.10",
     "konva": "^9.3.18",
+    "multer": "^1.4.5-lts.1",
+    "multer-s3": "^3.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-icons": "^5.3.0",
@@ -17,6 +34,7 @@
     "react-router-dom": "^6.26.1",
     "react-scripts": "^5.0.1",
     "use-image": "^1.1.1",
+    "uuid": "^11.1.0",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -42,5 +60,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/forge-viewer": "^7.89.1"
   }
 }

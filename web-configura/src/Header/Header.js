@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Rect, Image as KonvaImage, Text, Group } from "react-konva";
+import { Stage, Layer, Rect, Image, Text, Group } from "react-konva";
 import useImage from "use-image";
 import "./styles.css";
 import sprs from "../assets/productimages/sprs-image.avif";
@@ -13,7 +13,7 @@ import aisleSpace from "../assets/icons/aisle-space.webp"
 import door from "../assets/icons/door.png"
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import { OrthographicCamera, Html, Line } from "@react-three/drei";
+import { OrthographicCamera, Html, Line, PerspectiveCamera } from "@react-three/drei";
 import { TextureLoader } from "three";
 import standFront30 from "../assets/racking/height/stand-front-30.png";
 import standFront40 from "../assets/racking/height/stand-front-40.png";
@@ -24,7 +24,9 @@ import beamFrontEmpty300 from "../assets/racking/width/beam-front-empty-36.png";
 import sideStand80 from "../assets/racking/depth/stand-side-30-w8.png";
 import sideStand100 from "../assets/racking/depth/stand-side-40-w11.png";
 import sideStand120 from "../assets/racking/depth/stand-side-40-w11.png";
-import imageAI from "../assets/canvas_image.svg"
+import topViewSPR from "../assets/racking/SPR_Top_View.png"
+import topViewSPRAddOn from "../assets/racking/Addon.png"
+// import imageAI from "../assets/canvas_image.svg"
 
 // svg image of the converted png
 // import rightView from "../assets/viewer-right-view.svg"
@@ -32,18 +34,28 @@ import rightView from "../assets/rightview.png"
 import frontview1 from "../assets/frontview1.svg"
 import box from "../assets/racking/box-front.png"
 
+import { PivotControls, useGLTF } from "@react-three/drei";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import axios from "axios";
+
 const GRID_SIZE = 50; // Cell size
 
 const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const selectedImageHeight = selectedHeight;
   const selectedImageWidth = selectedWidth;
+  const { nodes, sceneglb } = useGLTF("/assets/UNIT.glb");
 
   const mesh1Ref = useRef();
   const mesh2Ref = useRef();
   const topBar1Ref = useRef();
   const topBar2Ref = useRef();
   const rackRefs = useRef([]);
+
+  // Loading gltf
+  const loader = new GLTFLoader();
+  const [model, setModel] = useState(null);
+  const scene = useThree();
 
   const standFront = {
     1: useLoader(TextureLoader, rightView),
@@ -118,8 +130,33 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
     }),
   }));
 
+  useEffect(() => {
+    loader.load("/assets/UNIT.glb", (gltf) => {
+      const model = gltf.scene;
+      console.log("model", model)
+      // model.position.set(2, 0, 0);
+      model.scale.set(0.5, 0.5, 0.5);
+      model.rotation.set(0, 0, 0);
+      // model.traverse((children) => {
+      //   if (children.isMesh) {
+      //     children.castShadow = true;
+      //     children.receiveShadow = true;
+      //   }
+      // });
+      // scene.add(model);
+      setModel(model);
+    })
+  }, [])
+
   return (
+    <>
+    <PerspectiveCamera makeDefault position={[-2, 0, 5]} />
+    <group position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+    {model && <primitive object={model} />}
+    </group>
+    
     <group position={position}>
+
       {/* Left Mesh */}
       <mesh ref={mesh1Ref} position={[-2.9, heights[selectedImageHeight] / 5, 0]}>
         <planeGeometry args={[4, heights[selectedImageHeight]]} />
@@ -143,27 +180,27 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
         <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
       </mesh>
 
-      
+
 
       {/* Centered Edit Label */}
       {/* <Html position={[-1.5, 2.7, 0]} center style={{ pointerEvents: "visible" }} onPointerDown={(e) => e.stopPropagation()}>
-                <div className="edit-pallet">
-                    <img className="edit-pallet" id="edit-pallet" src={edit} style={{ width: "45px", height: "25px", cursor: "pointer" }} onClick={toggleDropdown} alt="Edit"></img>
-                    <h6>Edit Shelf Unit</h6>
-                    {showDropdown == true && (
-                        <><select name="dropdown-menu" id="dropdown-menu">
-                            <option value="height">Shelf Height</option>
-                            <option value="width">Shelf Width</option>
-                            <option value="levels">Levels</option>
-                            <option value="deck">Deck</option>
-                            <option value="rack-protect-left">Rack Protection Left</option>
-                            <option value="rack-protect-right">Rack Protection Right</option>
-                        </select></>
-                )}
-                    
-                </div>
-            </Html> */}
-    </group>
+              <div className="edit-pallet">
+                  <img className="edit-pallet" id="edit-pallet" src={edit} style={{ width: "45px", height: "25px", cursor: "pointer" }} onClick={toggleDropdown} alt="Edit"></img>
+                  <h6>Edit Shelf Unit</h6>
+                  {showDropdown == true && (
+                      <><select name="dropdown-menu" id="dropdown-menu">
+                          <option value="height">Shelf Height</option>
+                          <option value="width">Shelf Width</option>
+                          <option value="levels">Levels</option>
+                          <option value="deck">Deck</option>
+                          <option value="rack-protect-left">Rack Protection Left</option>
+                          <option value="rack-protect-right">Rack Protection Right</option>
+                      </select></>
+              )}
+                  
+              </div>
+          </Html> */}
+    </group></>
   );
 });
 
@@ -232,7 +269,7 @@ const Header = () => {
   const [gridSize, setGridSize] = useState({ width: 7000, height: 7000 });
   const [stands, setStands] = useState([{ id: 1, position: [0, 0, 0] }]);
   const stageWidth = 1050;
-  const stageHeight = 920;
+  const stageHeight = 720;
   const rectSize = 90;
   const [rects, setRects] = useState([]);
   const [rectsByName, setRectsByName] = useState({});
@@ -250,6 +287,18 @@ const Header = () => {
   const saveJSON = useRef(null);
   const countsRef = useRef({ spr: 0, canti: 0, space: 0 });
   const standRef = useRef();
+  const [topViewSPRImage] = useImage(topViewSPR); // Load image
+  const [addOnSPRImage] = useImage(topViewSPRAddOn); // Load image
+
+  // useEffect(() => {
+  //   axios.get("http://localhost:8000/save/files")
+  //   .then((res) => {
+  //     console.log("res in get", res);
+  //   })
+  //   .catch((error) => {
+  //     console.log("res in err", error);
+  //   })
+  // }, [])
 
   const heightData = {
     1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10' },
@@ -417,33 +466,25 @@ const Header = () => {
 
   const handleDragMove = (index, e) => {
     const newRects = [...rects];
-    const newX = Math.max(0, Math.min(stageWidth - rectSize, e.target.x()));
-    const newY = Math.max(0, Math.min(stageHeight - rectSize, e.target.y()));
+    let newX = Math.max(0, Math.min(stageWidth - rectSize, e.target.x()));
+    let newY = Math.max(0, Math.min(stageHeight - rectSize, e.target.y()));
 
-    // Check for overlap with the other rectangle
-    const otherIndex = index === 0 ? 1 : 0;
-    const otherRect = newRects[otherIndex];
+    // Find the nearest available position if overlapping
+    let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
 
-    if (
-      newX < otherRect.x + rectSize &&
-      newX + rectSize > otherRect.x &&
-      newY < otherRect.y + rectSize &&
-      newY + rectSize > otherRect.y
-    ) {
-      return; // Prevent movement if overlapping
-    }
-
-    newRects[index] = { ...newRects[index], x: newX, y: newY };
+    newRects[index] = { ...newRects[index], x: finalX, y: finalY };
     setRects(newRects);
-  };
+};
 
-  const handleImageClick = (color, name, fullName) => {
+  const handleImageClick = (color, name, fullName, imageUrl, addOnSPRImage) => {
     const margin = 10;
     const rowHeight = rectSize + margin; // Fixed row height
     const rowMap = { spr: 0, canti: 1, rack: 2, space: 3 }; // Define fixed row positions
 
     setRects((prevRects) => {
-      let count = prevRects.filter(rect => rect.name.startsWith(name)).length;
+      // Filter only for the current type (spr, aisle, etc.)
+      let filteredRects = prevRects.filter(rect => rect.name.startsWith(name));
+      let count = filteredRects.length;
       let newId = `${name}${count + 1}`; // Ensure uniqueness like spr1, spr2, canti1, canti2
 
       if (name === 'space') {
@@ -456,8 +497,22 @@ const Header = () => {
         ];
       }
 
-      // First rectangle starts at (0,0)
-      let x = count === 0 ? 0 : prevRects[prevRects.length - 1].x + rectSize + margin;
+      let lastRect = filteredRects.length > 0 ? filteredRects[filteredRects.length - 1] : null; 
+      let x = lastRect ? lastRect.x + rectSize : 0;
+      let y = lastRect ? lastRect.y : 0;
+
+      let isNewRow = x + rectSize > stageWidth;
+      if (isNewRow) {
+        x = 0;
+        y += rectSize + margin;
+      }
+
+      // Find the nearest available position that does not overlap
+      // let { x: finalX, y: finalY } = findNearestNonOverlappingPosition1(x, y, prevRects);
+
+      {/* 
+        // First rectangle starts at (0,0)
+      let x = count === 0 ? 0 : prevRects[prevRects.length - 1].x + rectSize ;
       let y = 0; // Keep y fixed at the top
 
       // Ensure it does not exceed the canvas width
@@ -465,6 +520,7 @@ const Header = () => {
         x = 0; // Move to the next row
         y += rectSize + margin; // Move down with spacing
       }
+        */}
 
       // Update count for the specific type (spr, canti, etc.)
       countsRef.current[name] = count + 1;
@@ -473,33 +529,85 @@ const Header = () => {
         ...prevRects,
         {
           id: newId,  // Unique ID like spr1, spr2, canti1, canti2
-          x,
-          y,
+          x, // x: finalX,
+          y, // y: finalY,
           width: rectSize,
           height: rectSize,
           color,
           name: newId, // Ensure name is also unique
           fullName: fullName,
+          imageUrl: name === "spr" ? (isNewRow ? imageUrl : addOnSPRImage) : color,
         },
       ];
     });
   };
 
+  // Function to find the nearest available position that does not overlap
+const findNearestNonOverlappingPosition1 = (x, y, existingRects) => {
+  let step = 5; // Move in small increments to find a valid spot
+  let maxAttempts = 100;
+  let attempts = 0;
+
+  while (isOverlapping1(x, y, existingRects) && attempts < maxAttempts) {
+      x += step;
+      if (x + rectSize > stageWidth) {
+          x = 0; 
+          y += step;
+      }
+      if (y + rectSize > stageHeight) {
+          y = 0; 
+      }
+      attempts++;
+  }
+
+  return { x, y };
+};
+
+// Check if a position is overlapping with any existing rectangle
+const isOverlapping1 = (x, y, existingRects) => {
+  return existingRects.some(rect => (
+      x < rect.x + rect.width &&
+      x + rectSize > rect.x &&
+      y < rect.y + rect.height &&
+      y + rectSize > rect.y
+  ));
+};
 
 
   const isOverlapping = (x, y, index) => {
     return rects.some((rect, i) => {
-      if (i !== index) {
-        return (
-          x < rect.x + rect.width &&
-          x + rect.width > rect.x &&
-          y < rect.y + rect.height &&
-          y + rect.height > rect.y
-        );
-      }
-      return false;
+        if (i !== index) {
+            return (
+                x < rect.x + rect.width &&
+                x + rect.width > rect.x &&
+                y < rect.y + rect.height &&
+                y + rect.height > rect.y
+            );
+        }
+        return false;
     });
-  };
+};
+
+// Find the nearest available position that does not overlap
+const findNearestNonOverlappingPosition = (x, y, index) => {
+  let step = 5; // Move in small increments to find a valid spot
+  let maxAttempts = 50; // Prevent infinite loops
+  let attempts = 0;
+
+  while (isOverlapping(x, y, index) && attempts < maxAttempts) {
+      x += step;
+      if (x + rectSize > stageWidth) {
+          x = 0; 
+          y += step;
+      }
+      if (y + rectSize > stageHeight) {
+          y = 0; 
+      }
+      attempts++;
+  }
+
+  return { x, y };
+};
 
   const downloadJSON = (jsonString) => {
     const blob = new Blob([jsonString], { type: "application/json" });
@@ -545,7 +653,7 @@ const Header = () => {
       <nav className="navbar">
         <div className="navbar-left">
           <a href="#" className="logo">
-            Godrej
+            StoreSphere
           </a>
         </div>
 
@@ -558,6 +666,9 @@ const Header = () => {
         </div>
 
         <div className="navbar-right">
+          <ul className="nav-links">
+            <li><a href="/upload-dwg">Upload DWG</a></li>
+          </ul>
           <a href="/cart" className="cart-icon">
             <i className="fas fa-shopping-cart"></i>
             <span className="cart-count">0</span>
@@ -578,12 +689,12 @@ const Header = () => {
           <div className="product-group">
             <h1>Product Group</h1>
             <div className="image-grid">
-              <div className="image-box" onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack')}>
+              <div className="image-box" onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}>
                 <img src={sprs} alt="Shuttle Pallet Racking" />
               </div>
-              <div className="image-box" onClick={() => handleImageClick('red', 'canti', 'Cantilever')}>
+              {/* <div className="image-box" onClick={() => handleImageClick('red', 'canti', 'Cantilever')}>
                 <img src={canti} alt="Cantilever" />
-              </div>
+              </div> */}
               {/* <div className="image-box">
                 <img src="{mts}" alt="Multi-Tier Racking" />
               </div>
@@ -600,7 +711,7 @@ const Header = () => {
                 <div className="image-box">
                   <img src={aisleSpace} alt="Aisle Space" onClick={() => handleImageClick('grey', 'space', 'Aisle Space')} />
                 </div>
-                <div className="image-box" onClick={() => handleImageClick('brown', 'door', 'Door')}>
+                {/* <div className="image-box" onClick={() => handleImageClick('brown', 'door', 'Door')}>
                   <img src={door} alt="Door" />
                 </div>
                 <div className="image-box" onClick={() => handleImageClick('brown', 'pillar', 'Pillar')}>
@@ -608,7 +719,7 @@ const Header = () => {
                 </div>
                 <div className="image-box" onClick={() => handleImageClick('brown', 'door', 'Door')}>
                   <img src={door} alt="Door" />
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
@@ -645,36 +756,42 @@ const Header = () => {
                     return { x: newX, y: newY };
                   }}
                 >
-                  <Rect
-                    x={rect.x}
-                    y={rect.y}
-                    width={rect.width}
-                    height={rect.height}
+                  {rect.name === "Aisle Space" ? (
+                    <><Rect
                     fill={rect.color}
-                  // onDragMove={(e) => !rect.name === "Aisle Space" && handleDragMove(index, e)}
-                  //   dragBoundFunc={(pos) => {
-                  //     let newX = rect.name === "Aisle Space" ? rects[index].x : Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-                  //     let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
-
-                  //     if (isOverlapping(newX, newY, index)) {
-                  // return { x: rects[index].x, y: rects[index].y };
-                  //     }
-
-                  //     return { x: newX, y: newY };
-                  //   }}
-                  />
-                  <Text
-                    x={rect.name === "Aisle Space" ? rect.x + rect.width / 2 - 30 : rect.x + rectSize / 4}
-                    y={rect.name === "Aisle Space" ? rect.y + rect.height / 2 - 50 : rect.y + rectSize / 4}
-                    text={rect.name}
-                    fontSize={14}
-                    fill="white"
-                    fontStyle="bold"
-                    align="center"
-                    width={rectSize}
-                    height={rectSize}
-                    verticalAlign="middle"
-                  />
+                      x={rect.x}
+                      y={rect.y}
+                      width={rect.width}
+                      height={rect.height} /><Text
+                        x={rect.name === "Aisle Space" ? rect.x + rect.width / 2 - 30 : rect.x + rectSize / 4}
+                        y={rect.name === "Aisle Space" ? rect.y + rect.height / 2 - 50 : rect.y + rectSize / 4}
+                        text={rect.name}
+                        fontSize={14}
+                        fill="black"
+                        fontStyle="bold"
+                        align="center"
+                        width={rectSize}
+                        height={rectSize}
+                        verticalAlign="middle" /></>
+                  ) : (
+                    <><Image
+                        image={rect.imageUrl}
+                        x={rect.x}
+                        y={rect.y}
+                        width={rect.width}
+                        height={rect.height} /><Text
+                          x={rect.name === "Aisle Space" ? rect.x + rect.width / 2 - 30 : rect.x + rectSize / 4}
+                          y={rect.name === "Aisle Space" ? rect.y + rect.height / 2 - 50 : rect.y + rectSize / 4}
+                          text={rect.name}
+                          fontSize={14}
+                          fill="black"
+                          fontStyle="bold"
+                          align="center"
+                          width={rectSize}
+                          height={rectSize}
+                          verticalAlign="middle" /></>
+                  )}
+                  
                 </Group>
               ))}
             </Layer>
@@ -844,8 +961,9 @@ const Header = () => {
                   </div>
                 </div>
                 <div className="canvas">
-                  <Canvas>
-                    {selectedView === "stand" && <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} />}
+                  <Canvas >
+                    {selectedView === "stand" && 
+                    <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} />}
                     {selectedView === "sideView" && <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
                   </Canvas>
 
@@ -861,77 +979,10 @@ const Header = () => {
             </div>
           )}
         </div>
-
-        <div className="right-half">
-          <div className="product-details">
-            <h1>Product Details</h1>
-            <label>Warehouse Dimensions</label>
-            <p><strong>{stageWidth} ft x {stageHeight} ft</strong></p>
-            <label>Total Aisle Space</label>
-            <p><strong>{countsRef.current.space}</strong></p>
-            {saveJSON.current ? (
-              <>
-                <p><strong>Total SPRs:</strong> {countsRef.current.spr}</p>
-                <table>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Part No</th>
-                      <th>Part Name</th>
-                      <th>Quantity</th>
-                      <th>Price</th>
-                      <th>Total Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {JSON.parse(saveJSON.current).map((item, index) => {
-                      // Calculate the total cost for the "Total Price" column for this item
-                      const totalItemPrice = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
-
-                      return (
-                        <React.Fragment key={index}>
-                          {item.parts.map((part, partIndex) => (
-                            <tr key={partIndex}>
-                              {partIndex === 0 && (
-                                <td rowSpan={item.parts.length}>{item.id}</td>
-                              )}
-                              <td>{part.partNo}</td>
-                              <td>{part.partName}</td>
-                              <td>{part.quantity}</td>
-                              <td>${part.price}</td>
-                              {partIndex === 0 && (
-                                <td rowSpan={item.parts.length}>${totalItemPrice.toFixed(2)}</td>
-                              )}
-                            </tr>
-                          ))}
-                        </React.Fragment>
-                      );
-                    })}
-                    {/* Row for the total cost of the last column */}
-                    <tr>
-                      <td colSpan={5} style={{ textAlign: 'right', fontWeight: 'bold' }}>Total Cost:</td>
-                      <td>
-                        ${
-                          // Calculate the grand total for all the items
-                          JSON.parse(saveJSON.current).reduce((total, item) => {
-                            const itemTotal = item.parts.reduce((acc, part) => acc + (parseFloat(part.price) * parseInt(part.quantity)), 0);
-                            return total + itemTotal;
-                          }, 0).toFixed(2)
-                        }
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-                <div className="downloadJSON">
+        <div className="downloadJSON">
                   <button onClick={() => downloadJSON((saveJSON.current))}>Download BOM</button>
                 </div>
-                {/* <p><strong>Total Cantilevers:</strong> { }</p> */}
-              </>
-            ) : (
-              <p>No product data available</p>
-            )}
-          </div>
-        </div>
+
 
 
       </div>
