@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Rect, Image, Text, Group } from "react-konva";
+import { Stage, Layer, Rect, Image, Text, Group, Arrow } from "react-konva";
 import { useLocation } from "react-router-dom";
 import useImage from "use-image";
 import "./styles.css";
@@ -14,7 +14,7 @@ import aisleSpace from "../assets/icons/aisle-space.webp"
 import door from "../assets/icons/door.png"
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import { OrthographicCamera, Html, Line, PerspectiveCamera } from "@react-three/drei";
+import { OrthographicCamera, Html, PerspectiveCamera } from "@react-three/drei";
 import { TextureLoader } from "three";
 import standFront30 from "../assets/racking/height/stand-front-30.png";
 import standFront40 from "../assets/racking/height/stand-front-40.png";
@@ -286,6 +286,8 @@ const Header = () => {
   const [selectedRackLoad, setSelectedRackLoad] = useState(1);
   const [selectedView, setSelectedView] = useState("stand");
   const [selectedElevation, setSelectedElevation] = useState(1);
+  const [draggingCoordinates, setDraggingCoordinates] = useState({ x: 0, y: 0 });
+  const [activeDragId, setActiveDragId] = useState(null);
   // const [saveJSON, setSaveJSON] = useState(null);
   const saveJSON = useRef(null);
   const countsRef = useRef({ spr: 0, canti: 0, space: 0 });
@@ -352,8 +354,8 @@ const Header = () => {
 
     // Construct jsonData dynamically for all present IDs
     const jsonData = {
-        // productGroup: selectedRect.fullName,
-        items: rects
+      // productGroup: selectedRect.fullName,
+      items: rects
         .filter(rect => rect.fullName === "Shuttle Pallet Rack")
         .map(rect => ({
           id: rect.id,
@@ -362,36 +364,40 @@ const Header = () => {
           x_position: rect.x,
           y_position: rect.y,
           iamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam"
-      }))
+        }))
     };
 
     console.log("Generated JSON:", JSON.stringify(jsonData, null, 2));
 
     // Update saveJSON dynamically
     saveJSON.current = ((prevSaveJSON) => {
-        const updatedSaveJSON = prevSaveJSON ? JSON.parse(prevSaveJSON) : [];
+      const updatedSaveJSON = prevSaveJSON ? JSON.parse(prevSaveJSON) : [];
 
-        // Merge existing and new data
-        jsonData.items.forEach(newItem => {
-            const existingIndex = updatedSaveJSON.findIndex(item => item.id === newItem.id);
-            if (existingIndex !== -1) {
-                updatedSaveJSON[existingIndex] = newItem; // Update existing
-            } else {
-                updatedSaveJSON.push(newItem); // Add new entry
-            }
-        });
+      // Merge existing and new data
+      jsonData.items.forEach(newItem => {
+        const existingIndex = updatedSaveJSON.findIndex(item => item.id === newItem.id);
+        if (existingIndex !== -1) {
+          updatedSaveJSON[existingIndex] = newItem; // Update existing
+        } else {
+          updatedSaveJSON.push(newItem); // Add new entry
+        }
+      });
 
-        return JSON.stringify(updatedSaveJSON.length > 0 ? updatedSaveJSON : [jsonData], null, 2);
+      return JSON.stringify(updatedSaveJSON.length > 0 ? updatedSaveJSON : [jsonData], null, 2);
     })(saveJSON.current);
 
     console.log("Updated saveJSON:", saveJSON.current);
 
-    downloadJSON(saveJSON.current);
+    if (saveJSON.current.length > 0) {
+      alert("Please place any one of the Product Group");
+    } else {
+      downloadJSON(saveJSON.current);
+    }
 
     // Close modal
     setModalVisible(false);
     setSelectedRect(null);
-};
+  };
 
 
   const handleChangeUpright = (event) => {
@@ -436,10 +442,10 @@ const Header = () => {
     let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
 
     if (finalX !== newRects[index].x || finalY !== newRects[index].y) {
-        newRects[index] = { ...newRects[index], x: finalX, y: finalY };
-        setRects(newRects);
+      newRects[index] = { ...newRects[index], x: finalX, y: finalY };
+      setRects(newRects);
     }
-};
+  };
 
   const handleImageClick = (color, name, fullName, imageUrl, addOnSPRImage) => {
     const margin = 10;
@@ -507,20 +513,20 @@ const Header = () => {
       ];
     });
   };
-  
+
   const handleDragStart = (e, color, name, fullName, imageUrl, addOnSPRImage) => {
     e.dataTransfer.setData(
       'draggedItem',
       JSON.stringify({ color, name, fullName, imageUrl, addOnSPRImage })
     );
   };
-  
+
   const handleDrop = (e) => {
     e.preventDefault();
     const draggedItem = JSON.parse(e.dataTransfer.getData('draggedItem'));
     const stage = e.target.getStage();
     const pointerPosition = stage.getPointerPosition();
-  
+
     setRects((prevRects) => [
       ...prevRects,
       {
@@ -571,58 +577,58 @@ const Header = () => {
 
   const isOverlapping = (x, y, index) => {
     return rects.some((rect, i) => {
-        if (i !== index) {
-            return (
-                x < rect.x + rect.width &&
-                x + rects[index].width > rect.x &&
-                y < rect.y + rect.height &&
-                y + rects[index].height > rect.y
-            );
-        }
-        return false;
+      if (i !== index) {
+        return (
+          x < rect.x + rect.width &&
+          x + rects[index].width > rect.x &&
+          y < rect.y + rect.height &&
+          y + rects[index].height > rect.y
+        );
+      }
+      return false;
     });
-};
+  };
 
   // Find the nearest available position that does not overlap
   const findNearestNonOverlappingPosition = (x, y, index) => {
-    let step = 5; 
+    let step = 5;
     let maxAttempts = 100; // Increase attempts for a better search
     let attempts = 0;
     let found = false;
 
     while (attempts < maxAttempts) {
-        if (!isOverlapping(x, y, index)) {
-            found = true;
-            break;
+      if (!isOverlapping(x, y, index)) {
+        found = true;
+        break;
+      }
+
+      // Try moving in a spiral pattern
+      let directions = [
+        { dx: step, dy: 0 },   // Right
+        { dx: -step, dy: 0 },  // Left
+        { dx: 0, dy: step },   // Down
+        { dx: 0, dy: -step },  // Up
+      ];
+
+      for (let dir of directions) {
+        let newX = x + dir.dx;
+        let newY = y + dir.dy;
+
+        if (newX >= 0 && newX + rects[index].width <= stageWidth &&
+          newY >= 0 && newY + rects[index].height <= stageHeight &&
+          !isOverlapping(newX, newY, index)) {
+
+          return { x: newX, y: newY };
         }
+      }
 
-        // Try moving in a spiral pattern
-        let directions = [
-            { dx: step, dy: 0 },   // Right
-            { dx: -step, dy: 0 },  // Left
-            { dx: 0, dy: step },   // Down
-            { dx: 0, dy: -step },  // Up
-        ];
-
-        for (let dir of directions) {
-            let newX = x + dir.dx;
-            let newY = y + dir.dy;
-
-            if (newX >= 0 && newX + rects[index].width <= stageWidth &&
-                newY >= 0 && newY + rects[index].height <= stageHeight &&
-                !isOverlapping(newX, newY, index)) {
-                
-                return { x: newX, y: newY };
-            }
-        }
-
-        attempts++;
+      attempts++;
     }
 
     return found ? { x, y } : { x: rects[index].x, y: rects[index].y }; // Return last valid position
-};
+  };
 
-  const downloadJSON = async(jsonString) => {
+  const downloadJSON = async (jsonString) => {
     const blob = new Blob([jsonString], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -746,9 +752,22 @@ const Header = () => {
           </div> */}
         </div>
 
-        
+
         {/* Center Half with Full-Sized Grid */}
         <div className="center-half" ref={centerRef}>
+
+          <svg width={stageWidth} height="20" style={{ position: "absolute", top: 5, left: 138 }}>
+            <line x1="0" y1="0" x2={stageWidth} y2="0" stroke="black" strokeWidth="5" />
+            <text x={stageWidth / 2} y="18" fontWeight="bold" fontSize="16" textAnchor="middle" fill="black">
+              {`Width: 100m`}
+            </text>
+          </svg>
+          <svg width="20" height={stageHeight} style={{ position: "absolute", top: 30, left: 20 }}>
+            <line x1="0" y1={stageHeight} x2="0" y2="0" stroke="black" strokeWidth="5" />
+            <text x={-stageHeight / 2} y="18" fontWeight="bold" fontSize="16" textAnchor="middle" fill="black" transform={`rotate(-90, 10, 10)`}>
+              {`Height: 100m`}
+            </text>
+          </svg>
 
           <Stage width={stageWidth} height={stageHeight} className="konva-stage" onDrop={(e) => handleDrop(e)} onDragOver={(e) => e.preventDefault()}>
             <Layer>
@@ -757,13 +776,25 @@ const Header = () => {
                   key={rect.id}
                   draggable
                   onDblClick={() => handleRectClick(rect)}
-                  onDragMove={(e) => rect.name !== "Aisle Space" && handleDragMove(index, e)}
+                  onDragStart={() => setActiveDragId(rect.id)}
+                  onDragMove={(e) => {
+                    if (rect.name !== "Aisle Space") handleDragMove(index, e);
+
+                    if (activeDragId === rect.id) {
+                      const { x, y } = e.target.position();
+                      setDraggingCoordinates({ x, y });
+                    }
+                  }}
+                  onDragEnd={() => {
+                    setDraggingCoordinates(null);
+                    setActiveDragId(null); // Reset active dragging element
+                  }}
                   dragBoundFunc={(pos) => {
                     // let newX = rect.name === "Aisle Space" ? rects[index].x : Math.max(0, Math.min(stageWidth - rect.width, pos.x));
                     // let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
 
                     let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-        let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
+                    let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
 
                     // Prevent overlapping before moving
                     // if (isOverlapping(newX, newY, index)) {
@@ -773,13 +804,14 @@ const Header = () => {
                     // return { x: newX, y: newY };
 
                     // Ensure we get the nearest available position if overlapping
-        let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
+                    let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
 
-        return { x: finalX, y: finalY };
+                    return { x: finalX, y: finalY };
                   }}
                 >
                   {rect.name === "Aisle Space" ? (
-                    <><Rect
+                    <>
+                    <Rect
                       fill={rect.color}
                       x={rect.x}
                       y={rect.y}
@@ -794,9 +826,11 @@ const Header = () => {
                         align="center"
                         width={rectSize}
                         height={rectSize}
-                        verticalAlign="middle" /></>
+                        verticalAlign="middle" />
+                        </>
                   ) : (
-                    <><Image
+                    <>
+                    <Image
                       image={rect.imageUrl}
                       x={rect.x}
                       y={rect.y}
@@ -811,7 +845,57 @@ const Header = () => {
                         align="center"
                         width={rectSize}
                         height={rectSize}
-                        verticalAlign="middle" /></>
+                        verticalAlign="middle" />
+                        </>
+                  )}
+
+                  {/* Display X, Y coordinates while dragging */}
+
+                  {activeDragId === rect.id && draggingCoordinates && (
+                    <Text
+                      x={draggingCoordinates.x + 10}
+                      y={draggingCoordinates.y - 20}
+                      text={`X: ${draggingCoordinates.x}, Y: ${draggingCoordinates.y}`}
+                      fontSize={14}
+                      fill="black"
+                      fontStyle="bold"
+                    />
+                  )}
+
+                  {activeDragId === rect.id && draggingCoordinates && (
+                    <Group>
+                      <Arrow
+                        points={[0, draggingCoordinates.y, stageWidth, draggingCoordinates.y]} // Horizontal arrow
+                        stroke="red"
+                        strokeWidth={2}
+                        pointerLength={10}
+                        pointerWidth={10}
+                      />
+                      <Text
+                        x={60}
+                        y={draggingCoordinates.y - 15}
+                        text={`X: ${draggingCoordinates.x}`}
+                        fontSize={14}
+                        fill="red"
+                        fontStyle="bold"
+                      />
+                      <Arrow
+                        points={[draggingCoordinates.x, 0, draggingCoordinates.x, stageHeight]} // Vertical arrow
+                        stroke="blue"
+                        strokeWidth={2}
+                        pointerLength={10}
+                        pointerWidth={10}
+                      />
+                      <Text
+                        x={draggingCoordinates.x + 5}
+                        y={5}
+                        text={`Y: ${draggingCoordinates.y}`}
+                        fontSize={14}
+                        fill="blue"
+                        fontStyle="bold"
+                        rotation={-90} // Rotating text vertically
+                      />
+                    </Group>
                   )}
 
                 </Group>
