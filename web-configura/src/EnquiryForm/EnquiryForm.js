@@ -59,7 +59,9 @@ const EnquiryForm = () => {
         try {
             const response = await dynamoDB.put(params).promise();
             console.log("Data saved successfully:", response);
-            navigate("/configurator"); 
+            navigate("/configurator", {
+                state: { enquiryNumber: formData.enquiryNumber },
+            }); 
             // alert("Data saved successfully in DynamoDB!");
         } catch (error) {
             console.error("Error saving data:", error);

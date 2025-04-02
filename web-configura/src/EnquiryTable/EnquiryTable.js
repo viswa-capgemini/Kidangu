@@ -14,6 +14,9 @@ const EnquiryTable = () => {
         'Reference Number',
         'Product Group',
         'Billing Address',
+        'Status',
+        'View GA',
+        'View BOM',
         'Edit/Delete',
     ];
 

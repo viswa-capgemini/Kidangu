@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Stage, Layer, Rect, Image, Text, Group } from "react-konva";
+import { useLocation } from "react-router-dom";
 import useImage from "use-image";
 import "./styles.css";
 import sprs from "../assets/productimages/sprs-image.avif";
@@ -292,6 +293,8 @@ const Header = () => {
   const [topViewSPRImage] = useImage(topViewSPR); // Load image
   const [addOnSPRImage] = useImage(topViewSPRAddOn); // Load image
   const [unit] = useImage(unitImage);
+  const location = useLocation();
+  const enquiryNumber = location.state?.enquiryNumber || "N/A";
 
   const heightData = {
     1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10' },
@@ -352,6 +355,7 @@ const Header = () => {
         // productGroup: selectedRect.fullName,
         items: rects.map(rect => ({
             id: rect.id,
+            enquiryNumber: enquiryNumber,
             productGroup: rect.fullName,
             iamFilePath: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
             x_position: rect.x,
