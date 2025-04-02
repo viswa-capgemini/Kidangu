@@ -353,15 +353,16 @@ const Header = () => {
     // Construct jsonData dynamically for all present IDs
     const jsonData = {
         // productGroup: selectedRect.fullName,
-        items: rects.map(rect => ({
-            id: rect.id,
-            enquiryNumber: enquiryNumber,
-            productGroup: rect.fullName,
-            iamFilePath: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
-            x_position: rect.x,
-            y_position: rect.y,
-            iamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam"
-        }))
+        items: rects
+        .filter(rect => rect.fullName === "Shuttle Pallet Rack")
+        .map(rect => ({
+          id: rect.id,
+          productGroup: rect.fullName,
+          iamFilePath: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
+          x_position: rect.x,
+          y_position: rect.y,
+          iamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam"
+      }))
     };
 
     console.log("Generated JSON:", JSON.stringify(jsonData, null, 2));
