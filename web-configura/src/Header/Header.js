@@ -358,7 +358,7 @@ const Header = () => {
       items: rects
         .filter(rect => rect.fullName === "Shuttle Pallet Rack")
         .map(rect => ({
-          id: rect.id,
+          productId: rect.id,
           productGroup: rect.fullName,
           iamFilePath: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
           x_position: rect.x,
@@ -375,7 +375,7 @@ const Header = () => {
 
       // Merge existing and new data
       jsonData.items.forEach(newItem => {
-        const existingIndex = updatedSaveJSON.findIndex(item => item.id === newItem.id);
+        const existingIndex = updatedSaveJSON.findIndex(item => item.productId === newItem.productId);
         if (existingIndex !== -1) {
           updatedSaveJSON[existingIndex] = newItem; // Update existing
         } else {
@@ -388,11 +388,17 @@ const Header = () => {
 
     console.log("Updated saveJSON:", saveJSON.current);
 
-    if (saveJSON.current.length > 0) {
-      alert("Please place any one of the Product Group");
-    } else {
-      downloadJSON(saveJSON.current);
-    }
+    downloadJSON(saveJSON.current).then(((res) => {
+      if (res === true)
+        axios.post("http://localhost:5133/api/metadataapi/RunILogic2");
+    }));
+    // if (saveJSON.current.length > 0) {
+    //   alert("Please place any one of the Product Group");
+    // } else {
+    //   downloadJSON(saveJSON.current);
+    // }
+
+
 
     // Close modal
     setModalVisible(false);
@@ -628,7 +634,7 @@ const Header = () => {
     return found ? { x, y } : { x: rects[index].x, y: rects[index].y }; // Return last valid position
   };
 
-  const downloadJSON = async (jsonString) => {
+  var downloadJSON = async (jsonString) => {
     const blob = new Blob([jsonString], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -636,6 +642,8 @@ const Header = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    await sleep(5000);
+    return true;
   }
 
   // const fbx = useLoader(FBXLoader, "demo.fbx");
