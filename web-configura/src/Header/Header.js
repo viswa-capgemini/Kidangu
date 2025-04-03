@@ -388,18 +388,15 @@ const Header = () => {
 
     console.log("Updated saveJSON:", saveJSON.current);
 
-    downloadJSON(saveJSON.current).then(((res) => {
+    if (jsonData.items.length <= 0) {
+      alert("Please place any one of the Product Group");
+    } else {
+      downloadJSON(saveJSON.current).then(((res) => {
       if (res === true)
         axios.post("http://localhost:5133/api/metadataapi/RunILogic2");
     }));
-    // if (saveJSON.current.length > 0) {
-    //   alert("Please place any one of the Product Group");
-    // } else {
-    //   downloadJSON(saveJSON.current);
-    // }
-
-
-
+    }
+    
     // Close modal
     setModalVisible(false);
     setSelectedRect(null);
@@ -764,13 +761,13 @@ const Header = () => {
         {/* Center Half with Full-Sized Grid */}
         <div className="center-half" ref={centerRef}>
 
-          <svg width={stageWidth} height="20" style={{ position: "absolute", top: 5, left: 138 }}>
+          <svg width={stageWidth} height="20" style={{ position: "absolute", top: "1%", left: "10%" }}>
             <line x1="0" y1="0" x2={stageWidth} y2="0" stroke="black" strokeWidth="5" />
             <text x={stageWidth / 2} y="18" fontWeight="bold" fontSize="16" textAnchor="middle" fill="black">
               {`Width: 100m`}
             </text>
           </svg>
-          <svg width="20" height={stageHeight} style={{ position: "absolute", top: 30, left: 20 }}>
+          <svg width="20" height={stageHeight} style={{ position: "absolute", top: "12%", left: "2%" }}>
             <line x1="0" y1={stageHeight} x2="0" y2="0" stroke="black" strokeWidth="5" />
             <text x={-stageHeight / 2} y="18" fontWeight="bold" fontSize="16" textAnchor="middle" fill="black" transform={`rotate(-90, 10, 10)`}>
               {`Height: 100m`}
@@ -812,9 +809,9 @@ const Header = () => {
                     // return { x: newX, y: newY };
 
                     // Ensure we get the nearest available position if overlapping
-                    let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
+                    // let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
 
-                    return { x: finalX, y: finalY };
+                    // return { x: finalX, y: finalY };
                   }}
                 >
                   {rect.name === "Aisle Space" ? (
