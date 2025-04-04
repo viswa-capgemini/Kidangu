@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Stage, Layer, Rect, Image, Text, Group, Arrow } from "react-konva";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import useImage from "use-image";
 import "./styles.css";
 import sprs from "../assets/productimages/sprs-image.avif";
@@ -35,7 +35,7 @@ import unitImage from "../assets/racking/UNIT.png"
 import rightView from "../assets/rightview.png"
 import frontview1 from "../assets/frontview1.svg"
 import box from "../assets/racking/box-front.png"
-
+import CustomLoading from "../CustomStyles/CustomLoading";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import axios from "axios";
@@ -56,6 +56,10 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
 
   // Loading gltf
   const loader = new GLTFLoader();
+  const [modelFrame1, setModelFrame1] = useState(null);
+  const [modelFrame2, setModelFrame2] = useState(null);
+  const [modelBeam1, setModelBeam1] = useState(null);
+  const [modelBeam2, setModelBeam2] = useState(null);
   const [model, setModel] = useState(null);
   const scene = useThree();
 
@@ -106,10 +110,10 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
 
   useEffect(() => {
     // Log positions of individual meshes
-    if (mesh1Ref.current) console.log("Mesh 1 Position:", mesh1Ref.current.position);
-    if (mesh2Ref.current) console.log("Mesh 2 Position:", mesh2Ref.current.position);
-    if (topBar1Ref.current) console.log("Top Bar 1 Position:", topBar1Ref.current.position);
-    if (topBar2Ref.current) console.log("Top Bar 2 Position:", topBar2Ref.current.position);
+    if (mesh1Ref.current) //console.log("Mesh 1 Position:", mesh1Ref.current.position);
+    if (mesh2Ref.current) //console.log("Mesh 2 Position:", mesh2Ref.current.position);
+    if (topBar1Ref.current) //console.log("Top Bar 1 Position:", topBar1Ref.current.position);
+    if (topBar2Ref.current) //console.log("Top Bar 2 Position:", topBar2Ref.current.position);
 
     // Log all rack positions
     rackRefs.current.forEach((ref, index) => {
@@ -139,6 +143,28 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
       // model.position.set(2, 0, 0);
       model.scale.set(0.5, 0.5, 0.5);
       model.rotation.set(0, 0, 0);
+
+      // Find the specific child
+      const frameAssy1 = model.children.find(child => child.name === "FRAME_ASSY_1000D-7M1");
+      const frameAssy2 = model.children.find(child => child.name === "FRAME_ASSY_1000D-7M2");
+      const beamAssy1 = model.children.find(child => child.name === "BEAM_ASSEMBLY1");
+      const beamAssy2 = model.children.find(child => child.name === "BEAM_ASSEMBLY2");
+      
+      if (frameAssy1) {
+        const uprightChild1 = frameAssy1.children.find(child => child.name === "Upright_GXL_90_-_5000_x_163");
+        const uprightChild2 = frameAssy2.children.find(child => child.name === "Upright_GXL_90_-_5000_x_163_1");
+      
+      //   frameAssy1.rotation.set(0, -Math.PI / 2, 0); // Rotate left
+      // frameAssy2.rotation.set(0, Math.PI / 2, 0);  // Rotate right
+      if(uprightChild1 && uprightChild2) {
+         // Store them separately for positioning
+         setModelFrame1(uprightChild1);
+         setModelFrame2(uprightChild2);
+         setModelBeam1(beamAssy1);
+          setModelBeam2(beamAssy2);
+      }
+
+      }
       // model.traverse((children) => {
       //   if (children.isMesh) {
       //     children.castShadow = true;
@@ -152,10 +178,33 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
 
   return (
     <>
-      <PerspectiveCamera makeDefault position={[-2, 0, 5]} />
-      <group position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      <OrthographicCamera position={[0, 0, 0]} />
+      {/* <group position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         {model && <primitive object={model} />}
+      </group> */}
+
+      <group position={[0, -2, 0]} >
+        {modelFrame1 && (
+          <primitive object={modelFrame1} position={[-2, 0, 0]} />
+        )}
       </group>
+      <group position={[0, -2, 0]}>
+        {modelFrame2 && (
+          <primitive object={modelFrame2} position={[2, 0, 0]} />
+        )}
+      </group>
+      <group position={[0, -2, 0]}>
+        {modelBeam1 && (
+          <primitive object={modelBeam1} position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+        )}
+      </group>
+      <group position={[0, -2, 0]}>
+        {modelBeam2 && (
+          <primitive object={modelBeam2} position={[2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+        )}
+      </group>
+      <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
+      <ambientLight intensity={0.6} />
 
       <group position={position}>
 
@@ -264,6 +313,7 @@ const CameraController = ({ stands }) => {
 // };
 
 const Header = () => {
+  const [loading, setLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [imagePosition, setImagePosition] = useState({ x: 50, y: 50 });
   const [image] = useImage(sprs);
@@ -297,6 +347,7 @@ const Header = () => {
   const [unit] = useImage(unitImage);
   const location = useLocation();
   const enquiryNumber = location.state?.enquiryNumber || "N/A";
+  const navigate = useNavigate();
 
   const heightData = {
     1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10' },
@@ -393,7 +444,17 @@ const Header = () => {
     } else {
       downloadJSON(saveJSON.current).then(((res) => {
       if (res === true)
-        axios.post("http://localhost:5133/api/metadataapi/RunILogic2");
+        axios.post("http://localhost:5133/api/metadataapi/RunILogic2")
+      .then(() => {
+        setInterval(() => {
+          setLoading(false);
+          navigate('/');
+        }, 120000)
+      })
+      .catch((err) => {
+        console.log("err in api", err);
+        setLoading(false);
+      });
     }));
     }
     
@@ -631,7 +692,8 @@ const Header = () => {
     return found ? { x, y } : { x: rects[index].x, y: rects[index].y }; // Return last valid position
   };
 
-  var downloadJSON = async (jsonString) => {
+  const downloadJSON = async (jsonString) => {
+    setLoading(true);
     const blob = new Blob([jsonString], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -1091,6 +1153,8 @@ const Header = () => {
         <div className="downloadJSON">
           <button onClick={handleSaveAndClose}>Download BOM</button>
         </div>
+
+        {loading && <CustomLoading />}
 
       </div>
     </div>

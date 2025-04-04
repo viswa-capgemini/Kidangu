@@ -76,35 +76,41 @@ const EnquiryTable = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                    {rows.length > 0 ? (
-                        rows.map((row, rowIndex) => (
-                            <TableRow key={rowIndex}>
-                                {columns.map((column, colIndex) => (
-                                    <TableCell key={colIndex}>
-                                        {column === "Edit/Delete" ? (
-                                            <>
-                                            <Button variant="contained" color="primary">
-                                                Edit
-                                            </Button>
-                                            <Button variant="contained" color="error">
-                                            Delete
-                                        </Button>
-                                        </>
-                                        ) : (
-                                            row[columnMapping[column]] || "N/A"
-                                        )}
-                                    </TableCell>
-                                ))}
+                        {rows.length > 0 ? (
+                            rows.map((row, rowIndex) => (
+                                <TableRow key={rowIndex}>
+                                    {columns.map((column, colIndex) => (
+                                        <TableCell key={colIndex}>
+                                            {column === "Edit/Delete" ? (
+                                                <>
+                                                    <Button variant="contained" color="primary">
+                                                        Edit
+                                                    </Button>
+                                                    <Button variant="contained" color="error">
+                                                        Delete
+                                                    </Button>
+                                                </>
+                                            ) : column === "Product Group" && Array.isArray(row[columnMapping[column]]) ? (
+                                                row[columnMapping[column]].join(", ")
+                                            ) : column === "View GA" ? (
+                                                <Button variant="contained" color="primary" onClick={() => navigate("/ga-view", { state: { enquiryId: row.enquiryId } })}>
+                                                    View GA
+                                                </Button>
+                                            ) :(
+                                                row[columnMapping[column]] || "N/A"
+                                            )}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={columns.length} align="center">
+                                    No data available
+                                </TableCell>
                             </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={columns.length} align="center">
-                                No data available
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
+                        )}
+                    </TableBody>
                 </Table>
             </TableContainer>
         </Box>
