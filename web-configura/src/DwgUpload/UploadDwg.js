@@ -20,7 +20,7 @@ const UploadDwg = () => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [viewer, setViewer] = useState(null);
   const [accessToken, setAccessToken] = useState("");
-  const urn = useRef("");
+  const urn = useRef("dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6ZHdnLWFwaS9HQV9maW5hbF92Mi5kd2c");
   const viewerContainerRef = useRef(null);
   const viewerRef = useRef(null);
 
@@ -48,7 +48,11 @@ const UploadDwg = () => {
           setViewer(viewerInstance);
     
           const documentId = `urn:${urn.current}`;
-          loadModal(viewerInstance, documentId);
+          // loadModal(viewerInstance, documentId);
+        window.Autodesk.Viewing.Document.load(documentId, (doc) => {
+          const defaultModel = doc.getRoot().getDefaultGeometry();
+          viewerInstance.loadDocumentNode(doc, defaultModel);
+        });
         }
       });
     }

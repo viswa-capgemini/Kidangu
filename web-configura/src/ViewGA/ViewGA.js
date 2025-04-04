@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 // import { Autodesk } from "@forge/viewer";
 
 const ViewGA = () => {
-    const urn = "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6ZHdnLWFwaS9HQV9maW5hbC5kd2c";
+    const urn = "dXJuOmFkc2sub2JqZWN0czpvcy5vYmplY3Q6ZHdnLWFwaS9HQV9maW5hbF92Mi5kd2c";
 
     useEffect(() => {
         const options = {

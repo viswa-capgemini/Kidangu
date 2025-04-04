@@ -141,8 +141,8 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
       const model = gltf.scene;
       console.log("model", model)
       // model.position.set(2, 0, 0);
-      model.scale.set(0.5, 0.5, 0.5);
-      model.rotation.set(0, 0, 0);
+      model.scale.set(0.7, 0.7, 0.7);
+      model.rotation.set(0, Math.PI, 0);
 
       // Find the specific child
       const frameAssy1 = model.children.find(child => child.name === "FRAME_ASSY_1000D-7M1");
@@ -178,12 +178,18 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
 
   return (
     <>
-      <OrthographicCamera position={[0, 0, 0]} />
-      {/* <group position={[0, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
+      {/* <OrthographicCamera
+  makeDefault
+  position={[0, 0, 5]} // Front of model
+  near={0.1}
+  far={1000}
+  zoom={100}
+/>
+      <group position={[-3, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
         {model && <primitive object={model} />}
       </group> */}
 
-      <group position={[0, -2, 0]} >
+      {/* <group position={[0, -2, 0]} >
         {modelFrame1 && (
           <primitive object={modelFrame1} position={[-2, 0, 0]} />
         )}
@@ -195,67 +201,91 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
       </group>
       <group position={[0, -2, 0]}>
         {modelBeam1 && (
-          <primitive object={modelBeam1} position={[-2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+          <primitive object={modelBeam1} position={[-2, 0, 0]}  />
         )}
       </group>
       <group position={[0, -2, 0]}>
         {modelBeam2 && (
-          <primitive object={modelBeam2} position={[2, 0, 0]} rotation={[0, Math.PI / 2, 0]} />
+          <primitive object={modelBeam2} position={[2, 0, 0]}  />
         )}
-      </group>
+      </group> */}
+
+<group position={position}>
+
+{/* Left Mesh */}
+<mesh ref={mesh1Ref} position={[-2.9, heights[selectedImageHeight] / 5, 0]}>
+  <planeGeometry args={[4, heights[selectedImageHeight]]} />
+  <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
+</mesh>
+
+{/* Right Mesh */}
+<mesh ref={mesh2Ref} position={[widths[selectedWidth] + 0.1, heights[selectedImageHeight] / 5, 0]}>
+  <planeGeometry args={[4, heights[selectedImageHeight]]} />
+  <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
+</mesh>
+
+{/* Top Bars */}
+<mesh ref={topBar1Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight], 0]}>
+  <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
+  <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
+</mesh>
+
+<mesh ref={topBar2Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight] + 1.5, 0]}>
+  <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
+  <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
+</mesh>
+
+
+
+{/* Centered Edit Label */}
+{/* <Html position={[-1.5, 2.7, 0]} center style={{ pointerEvents: "visible" }} onPointerDown={(e) => e.stopPropagation()}>
+      <div className="edit-pallet">
+          <img className="edit-pallet" id="edit-pallet" src={edit} style={{ width: "45px", height: "25px", cursor: "pointer" }} onClick={toggleDropdown} alt="Edit"></img>
+          <h6>Edit Shelf Unit</h6>
+          {showDropdown == true && (
+              <><select name="dropdown-menu" id="dropdown-menu">
+                  <option value="height">Shelf Height</option>
+                  <option value="width">Shelf Width</option>
+                  <option value="levels">Levels</option>
+                  <option value="deck">Deck</option>
+                  <option value="rack-protect-left">Rack Protection Left</option>
+                  <option value="rack-protect-right">Rack Protection Right</option>
+              </select></>
+      )}
+          
+      </div>
+  </Html> */}
+</group>
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
       <ambientLight intensity={0.6} />
 
-      <group position={position}>
-
-        {/* Left Mesh */}
-        <mesh ref={mesh1Ref} position={[-2.9, heights[selectedImageHeight] / 5, 0]}>
-          <planeGeometry args={[4, heights[selectedImageHeight]]} />
-          <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
-        </mesh>
-
-        {/* Right Mesh */}
-        <mesh ref={mesh2Ref} position={[widths[selectedWidth] + 0.1, heights[selectedImageHeight] / 5, 0]}>
-          <planeGeometry args={[4, heights[selectedImageHeight]]} />
-          <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
-        </mesh>
-
-        {/* Top Bars */}
-        <mesh ref={topBar1Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight], 0]}>
-          <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-          <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
-        </mesh>
-
-        <mesh ref={topBar2Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight] + 1.5, 0]}>
-          <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-          <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
-        </mesh>
-
-
-
-        {/* Centered Edit Label */}
-        {/* <Html position={[-1.5, 2.7, 0]} center style={{ pointerEvents: "visible" }} onPointerDown={(e) => e.stopPropagation()}>
-              <div className="edit-pallet">
-                  <img className="edit-pallet" id="edit-pallet" src={edit} style={{ width: "45px", height: "25px", cursor: "pointer" }} onClick={toggleDropdown} alt="Edit"></img>
-                  <h6>Edit Shelf Unit</h6>
-                  {showDropdown == true && (
-                      <><select name="dropdown-menu" id="dropdown-menu">
-                          <option value="height">Shelf Height</option>
-                          <option value="width">Shelf Width</option>
-                          <option value="levels">Levels</option>
-                          <option value="deck">Deck</option>
-                          <option value="rack-protect-left">Rack Protection Left</option>
-                          <option value="rack-protect-right">Rack Protection Right</option>
-                      </select></>
-              )}
-                  
-              </div>
-          </Html> */}
-      </group></>
+      </>
   );
 });
 
 const SideView = ({ position, selectedDepth }) => {
+
+  const loader = new GLTFLoader();
+  const [model, setModel] = useState(null);
+
+  useEffect(() => {
+    loader.load("/assets/UNIT.glb", (gltf) => {
+      const model = gltf.scene;
+      console.log("model", model)
+      // model.position.set(2, 0, 0);
+      model.scale.set(0.7, 0.7, 0.7);
+      model.rotation.set(Math.PI, 0, 0);
+
+      // model.traverse((children) => {
+      //   if (children.isMesh) {
+      //     children.castShadow = true;
+      //     children.receiveShadow = true;
+      //   }
+      // });
+      // scene.add(model);
+      setModel(model);
+    })
+  }, [])
 
   const depths = {
     1: 1,  // Height for standFront30
@@ -269,6 +299,24 @@ const SideView = ({ position, selectedDepth }) => {
   };
 
   return (
+
+//     <>
+//     <OrthographicCamera
+//   makeDefault
+//   position={[0, 0, 5]} // Right side view
+//   zoom={100}
+//   near={0.1}
+//   far={1000}
+// />
+
+//       <group position={[0, 0, 0]} rotation={[0, 0, 0]}>
+//         {model && <primitive object={model} />}
+//       </group>
+
+//     <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
+//       <ambientLight intensity={0.6} />
+//       </>
+
     <group position={[0, 0, 0]}>
       <mesh position={[-1, 0, 0]}>
         <planeGeometry args={[depths[selectedDepth], 3.6]} />
@@ -1133,7 +1181,7 @@ const Header = () => {
                   </div>
                 </div>
                 <div className="canvas">
-                  <Canvas >
+                  <Canvas orthographic camera={{ position: [0, 0, 5], zoom: 100, near: 0.1, far: 1000 }}>
                     {selectedView === "stand" &&
                       <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} />}
                     {selectedView === "sideView" && <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
