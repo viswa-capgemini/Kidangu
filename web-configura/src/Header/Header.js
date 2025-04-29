@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
-import { Stage, Layer, Rect, Image, Text, Group, Arrow } from "react-konva";
+import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useMemo  } from "react";
+import { Stage, Layer, Rect, Image, Text, Group, Arrow, Transformer } from "react-konva";
 import { useLocation, useNavigate } from "react-router-dom";
 import useImage from "use-image";
 import "./styles.css";
@@ -14,7 +14,7 @@ import aisleSpace from "../assets/icons/aisle-space.webp"
 import door from "../assets/icons/door.png"
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import { OrthographicCamera, Html, PerspectiveCamera } from "@react-three/drei";
+import { OrthographicCamera, Html, PerspectiveCamera, OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 import standFront30 from "../assets/racking/height/stand-front-30.png";
 import standFront40 from "../assets/racking/height/stand-front-40.png";
@@ -39,65 +39,31 @@ import CustomLoading from "../CustomStyles/CustomLoading";
 import { PivotControls, useGLTF } from "@react-three/drei";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import axios from "axios";
+import * as THREE from "three";
+import { Object3D } from 'three';
+import AxisHelper from "../Axis/AxisHelper";
 
 const GRID_SIZE = 50; // Cell size
 
-const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
-  const [showDropdown, setShowDropdown] = useState(false);
-  const selectedImageHeight = selectedHeight;
-  const selectedImageWidth = selectedWidth;
-  const { nodes, sceneglb } = useGLTF("/assets/UNIT.glb");
+const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRackLoad, selectedNoOfLevels, idsInRow }, ref) => {
+  const { scene } = useThree();
+  const instancedMeshRef = useRef();
+  const tempObject = useMemo(() => new Object3D(), []);
 
+  // References for exposing mesh positions
   const mesh1Ref = useRef();
   const mesh2Ref = useRef();
   const topBar1Ref = useRef();
   const topBar2Ref = useRef();
   const rackRefs = useRef([]);
 
-  // Loading gltf
-  const loader = new GLTFLoader();
-  const [modelFrame1, setModelFrame1] = useState(null);
-  const [modelFrame2, setModelFrame2] = useState(null);
-  const [modelBeam1, setModelBeam1] = useState(null);
-  const [modelBeam2, setModelBeam2] = useState(null);
-  const [model, setModel] = useState(null);
-  const scene = useThree();
-
-  const standFront = {
-    1: useLoader(TextureLoader, rightView),
-    2: useLoader(TextureLoader, rightView),
-    3: useLoader(TextureLoader, rightView),
-  };
-
-  const beamFront = {
-    1: useLoader(TextureLoader, beamFrontEmpty100),
-    2: useLoader(TextureLoader, beamFrontEmpty200),
-    3: useLoader(TextureLoader, beamFrontEmpty300),
-  };
-
-  const rackLoader = {
-    1: useLoader(TextureLoader, box),
-    2: useLoader(TextureLoader, box),
-    3: useLoader(TextureLoader, box),
-  }
-
-  const heights = {
-    1: 3,  // Height for standFront30
-    2: 4,  // Height for standFront40
-    3: 5,  // Height for standFront50
-  };
-
-  const widths = {
-    1: 0.1,  // Width for beamFrontEmpty100
-    2: 0.3,  // Width for beamFrontEmpty200
-    3: 0.5,  // Width for beamFrontEmpty300
-  };
-
-  const svgHeight = {
-    1: 300,
-    2: 350,
-    3: 400
-  }
+  // GLTF model states
+  const [modelParts, setModelParts] = useState({
+    frame1: null,
+    frame2: null,
+    beam1: null,
+    beam2: null,
+  });
 
   const rackPositions = [
     [-2.45, 1.8],
@@ -108,25 +74,6 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
     [-0.45, 0.3],
   ];
 
-  useEffect(() => {
-    // Log positions of individual meshes
-    if (mesh1Ref.current) //console.log("Mesh 1 Position:", mesh1Ref.current.position);
-    if (mesh2Ref.current) //console.log("Mesh 2 Position:", mesh2Ref.current.position);
-    if (topBar1Ref.current) //console.log("Top Bar 1 Position:", topBar1Ref.current.position);
-    if (topBar2Ref.current) //console.log("Top Bar 2 Position:", topBar2Ref.current.position);
-
-    // Log all rack positions
-    rackRefs.current.forEach((ref, index) => {
-      if (ref) console.log(`Rack ${index} Position:`, ref.position);
-    });
-  }, [selectedImageHeight, selectedWidth, selectedHeight, rackPositions]);
-
-  const toggleDropdown = (e) => {
-    e.stopPropagation();
-    setShowDropdown(true);
-  };
-
-  // Expose mesh positions to the parent component
   useImperativeHandle(ref, () => ({
     getMeshPositions: () => ({
       mesh1: mesh1Ref.current?.position.toArray() || [0, 0, 0],
@@ -137,129 +84,152 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth }, ref) => {
   }));
 
   useEffect(() => {
+    if (modelParts.frame1) {
+      // Create a bounding box to measure the model
+      const boundingBox = new THREE.Box3().setFromObject(modelParts.frame1);
+      const height = boundingBox.max.y - boundingBox.min.y;
+      console.log("Frame1 height:", height);
+    }
+  }, [modelParts.frame1]);
+
+  useEffect(() => {
+    if (modelParts.frame1 && instancedMeshRef.current) {
+      // Clone the geometry and material from the original model
+      let geometry, material;
+      modelParts.frame1.traverse((child) => {
+        if (child.isMesh) {
+          geometry = child.geometry;
+          material = child.material;
+        }
+      });
+      
+      if (geometry && material) {
+        // Create instances at different heights
+        for (let i = 0; i < 1; i++) {
+          tempObject.position.set(0, i * 1, 0);
+          tempObject.updateMatrix();
+          instancedMeshRef.current.setMatrixAt(i, tempObject.matrix);
+        }
+        instancedMeshRef.current.instanceMatrix.needsUpdate = true;
+      }
+    }
+  }, [modelParts.frame1]);
+
+  useEffect(() => {
+    const loader = new GLTFLoader();
     loader.load("/assets/UNIT.glb", (gltf) => {
       const model = gltf.scene;
-      console.log("model", model)
-      // model.position.set(2, 0, 0);
-      model.scale.set(0.7, 0.7, 0.7);
-      model.rotation.set(0, Math.PI, 0);
-
-      // Find the specific child
-      const frameAssy1 = model.children.find(child => child.name === "FRAME_ASSY_1000D-7M1");
-      const frameAssy2 = model.children.find(child => child.name === "FRAME_ASSY_1000D-7M2");
-      const beamAssy1 = model.children.find(child => child.name === "BEAM_ASSEMBLY1");
-      const beamAssy2 = model.children.find(child => child.name === "BEAM_ASSEMBLY2");
-      
-      if (frameAssy1) {
-        const uprightChild1 = frameAssy1.children.find(child => child.name === "Upright_GXL_90_-_5000_x_163");
-        const uprightChild2 = frameAssy2.children.find(child => child.name === "Upright_GXL_90_-_5000_x_163_1");
-      
-      //   frameAssy1.rotation.set(0, -Math.PI / 2, 0); // Rotate left
-      // frameAssy2.rotation.set(0, Math.PI / 2, 0);  // Rotate right
-      if(uprightChild1 && uprightChild2) {
-         // Store them separately for positioning
-         setModelFrame1(uprightChild1);
-         setModelFrame2(uprightChild2);
-         setModelBeam1(beamAssy1);
-          setModelBeam2(beamAssy2);
+      console.log("model", model);
+  
+      const frame1 = model.getObjectByName("FRAME_ASSY_1000D-7M1");
+      const frame2 = model.getObjectByName("FRAME_ASSY_1000D-7M2");
+      const beam1 = model.getObjectByName("BEAM_ASSEMBLY1");
+      const beam2 = model.getObjectByName("BEAM_ASSEMBLY3");
+  
+      if (frame1) {
+        frame1.rotation.set(0, -Math.PI / 2, 0);
+        // Center the geometry for proper scaling
+        new THREE.Box3().setFromObject(frame1).getCenter(frame1.position);
+        frame1.position.multiplyScalar(-1);
       }
-
+      if (frame2) {
+        frame2.rotation.set(0, Math.PI / 2, 0);
+        // Center the geometry for proper scaling
+        new THREE.Box3().setFromObject(frame2).getCenter(frame2.position);
+        frame2.position.multiplyScalar(-1);
       }
-      // model.traverse((children) => {
-      //   if (children.isMesh) {
-      //     children.castShadow = true;
-      //     children.receiveShadow = true;
-      //   }
-      // });
-      // scene.add(model);
-      setModel(model);
-    })
-  }, [])
+      if (beam1) beam1.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
+      if (beam2) beam2.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+  
+      setModelParts({
+        frame1,
+        frame2,
+        beam1,
+        beam2,
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    rackRefs.current.forEach((ref, index) => {
+      if (ref) {
+        console.log(`Rack ${index} Position:`, ref.position);
+      }
+    });
+  }, [selectedWidth]);
+
+  // Function for reusing the clone method for deep cloning
+  const clone = (object) => object?.clone(true);
+  const totalWidth = (idsInRow + 2) * 4.1; // Calculate total width based on frames
 
   return (
     <>
-      {/* <OrthographicCamera
-  makeDefault
-  position={[0, 0, 5]} // Front of model
-  near={0.1}
-  far={1000}
-  zoom={100}
-/>
-      <group position={[-3, 0, 0]} rotation={[0, Math.PI / 2, 0]}>
-        {model && <primitive object={model} />}
-      </group> */}
+      <OrthographicCamera
+        makeDefault
+        position={[0, -1, 10]}
+        near={0.1}
+        far={1000}
+        zoom={90}
+      />
 
-      {/* <group position={[0, -2, 0]} >
-        {modelFrame1 && (
-          <primitive object={modelFrame1} position={[-2, 0, 0]} />
-        )}
-      </group>
-      <group position={[0, -2, 0]}>
-        {modelFrame2 && (
-          <primitive object={modelFrame2} position={[2, 0, 0]} />
-        )}
-      </group>
-      <group position={[0, -2, 0]}>
-        {modelBeam1 && (
-          <primitive object={modelBeam1} position={[-2, 0, 0]}  />
-        )}
-      </group>
-      <group position={[0, -2, 0]}>
-        {modelBeam2 && (
-          <primitive object={modelBeam2} position={[2, 0, 0]}  />
-        )}
-      </group> */}
+      {/* Add OrbitControls with restricted functionality */}
+    {/* <OrbitControls 
+      enableRotate={false}  // Disable rotation
+      enableZoom={true}     // Allow zooming
+      enablePan={true}      // Enable panning
+      panSpeed={1}          // Adjust pan speed
+      screenSpacePanning={true}
+      maxPolarAngle={Math.PI / 2}
+      minPolarAngle={Math.PI / 2}
+    /> */}
 
-<group position={position}>
-
-{/* Left Mesh */}
-<mesh ref={mesh1Ref} position={[-2.9, heights[selectedImageHeight] / 5, 0]}>
-  <planeGeometry args={[4, heights[selectedImageHeight]]} />
-  <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
-</mesh>
-
-{/* Right Mesh */}
-<mesh ref={mesh2Ref} position={[widths[selectedWidth] + 0.1, heights[selectedImageHeight] / 5, 0]}>
-  <planeGeometry args={[4, heights[selectedImageHeight]]} />
-  <meshBasicMaterial map={standFront[selectedImageHeight]} transparent alphaTest={0.5} depthWrite={false} />
-</mesh>
-
-{/* Top Bars */}
-<mesh ref={topBar1Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight], 0]}>
-  <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-  <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
-</mesh>
-
-<mesh ref={topBar2Ref} position={[-1.5 + widths[selectedWidth] / 2, widths[selectedHeight] + 1.5, 0]}>
-  <planeGeometry args={[2.9 + widths[selectedWidth], 0.2]} />
-  <meshBasicMaterial map={beamFront[selectedImageWidth]} transparent alphaTest={0.5} depthWrite={false} />
-</mesh>
-
-
-
-{/* Centered Edit Label */}
-{/* <Html position={[-1.5, 2.7, 0]} center style={{ pointerEvents: "visible" }} onPointerDown={(e) => e.stopPropagation()}>
-      <div className="edit-pallet">
-          <img className="edit-pallet" id="edit-pallet" src={edit} style={{ width: "45px", height: "25px", cursor: "pointer" }} onClick={toggleDropdown} alt="Edit"></img>
-          <h6>Edit Shelf Unit</h6>
-          {showDropdown == true && (
-              <><select name="dropdown-menu" id="dropdown-menu">
-                  <option value="height">Shelf Height</option>
-                  <option value="width">Shelf Width</option>
-                  <option value="levels">Levels</option>
-                  <option value="deck">Deck</option>
-                  <option value="rack-protect-left">Rack Protection Left</option>
-                  <option value="rack-protect-right">Rack Protection Right</option>
-              </select></>
-      )}
-          
-      </div>
-  </Html> */}
-</group>
-      <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
       <ambientLight intensity={0.6} />
+      <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
 
-      </>
+      {/* <instancedMesh 
+      ref={instancedMeshRef} 
+      args={[null, null, 1]}
+    /> */}
+
+      {/* Frames */}
+        <group position={[0, -2, 0]} >
+        {modelParts.frame1 && 
+          Array.from({ length: idsInRow + 2 }).map((_, index) => (
+            <primitive
+              key={index}
+              object={clone(modelParts.frame1)}
+              scale={[1, selectedHeight, 1]}
+              position={[-2 + index * 4.1, 0, 0]}
+              onUpdate={(self) => {
+                self.position.set(-2 + index * 4.1, 0, 0);
+                self.updateMatrixWorld();
+              }}
+            />
+          ))
+        }
+          {modelParts.beam1 &&
+            Array.from({ length: selectedNoOfLevels }).map((_, index) => (
+          <primitive
+            key={index}
+            object={clone(modelParts.beam1)}
+            position={[-1.5, index - 1, 1]} // Adjust the vertical spacing if needed
+            // onUpdate={(self) => {
+            //   self.position.set(self.position.x, index - 1, self.position.z); // Allow movement only in one direction (vertical)
+            //   self.updateMatrixWorld();
+            // }}
+          />
+            ))}
+        </group>
+        {/* Beams */}
+      {/* <group >
+        {modelParts.beam1 && (
+          <primitive object={modelParts.beam1} position={[-1.5, 0, 0]} />
+        )}
+        {modelParts.beam2 && (
+          <primitive object={modelParts.beam2} position={[1.5, 0, 0]} />
+        )}
+      </group> */}
+    </>
   );
 });
 
@@ -384,6 +354,7 @@ const Header = () => {
   const [selectedRackLoad, setSelectedRackLoad] = useState(1);
   const [selectedView, setSelectedView] = useState("stand");
   const [selectedElevation, setSelectedElevation] = useState(1);
+  const [selectedNoOfLevels, setSelectedNoOfLevels] = useState(5);
   const [draggingCoordinates, setDraggingCoordinates] = useState({ x: 0, y: 0 });
   const [activeDragId, setActiveDragId] = useState(null);
   // const [saveJSON, setSaveJSON] = useState(null);
@@ -396,11 +367,23 @@ const Header = () => {
   const location = useLocation();
   const enquiryNumber = location.state?.enquiryNumber || "N/A";
   const navigate = useNavigate();
+  const transformerRef = useRef(null);
+  const groupRefs = useRef({});
+  const [selectedShape, setSelectedShape] = useState(null);
+  const idsInRow = useRef(0);
+
+  useEffect(() => {
+    window.addEventListener('DOMContentLoaded', () => {
+      const div = document.querySelector('.canvas');
+      const rect = div.getBoundingClientRect();
+      console.log("rect", rect.width, rect.height);
+    })
+  }, [])
 
   const heightData = {
-    1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10' },
-    2: { name: "400", partNo: "GXL 90-1.8", fullName: "GXL 90-4m", cost: '20' },
-    3: { name: "500", partNo: "GXL 90-2.0", fullName: "GXL 90-5m", cost: '30' },
+    1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10', scale: 1 },
+    2: { name: "400", partNo: "GXL 90-1.8", fullName: "GXL 90-4m", cost: '20', scale: 1.1 },
+    3: { name: "500", partNo: "GXL 90-2.0", fullName: "GXL 90-5m", cost: '30', scale: 1.2 },
   }
 
   const widthData = {
@@ -441,7 +424,27 @@ const Header = () => {
     4: { name: "MHE" },
   }
 
+  const noOfLevels = {
+    1: { name: "1" },
+    2: { name: "2" },
+    3: { name: "3" },
+    4: { name: "4" },
+    5: { name: "5" },
+  }
+  // const [selectedScale, setSelectedScale] = useState(heightData[1].scale);
+  const selectedScale = useRef(heightData[selectedHeight].scale);
+
   const sleep = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+  useEffect(() => {
+    if (transformerRef.current && selectedShape) {
+      const selectedNode = groupRefs.current[selectedShape];
+      if (selectedNode) {
+        transformerRef.current.nodes([selectedNode]);
+        transformerRef.current.getLayer().batchDraw();
+      }
+    }
+  }, [selectedShape]);
 
   const handleRectClick = (rect) => {
     setSelectedRect(rect);
@@ -452,60 +455,103 @@ const Header = () => {
     const meshPositions = standRef.current?.getMeshPositions() || {};
 
     // Construct jsonData dynamically for all present IDs
-    const jsonData = {
-      // productGroup: selectedRect.fullName,
-      items: rects
-        .filter(rect => rect.fullName === "Shuttle Pallet Rack")
-        .map(rect => ({
-          productId: rect.id,
+    const warehouseJson = {
+      warehouse: {
+        enquiry_id: enquiryNumber,
+        warehousefile: `${enquiryNumber}.iam`,
+        dimensions: {
+          width: stageWidth,
+          length: 100,
+          height: stageHeight,
+        },
+        total_racks: rects.filter(rect => rect.fullName === "Shuttle Pallet Rack").length,
+        total_doors: 0,
+        total_windows: 0,
+        total_pillars: 0,
+        doors: [],
+        windows: [],
+        pillars: [],
+        aisles: rects
+        .filter(rect => rect.fullName === "Aisle Space")
+        .map((rect, index) => ({
+          aisleId: rect.id,
           productGroup: rect.fullName,
-          iamFilePath: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
-          x_position: rect.x,
-          y_position: rect.y,
-          iamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam"
-        }))
+          x_position: `${rect.x}`,
+          y_position: `${rect.y}`,
+          z_position: "0",
+          aisleIndex: index + 1,
+        })),
+        cross_aisles: [],
+        aisle_spaces: [],
+        products: rects
+          .filter(rect => rect.fullName === "Shuttle Pallet Rack")
+          .map((rect, index) => ({
+            productId: rect.id,
+            productGroup: rect.fullName,
+            sourceiamfile_path: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
+            x_position: `${-rect.x}`,
+            y_position: `${-rect.y}`,
+            z_position: "0",
+            sourceiamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam",
+            rack_id: index + 1,
+            racksubAssembly: `${enquiryNumber}_Rack${index + 1}.iam`
+          }))
+      }
     };
 
-    console.log("Generated JSON:", JSON.stringify(jsonData, null, 2));
+    console.log("Generated JSON:", JSON.stringify(warehouseJson, null, 2));
 
-    // Update saveJSON dynamically
+    // Save JSON dynamically into current context
     saveJSON.current = ((prevSaveJSON) => {
-      const updatedSaveJSON = prevSaveJSON ? JSON.parse(prevSaveJSON) : [];
+      let updatedSaveJSON = [];
 
-      // Merge existing and new data
-      jsonData.items.forEach(newItem => {
-        const existingIndex = updatedSaveJSON.findIndex(item => item.productId === newItem.productId);
-        if (existingIndex !== -1) {
-          updatedSaveJSON[existingIndex] = newItem; // Update existing
-        } else {
-          updatedSaveJSON.push(newItem); // Add new entry
+      if (prevSaveJSON) {
+        try {
+          updatedSaveJSON = JSON.parse(prevSaveJSON);
+        } catch (e) {
+          console.error("Invalid previous JSON, resetting...", e);
+          updatedSaveJSON = [];
         }
-      });
+      }
 
-      return JSON.stringify(updatedSaveJSON.length > 0 ? updatedSaveJSON : [jsonData], null, 2);
+      // Check if entry for this enquiry already exists
+      const existingIndex = updatedSaveJSON.findIndex(
+        entry => entry.warehouse?.enquiry_id === warehouseJson.warehouse.enquiry_id
+      );
+
+      if (existingIndex !== -1) {
+        updatedSaveJSON[existingIndex] = warehouseJson; // Replace existing
+      } else {
+        updatedSaveJSON.push(warehouseJson); // Add new
+      }
+
+      return JSON.stringify(updatedSaveJSON, null, 2);
     })(saveJSON.current);
 
+    // Debug output
     console.log("Updated saveJSON:", saveJSON.current);
 
-    if (jsonData.items.length <= 0) {
+    // Validate & trigger save + API call
+    if (warehouseJson.warehouse.products.length <= 0) {
       alert("Please place any one of the Product Group");
     } else {
-      downloadJSON(saveJSON.current).then(((res) => {
-      if (res === true)
-        axios.post("http://localhost:5133/api/metadataapi/RunILogic2")
-      .then(() => {
-        setInterval(() => {
-          setLoading(false);
-          navigate('/');
-        }, 120000)
-      })
-      .catch((err) => {
-        console.log("err in api", err);
-        setLoading(false);
+      downloadJSON(saveJSON.current).then((res) => {
+        if (res === true) {
+          axios.post("http://localhost:5133/api/metadataapi/RunILogic2")
+            .then(() => {
+              setTimeout(() => {
+                setLoading(false);
+                navigate('/');
+              }, 10000);
+            })
+            .catch((err) => {
+              console.log("err in api", err);
+              setLoading(false);
+            });
+        }
       });
-    }));
     }
-    
+
     // Close modal
     setModalVisible(false);
     setSelectedRect(null);
@@ -525,8 +571,11 @@ const Header = () => {
   };
 
   const handleHeightChange = (event) => {
-    setSelectedHeight(event.target.value);
-  }
+    const newSelectedHeight = (event.target.value);
+    setSelectedHeight(newSelectedHeight);
+    // setSelectedScale(heightData[newSelectedHeight].scale);
+    selectedScale.current = heightData[newSelectedHeight].scale;
+  };
 
   const handleWidthChange = (event) => {
     setSelectedWidth(event.target.value);
@@ -544,6 +593,9 @@ const Header = () => {
     setSelectedElevation(event.target.value);
   }
 
+  const handleLevelChange = (event) => {
+    setSelectedNoOfLevels(event.target.value);
+  }
 
   const handleDragMove = (index, e) => {
     const newRects = [...rects];
@@ -590,20 +642,9 @@ const Header = () => {
         y += rectSize + margin;
       }
 
-      // Find the nearest available position that does not overlap
-      // let { x: finalX, y: finalY } = findNearestNonOverlappingPosition1(x, y, prevRects);
-
-      {/* 
-        // First rectangle starts at (0,0)
-      let x = count === 0 ? 0 : prevRects[prevRects.length - 1].x + rectSize ;
-      let y = 0; // Keep y fixed at the top
-
-      // Ensure it does not exceed the canvas width
-      if (x + rectSize > stageWidth) {
-        x = 0; // Move to the next row
-        y += rectSize + margin; // Move down with spacing
-      }
-        */}
+      // Count the number of IDs in the current row
+      idsInRow.current = filteredRects.filter(rect => rect.y === y).length;
+      console.log(`Number of IDs in row ${y / rowHeight + 1}:`, idsInRow.current);
 
       // Update count for the specific type (spr, canti, etc.)
       countsRef.current[name] = count + 1;
@@ -612,15 +653,15 @@ const Header = () => {
         ...prevRects,
         {
           id: newId,  // Unique ID like spr1, spr2, canti1, canti2
-          x, // x: finalX,
-          y, // y: finalY,
+          x,
+          y,
           width: rectSize,
           height: rectSize,
           color,
           name: newId, // Ensure name is also unique
           fullName: fullName,
-          // imageUrl: name === "spr" ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) : color, // actual code
-          imageUrl,
+          imageUrl: name === "spr" ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) : color,
+          // imageUrl
         },
       ];
     });
@@ -779,6 +820,29 @@ const Header = () => {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  const handleTransformEnd = (rect, index) => {
+    const node = groupRefs.current[rect.id];
+    const scaleX = node.scaleX();
+    const scaleY = node.scaleY();
+
+    // Update dimensions
+    const updated = [...rects];
+    updated[index] = {
+      ...rect,
+      x: node.x(),
+      y: node.y(),
+      width: rect.width * scaleX,
+      height: rect.height * scaleY,
+    };
+
+    node.scaleX(1);
+    node.scaleY(1);
+
+    // Update the state in your app
+    // Assuming you have a setter:
+    // setRects(updated);
+  };
+
   const COLUMNS = Math.floor(gridSize.width / GRID_SIZE);
   const ROWS = Math.floor(gridSize.height / GRID_SIZE);
 
@@ -823,7 +887,7 @@ const Header = () => {
           <div className="product-group">
             <h1>Product Group</h1>
             <div className="image-grid">
-              <div className="image-box" draggable onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', unit, addOnSPRImage)} onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', unit, addOnSPRImage)}>
+              <div className="image-box" draggable onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}>
                 <img src={sprs} alt="Shuttle Pallet Racking" />
               </div>
               {/* <div className="image-box" onClick={() => handleImageClick('red', 'canti', 'Cantilever')}>
@@ -884,139 +948,147 @@ const Header = () => {
             </text>
           </svg>
 
-          <Stage width={stageWidth} height={stageHeight} className="konva-stage" onDrop={(e) => handleDrop(e)} onDragOver={(e) => e.preventDefault()}>
-            <Layer>
-              {rects.map((rect, index) => (
-                <Group
-                  key={rect.id}
-                  draggable
-                  onDblClick={() => handleRectClick(rect)}
-                  onDragStart={() => setActiveDragId(rect.id)}
-                  onDragMove={(e) => {
-                    if (rect.name !== "Aisle Space") handleDragMove(index, e);
+          <Stage
+      width={stageWidth}
+      height={stageHeight}
+      className="konva-stage"
+      onDrop={(e) => handleDrop(e)}
+      onDragOver={(e) => e.preventDefault()}
+    >
+      <Layer>
+        {rects.map((rect, index) => (
+          <Group
+            key={rect.id}
+            ref={(el) => (groupRefs.current[rect.id] = el)}
+            draggable
+            // onClick={() => setSelectedShape(rect.id)}
+            onDblClick={() => rect.name !== "Aisle Space" ? handleRectClick(rect) : null}
+            onDragStart={() => setActiveDragId(rect.id)}
+            onTransformEnd={() => handleTransformEnd(rect, index)}
+            onDragMove={(e) => {
+              if (rect.name !== "Aisle Space") handleDragMove(index, e);
 
-                    if (activeDragId === rect.id) {
-                      const { x, y } = e.target.position();
-                      setDraggingCoordinates({ x, y });
-                    }
-                  }}
-                  onDragEnd={() => {
-                    setDraggingCoordinates(null);
-                    setActiveDragId(null); // Reset active dragging element
-                  }}
-                  dragBoundFunc={(pos) => {
-                    // let newX = rect.name === "Aisle Space" ? rects[index].x : Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-                    // let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
+              if (activeDragId === rect.id) {
+                const { x, y } = e.target.position();
+                setDraggingCoordinates({ x, y });
+              }
+            }}
+            onDragEnd={() => {
+              setDraggingCoordinates(null);
+              setActiveDragId(null);
+            }}
+            dragBoundFunc={(pos) => {
+              let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
+              let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
+              return { x: newX, y: newY };
+            }}
+          >
+            {rect.name === "Aisle Space" ? (
+              <>
+                <Rect
+                  fill={rect.color}
+                  x={rect.x}
+                  y={rect.y}
+                  width={rect.width}
+                  height={rect.height}
+                />
+                <Text
+                  x={rect.x + rect.width / 2 - 30}
+                  y={rect.y + rect.height / 2 - 50}
+                  text={rect.name}
+                  fontSize={14}
+                  fill="black"
+                  fontStyle="bold"
+                  align="center"
+                  width={rectSize}
+                  height={rectSize}
+                  verticalAlign="middle"
+                />
+              </>
+            ) : (
+              <>
+                <Image
+                  image={rect.imageUrl}
+                  x={rect.x}
+                  y={rect.y}
+                  width={rect.width}
+                  height={rect.height}
+                />
+                <Text
+                  x={rect.x + rectSize / 4}
+                  y={rect.y + rectSize / 4}
+                  text={rect.name}
+                  fontSize={14}
+                  fill="black"
+                  fontStyle="bold"
+                  align="center"
+                  width={rectSize}
+                  height={rectSize}
+                  verticalAlign="middle"
+                />
+              </>
+            )}
 
-                    let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-                    let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
-
-                    // Prevent overlapping before moving
-                    // if (isOverlapping(newX, newY, index)) {
-                    //   return { x: rects[index].x, y: rects[index].y }; // Keep it at the last position
-                    // }
-
-                    // return { x: newX, y: newY };
-
-                    // Ensure we get the nearest available position if overlapping
-                    // let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
-
-                    // return { x: finalX, y: finalY };
-                  }}
-                >
-                  {rect.name === "Aisle Space" ? (
-                    <>
-                    <Rect
-                      fill={rect.color}
-                      x={rect.x}
-                      y={rect.y}
-                      width={rect.width}
-                      height={rect.height} /><Text
-                        x={rect.name === "Aisle Space" ? rect.x + rect.width / 2 - 30 : rect.x + rectSize / 4}
-                        y={rect.name === "Aisle Space" ? rect.y + rect.height / 2 - 50 : rect.y + rectSize / 4}
-                        text={rect.name}
-                        fontSize={14}
-                        fill="black"
-                        fontStyle="bold"
-                        align="center"
-                        width={rectSize}
-                        height={rectSize}
-                        verticalAlign="middle" />
-                        </>
-                  ) : (
-                    <>
-                    <Image
-                      image={rect.imageUrl}
-                      x={rect.x}
-                      y={rect.y}
-                      width={rect.width}
-                      height={rect.height} /><Text
-                        x={rect.name === "Aisle Space" ? rect.x + rect.width / 2 - 30 : rect.x + rectSize / 4}
-                        y={rect.name === "Aisle Space" ? rect.y + rect.height / 2 - 50 : rect.y + rectSize / 4}
-                        text={rect.name}
-                        fontSize={14}
-                        fill="black"
-                        fontStyle="bold"
-                        align="center"
-                        width={rectSize}
-                        height={rectSize}
-                        verticalAlign="middle" />
-                        </>
-                  )}
-
-                  {/* Display X, Y coordinates while dragging */}
-
-                  {activeDragId === rect.id && draggingCoordinates && (
-                    <Text
-                      x={draggingCoordinates.x + 10}
-                      y={draggingCoordinates.y - 20}
-                      text={`X: ${draggingCoordinates.x}, Y: ${draggingCoordinates.y}`}
-                      fontSize={14}
-                      fill="black"
-                      fontStyle="bold"
-                    />
-                  )}
-
-                  {activeDragId === rect.id && draggingCoordinates && (
-                    <Group>
-                      <Arrow
-                        points={[0, draggingCoordinates.y, stageWidth, draggingCoordinates.y]} // Horizontal arrow
-                        stroke="red"
-                        strokeWidth={2}
-                        pointerLength={10}
-                        pointerWidth={10}
-                      />
-                      <Text
-                        x={60}
-                        y={draggingCoordinates.y - 15}
-                        text={`X: ${draggingCoordinates.x}`}
-                        fontSize={14}
-                        fill="red"
-                        fontStyle="bold"
-                      />
-                      <Arrow
-                        points={[draggingCoordinates.x, 0, draggingCoordinates.x, stageHeight]} // Vertical arrow
-                        stroke="blue"
-                        strokeWidth={2}
-                        pointerLength={10}
-                        pointerWidth={10}
-                      />
-                      <Text
-                        x={draggingCoordinates.x + 5}
-                        y={5}
-                        text={`Y: ${draggingCoordinates.y}`}
-                        fontSize={14}
-                        fill="blue"
-                        fontStyle="bold"
-                        rotation={-90} // Rotating text vertically
-                      />
-                    </Group>
-                  )}
-
+            {activeDragId === rect.id && draggingCoordinates && (
+              <>
+                <Text
+                  x={draggingCoordinates.x + 10}
+                  y={draggingCoordinates.y - 20}
+                  text={`X: ${draggingCoordinates.x}, Y: ${draggingCoordinates.y}`}
+                  fontSize={14}
+                  fill="black"
+                  fontStyle="bold"
+                />
+                <Group>
+                  <Arrow
+                    points={[0, draggingCoordinates.y, stageWidth, draggingCoordinates.y]}
+                    stroke="red"
+                    strokeWidth={2}
+                    pointerLength={10}
+                    pointerWidth={10}
+                  />
+                  <Text
+                    x={60}
+                    y={draggingCoordinates.y - 15}
+                    text={`X: ${draggingCoordinates.x}`}
+                    fontSize={14}
+                    fill="red"
+                    fontStyle="bold"
+                  />
+                  <Arrow
+                    points={[draggingCoordinates.x, 0, draggingCoordinates.x, stageHeight]}
+                    stroke="blue"
+                    strokeWidth={2}
+                    pointerLength={10}
+                    pointerWidth={10}
+                  />
+                  <Text
+                    x={draggingCoordinates.x + 5}
+                    y={5}
+                    text={`Y: ${draggingCoordinates.y}`}
+                    fontSize={14}
+                    fill="blue"
+                    fontStyle="bold"
+                    rotation={-90}
+                  />
                 </Group>
-              ))}
-            </Layer>
-          </Stage>
+              </>
+            )}
+          </Group>
+        ))}
+
+<Transformer
+          ref={transformerRef}
+          rotateEnabled={true}
+          resizeEnabled={true}
+          anchorSize={8}
+          boundBoxFunc={(oldBox, newBox) => {
+            if (newBox.width < 5 || newBox.height < 5) return oldBox;
+            return newBox;
+          }}
+        />
+      </Layer>
+    </Stage>
 
           {modalVisible && selectedRect && (
             <div className="modal">
@@ -1043,6 +1115,16 @@ const Header = () => {
                       <label htmlFor="elevation">Elevation type:</label>
                       <select name="elevation" id="elevation" onChange={handleElevationChange} value={selectedElevation}>
                         {Object.entries(elevationData).map(([key, { name }]) => (
+                          <option key={key} value={key}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
+                      <label htmlFor="level">Total No of Levels</label>
+                      <select name="level" id="level" onChange={handleLevelChange} value={selectedNoOfLevels}>
+                        {Object.entries(noOfLevels).map(([key, { name }]) => (
                           <option key={key} value={key}>
                             {name}
                           </option>
@@ -1181,25 +1263,32 @@ const Header = () => {
                   </div>
                 </div>
                 <div className="canvas">
-                  <Canvas orthographic camera={{ position: [0, 0, 5], zoom: 100, near: 0.1, far: 1000 }}>
+                  <Canvas
+                    orthographic
+                    camera={{ position: [0, 0, 5], zoom: 10, near: 0.1, far: 1000 }}
+                    onCreated={({ gl }) => {
+                      console.log("Canvas Width:", gl.domElement.width);
+                      console.log("Canvas Height:", gl.domElement.height);
+                    }} style={{ width: "100%", height: "100%", overflowX: "auto" }}>
                     {selectedView === "stand" &&
-                      <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedHeight} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} />}
-                    {selectedView === "sideView" && <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
+                      <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedScale.current} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} idsInRow={idsInRow.current} />}
+                    {selectedView === "sideView" &&
+                      <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
                   </Canvas>
 
                   {/* {selectedView === "stand" && <FrontView />} */}
 
-                  <div className="button-container">
-                    <button onClick={handleSaveAndClose}>Save and Close</button>
+                  {/* <div className="button-container">
+                    <button onClick={() => setModalVisible(false)}>Save and Close</button>
                     <button onClick={() => setModalVisible(false)}>Close</button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
           )}
         </div>
         <div className="downloadJSON">
-          <button onClick={handleSaveAndClose}>Download BOM</button>
+          <button onClick={handleSaveAndClose}>Upload BOM</button>
         </div>
 
         {loading && <CustomLoading />}
