@@ -368,15 +368,49 @@ td[rowspan] {
 
 .canvas {
   flex: 60%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
   position: relative;
+  height: 80vh;
+  overflow-x: auto;
+  overflow-y: hidden; /* Prevent vertical scrolling unless needed */
+  padding: 0; /* Remove padding that creates extra space */
+  margin: 0 auto; /* Center the canvas but remove extra margin */
+  display: block; /* Change from flex to block */
+}
 
-  /* Centering the Canvas */
-  margin: auto; /* Centers it horizontally */
-  height: 80vh; /* Takes full height */
+/* Style the scrollbar for better appearance */
+.canvas::-webkit-scrollbar {
+  height: 8px;
+}
+
+.canvas::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.canvas::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+/* Button container styling */
+.button-container {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+}
+
+.button-container button {
+  padding: 8px 16px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.button-container button:hover {
+  background-color: #357ab8;
 }
 
 
@@ -548,4 +582,206 @@ td[rowspan] {
   width: 10px;
   border-bottom: 1px solid black;
   padding-bottom: 2px;
+}
+
+.edit-beam-compact {
+  position: relative;
+  display: inline-block;
+}
+
+.edit-icon {
+  cursor: pointer;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, background-color 0.2s;
+}
+
+.edit-icon:hover {
+  background-color: #f0f0f0;
+  transform: scale(1.05);
+}
+
+/* .dropdown-container {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: white;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 150px;
+  z-index: 10;
+  margin-top: 8px;
+  border: 1px solid #eaeaea;
+} */
+
+/* Arrow pointing to the icon */
+/* .dropdown-container::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background-color: white;
+  border-top: 1px solid #eaeaea;
+  border-left: 1px solid #eaeaea;
+  transform: translateX(-50%) rotate(45deg);
+} */
+
+/* .dropdown-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 6px;
+} */
+
+/* Custom styling for MUI components */
+/* .dropdown-container .MuiFormControl-root {
+  margin: 0;
+  min-width: 100%;
+}
+
+.dropdown-container .MuiInputLabel-root {
+  font-size: 12px;
+  transform: translate(12px, 12px) scale(1);
+}
+
+.dropdown-container .MuiInputLabel-shrink {
+  transform: translate(12px, -6px) scale(0.75);
+} */
+
+/* .dropdown-container .MuiOutlinedInput-root {
+  border-radius: 4px;
+  font-size: 12px;
+} */
+
+/* .dropdown-container .MuiOutlinedInput-input {
+  padding: 10px 12px;
+} */
+
+/* .dropdown-container .MuiMenuItem-root {
+  font-size: 12px;
+  min-height: 32px;
+} */
+
+/* .dropdown-container .MuiSelect-select {
+  padding-right: 24px !important;
+} */
+
+/* New code */
+
+.dropdown-container {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  background-color: white;
+  border-radius: 6px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 160px;
+  z-index: 10;
+  margin-top: 8px;
+  border: 1px solid #eaeaea;
+  transform: translateX(-50%) translateY(10px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.dropdown-container.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Compact version */
+.compact-dropdown {
+  width: 140px;
+  padding: 6px;
+}
+
+/* Arrow pointing to the icon */
+.dropdown-container::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background-color: white;
+  border-top: 1px solid #eaeaea;
+  border-left: 1px solid #eaeaea;
+}
+
+.dropdown-label {
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #333;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 4px;
+}
+
+/* Custom styling for MUI components */
+.dropdown-container .MuiFormControl-root {
+  margin: 0;
+  min-width: 100%;
+}
+
+.dropdown-container .MuiInputLabel-root {
+  font-size: 10px;
+  transform: translate(10px, 10px) scale(1);
+}
+
+.dropdown-container .MuiInputLabel-shrink {
+  transform: translate(10px, -6px) scale(0.75);
+}
+
+.dropdown-container .MuiOutlinedInput-root {
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.dropdown-container .MuiOutlinedInput-input {
+  padding: 8px 10px;
+}
+
+.dropdown-container .MuiMenuItem-root {
+  font-size: 10px;
+  min-height: 28px;
+  padding: 4px 10px;
+}
+
+.dropdown-container .MuiSelect-select {
+  padding-right: 24px !important;
+}
+
+/* Action buttons */
+.dropdown-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  gap: 4px;
+}
+
+.dropdown-actions .MuiButton-root {
+  font-size: 9px;
+  padding: 2px 8px;
+  min-width: 0;
+  flex: 1;
 }

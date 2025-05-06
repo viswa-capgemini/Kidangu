@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle, useMemo  } from "react";
 import { Stage, Layer, Rect, Image, Text, Group, Arrow, Transformer } from "react-konva";
 import { useLocation, useNavigate } from "react-router-dom";
+import { TextField, Button, MenuItem, Select, InputLabel, FormControl, FormHelperText, Grid, Paper, Typography } from '@mui/material';
 import useImage from "use-image";
 import "./styles.css";
 import sprs from "../assets/productimages/sprs-image.avif";
@@ -28,6 +29,7 @@ import sideStand120 from "../assets/racking/depth/stand-side-40-w11.png";
 import topViewSPR from "../assets/racking/SPR_Top_View.png"
 import topViewSPRAddOn from "../assets/racking/Addon.png"
 import unitImage from "../assets/racking/UNIT.png"
+import logWriter from "../logWriter"
 // import imageAI from "../assets/canvas_image.svg"
 
 // svg image of the converted png
@@ -45,10 +47,19 @@ import AxisHelper from "../Axis/AxisHelper";
 
 const GRID_SIZE = 50; // Cell size
 
-const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRackLoad, selectedNoOfLevels, idsInRow }, ref) => {
+const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRackLoad, selectedNoOfLevels, idsInRow, selectedSecuring }, ref) => {
   const { scene } = useThree();
   const instancedMeshRef = useRef();
   const tempObject = useMemo(() => new Object3D(), []);
+  const editIcon = useLoader(TextureLoader, edit);
+  // const [activeDropdown, setActiveDropdown] = useState(null);
+  const [showDropdownId, setShowDropdownId] = useState(null);
+  const [height, setHeight] = useState(selectedHeight);
+  let showDropdown = useRef(false);
+
+  // Calculate the center position of all frames for camera positioning
+  const totalWidth = (idsInRow + 1) * 4.1;
+  const centerX = (totalWidth / 2) - 2;
 
   // References for exposing mesh positions
   const mesh1Ref = useRef();
@@ -63,6 +74,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     frame2: null,
     beam1: null,
     beam2: null,
+    channel: null,
   });
 
   const rackPositions = [
@@ -83,12 +95,47 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     }),
   }));
 
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     // Check if click was outside any dropdown
+  //     if (showDropdown.current && !event.target.closest('.edit-beam-compact')) {
+  //       // setActiveDropdown(null);
+  //       showDropdown.current = false;
+  //     }
+  //   };
+  
+  //   // Add event listener
+  //   document.addEventListener('mousedown', handleClickOutside);
+    
+  //   // Clean up
+  //   return () => {
+  //     document.removeEventListener('mousedown', handleClickOutside);
+  //   };
+  // }, [showDropdown.current]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Check if click was outside any dropdown
+      if (showDropdownId && !event.target.closest('.edit-beam-compact')) {
+        setShowDropdownId(null);
+      }
+    };
+  
+    // Add event listener
+    document.addEventListener('mousedown', handleClickOutside);
+    
+    // Clean up
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showDropdownId]);
+
   useEffect(() => {
     if (modelParts.frame1) {
       // Create a bounding box to measure the model
       const boundingBox = new THREE.Box3().setFromObject(modelParts.frame1);
       const height = boundingBox.max.y - boundingBox.min.y;
-      console.log("Frame1 height:", height);
+      logWriter("Frame1 height", height, true);
     }
   }, [modelParts.frame1]);
 
@@ -119,12 +166,13 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     const loader = new GLTFLoader();
     loader.load("/assets/UNIT.glb", (gltf) => {
       const model = gltf.scene;
-      console.log("model", model);
+      logWriter("Model loaded", model, true);
   
       const frame1 = model.getObjectByName("FRAME_ASSY_1000D-7M1");
       const frame2 = model.getObjectByName("FRAME_ASSY_1000D-7M2");
       const beam1 = model.getObjectByName("BEAM_ASSEMBLY1");
       const beam2 = model.getObjectByName("BEAM_ASSEMBLY3");
+      const channel = model.getObjectByName("C_-_CHANNEL2");
   
       if (frame1) {
         frame1.rotation.set(0, -Math.PI / 2, 0);
@@ -140,12 +188,14 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       }
       if (beam1) beam1.rotation.set(-Math.PI / 2, 0, -Math.PI / 2);
       if (beam2) beam2.rotation.set(Math.PI / 2, 0, Math.PI / 2);
+      if (channel) channel.rotation.set(Math.PI / 2, Math.PI / 2, 0);
   
       setModelParts({
         frame1,
         frame2,
         beam1,
         beam2,
+        channel,
       });
     });
   }, []);
@@ -158,9 +208,17 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     });
   }, [selectedWidth]);
 
+  const editPallet = (idsInRow, levelIndex, rowIndex) => {
+    logWriter("Edit Pallet", `Level: ${levelIndex}, Row: ${rowIndex}, ID in Row: ${idsInRow}`, true);
+  }
+
+  const showDropDown = () => {
+    showDropdown.current = true
+    console.log("showDropdown", showDropdown.current);
+  }
+
   // Function for reusing the clone method for deep cloning
   const clone = (object) => object?.clone(true);
-  const totalWidth = (idsInRow + 2) * 4.1; // Calculate total width based on frames
 
   return (
     <>
@@ -172,33 +230,16 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
         zoom={90}
       />
 
-      {/* Add OrbitControls with restricted functionality */}
-    {/* <OrbitControls 
-      enableRotate={false}  // Disable rotation
-      enableZoom={true}     // Allow zooming
-      enablePan={true}      // Enable panning
-      panSpeed={1}          // Adjust pan speed
-      screenSpacePanning={true}
-      maxPolarAngle={Math.PI / 2}
-      minPolarAngle={Math.PI / 2}
-    /> */}
-
       <ambientLight intensity={0.6} />
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
 
-      {/* <instancedMesh 
-      ref={instancedMeshRef} 
-      args={[null, null, 1]}
-    /> */}
-
-      {/* Frames */}
-        <group position={[0, -2, 0]} >
-        {modelParts.frame1 && 
+      <group position={[0, -2, 0]}>
+        {modelParts.frame1 &&
           Array.from({ length: idsInRow + 2 }).map((_, index) => (
             <primitive
               key={index}
               object={clone(modelParts.frame1)}
-              scale={[1, selectedHeight, 1]}
+              scale={[1, height, 1]}
               position={[-2 + index * 4.1, 0, 0]}
               onUpdate={(self) => {
                 self.position.set(-2 + index * 4.1, 0, 0);
@@ -207,28 +248,145 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
             />
           ))
         }
-          {modelParts.beam1 &&
-            Array.from({ length: selectedNoOfLevels }).map((_, index) => (
-          <primitive
-            key={index}
-            object={clone(modelParts.beam1)}
-            position={[-1.5, index - 1, 1]} // Adjust the vertical spacing if needed
-            // onUpdate={(self) => {
-            //   self.position.set(self.position.x, index - 1, self.position.z); // Allow movement only in one direction (vertical)
-            //   self.updateMatrixWorld();
-            // }}
-          />
-            ))}
-        </group>
-        {/* Beams */}
-      {/* <group >
-        {modelParts.beam1 && (
-          <primitive object={modelParts.beam1} position={[-1.5, 0, 0]} />
-        )}
-        {modelParts.beam2 && (
-          <primitive object={modelParts.beam2} position={[1.5, 0, 0]} />
-        )}
-      </group> */}
+        {modelParts.beam1 &&
+          Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
+            Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => (
+              <primitive
+                key={`${levelIndex}-${rowIndex}`}
+                object={clone(modelParts.beam1)}
+                position={[-1.5 + rowIndex * 4.1, levelIndex - 1, 1]} // Adjust the vertical and horizontal spacing if needed
+                onUpdate={(self) => {
+                  self.position.set(-1.5 + rowIndex * 4.1, levelIndex - 1, 1);
+                  self.updateMatrixWorld();
+                }}
+              />
+            ))
+          )}
+        {selectedSecuring == 1 && modelParts.channel &&
+          Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
+            Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => (
+              <primitive
+                key={`${levelIndex}-${rowIndex}`}
+                object={clone(modelParts.channel)}
+                position={[-2 + rowIndex * 4.1, levelIndex - 1, 1]} // Adjust the vertical and horizontal spacing if needed
+                onUpdate={(self) => {
+                  self.position.set(-2 + rowIndex * 4.1, levelIndex - 1, 1);
+                  self.updateMatrixWorld();
+                }}
+              />
+            ))
+          )}
+
+        {/* Edit Icons at the top of each row */}
+        {modelParts.frame1 &&
+  Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
+    Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
+      const shelfId = `row-${rowIndex}`;
+
+      return (
+        <Html
+          key={`edit-row-${rowIndex}`}
+          position={[rowIndex * 4.1, 4, 1.5]}
+          transform
+          occlude
+          style={{
+            pointerEvents: 'auto',
+          }}
+        >
+          <div className="edit-beam-compact">
+            <div
+              className="edit-icon"
+              onClick={() => {
+                // Toggle dropdown for this specific row
+                setShowDropdownId(prev => prev === shelfId ? null : shelfId);
+              }}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+              </svg>
+            </div>
+            
+            {showDropdownId === shelfId && (
+              <div className="dropdown-container compact-dropdown">
+                <div className="dropdown-label">Edit Shelf Unit</div>
+
+                <FormControl fullWidth size="small" margin="dense">
+                  <InputLabel id={`height-label-${rowIndex}`}>Height</InputLabel>
+                  <Select
+                    labelId={`height-label-${rowIndex}`}
+                    id={`height-select-${rowIndex}`}
+                    value={height}
+                    label="Height"
+                    onChange={(e) => {
+                      setHeight(e.target.value);
+                    }}
+                  >
+                    <MenuItem value={1}>300 cm</MenuItem>
+                    <MenuItem value={1.1}>400 cm</MenuItem>
+                    <MenuItem value={1.2}>500 cm</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth size="small" margin="dense" sx={{ mt: 0.5 }}>
+                  <InputLabel>Width</InputLabel>
+                  <Select
+                    // value={selectedWidth || 1}
+                    label="Width"
+                    // onChange={(e) => setSelectedWidth(e.target.value)}
+                  >
+                    <MenuItem value={1}>100 cm</MenuItem>
+                    <MenuItem value={1.2}>120 cm</MenuItem>
+                    <MenuItem value={1.5}>150 cm</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <FormControl fullWidth size="small" margin="dense" sx={{ mt: 0.5 }}>
+                  <InputLabel id={`depth-label-${rowIndex}`}>Depth</InputLabel>
+                  <Select
+                    labelId={`depth-label-${rowIndex}`}
+                    id={`depth-select-${rowIndex}`}
+                    // value={selectedDepth || 1}
+                    label="Depth"
+                    onChange={(e) => {
+                      // setSelectedDepth(e.target.value);
+                    }}
+                  >
+                    <MenuItem value={1}>80 cm</MenuItem>
+                    <MenuItem value={1.1}>100 cm</MenuItem>
+                    <MenuItem value={1.2}>120 cm</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <div className="dropdown-actions">
+                  <Button
+                    size="small"
+                    variant="contained"
+                    color="primary"
+                    onClick={() => {
+                      // Apply changes
+                      console.log("Applied changes:", { height, width: selectedWidth});
+                      setShowDropdownId(null);
+                    }}
+                  >
+                    Apply
+                  </Button>
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    onClick={() => setShowDropdownId(null)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+          </div>
+        </Html>
+      );
+    })
+  )
+}
+      </group>
     </>
   );
 });
@@ -241,7 +399,6 @@ const SideView = ({ position, selectedDepth }) => {
   useEffect(() => {
     loader.load("/assets/UNIT.glb", (gltf) => {
       const model = gltf.scene;
-      console.log("model", model)
       // model.position.set(2, 0, 0);
       model.scale.set(0.7, 0.7, 0.7);
       model.rotation.set(Math.PI, 0, 0);
@@ -355,6 +512,7 @@ const Header = () => {
   const [selectedView, setSelectedView] = useState("stand");
   const [selectedElevation, setSelectedElevation] = useState(1);
   const [selectedNoOfLevels, setSelectedNoOfLevels] = useState(5);
+  const [selectedSecuring, setSelectedSecuring] = useState(0);
   const [draggingCoordinates, setDraggingCoordinates] = useState({ x: 0, y: 0 });
   const [activeDragId, setActiveDragId] = useState(null);
   // const [saveJSON, setSaveJSON] = useState(null);
@@ -371,14 +529,18 @@ const Header = () => {
   const groupRefs = useRef({});
   const [selectedShape, setSelectedShape] = useState(null);
   const idsInRow = useRef(0);
+  const canvasWrapperRef = useRef(null);
 
   useEffect(() => {
-    window.addEventListener('DOMContentLoaded', () => {
-      const div = document.querySelector('.canvas');
-      const rect = div.getBoundingClientRect();
-      console.log("rect", rect.width, rect.height);
-    })
-  }, [])
+    if(canvasWrapperRef.current) {
+      canvasWrapperRef.current.scrollLeft = canvasWrapperRef.current.scrollWidth;
+    }
+    // window.addEventListener('DOMContentLoaded', () => {
+    //   const div = document.querySelector('.canvas');
+    //   const rect = div.getBoundingClientRect();
+    //   console.log("rect", rect.width, rect.height);
+    // })
+  }, [idsInRow.current]);
 
   const heightData = {
     1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10', scale: 1 },
@@ -499,7 +661,7 @@ const Header = () => {
       }
     };
 
-    console.log("Generated JSON:", JSON.stringify(warehouseJson, null, 2));
+    logWriter("Generated JSON:", JSON.stringify(warehouseJson, null, 2), true);
 
     // Save JSON dynamically into current context
     saveJSON.current = ((prevSaveJSON) => {
@@ -529,7 +691,7 @@ const Header = () => {
     })(saveJSON.current);
 
     // Debug output
-    console.log("Updated saveJSON:", saveJSON.current);
+    logWriter("Updated saveJSON", saveJSON.current, true);
 
     // Validate & trigger save + API call
     if (warehouseJson.warehouse.products.length <= 0) {
@@ -569,6 +731,14 @@ const Header = () => {
   const handleChangeBracing = (event) => {
     setSelectedBracing(event.target.value);
   };
+
+  const handleChangeSecuring = (event) => {
+    if(event.target.checked) {
+      setSelectedSecuring(1);
+    } else {
+      setSelectedSecuring(0);
+    }
+  }
 
   const handleHeightChange = (event) => {
     const newSelectedHeight = (event.target.value);
@@ -644,7 +814,7 @@ const Header = () => {
 
       // Count the number of IDs in the current row
       idsInRow.current = filteredRects.filter(rect => rect.y === y).length;
-      console.log(`Number of IDs in row ${y / rowHeight + 1}:`, idsInRow.current);
+      logWriter(`Number of IDs in row ${y / rowHeight + 1}:`, idsInRow.current, true);
 
       // Update count for the specific type (spr, canti, etc.)
       countsRef.current[name] = count + 1;
@@ -1193,6 +1363,17 @@ const Header = () => {
                         ))}
                       </select>
                     </div>
+                    <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
+                      <label htmlFor="securing">Pallet Securing</label>
+                      <input type="checkbox" name="securing" id="securing" onChange={handleChangeSecuring} value={selectedSecuring}>
+                        {/* <option value="">Select Bracing</option> */}
+                        {/* {Object.entries(bracingMaterialData).map(([key, { name }]) => (
+                          <option key={key} value={key}>
+                            {name}
+                          </option>
+                        ))} */}
+                      </input>
+                    </div>
                     <div className="cost">
                       <table style={{ borderCollapse: "collapse", width: "100%", border: "1px solid black" }}>
                         <thead>
@@ -1262,26 +1443,32 @@ const Header = () => {
                     </div>
                   </div>
                 </div>
-                <div className="canvas">
-                  <Canvas
-                    orthographic
-                    camera={{ position: [0, 0, 5], zoom: 10, near: 0.1, far: 1000 }}
-                    onCreated={({ gl }) => {
-                      console.log("Canvas Width:", gl.domElement.width);
-                      console.log("Canvas Height:", gl.domElement.height);
-                    }} style={{ width: "100%", height: "100%", overflowX: "auto" }}>
-                    {selectedView === "stand" &&
-                      <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedScale.current} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} idsInRow={idsInRow.current} />}
-                    {selectedView === "sideView" &&
-                      <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
-                  </Canvas>
+                <div className="canvas" style={{ whiteSpace: "nowrap" }}>
+                  <div className="canvas-inner" style={{
+                    width: `${Math.max(100, (idsInRow.current + 2) * 100)}px`,
+                    height: '100%',
+                  }}>
+                    <Canvas
+                      orthographic
+                      camera={{ position: [0, 0, 5], zoom: 10, near: 0.1, far: 1000 }}
+                      onCreated={({ gl }) => {
+                        logWriter("Canvas Width:", gl.domElement.width, true);
+                        logWriter("Canvas Height:", gl.domElement.height, true);
+                      }}
+                      style={{ overflow: "auto", width: `${(idsInRow.current + 2) * 120}%`, height: "100%" }} >
+                      {selectedView === "stand" &&
+                        <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedScale.current} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} idsInRow={idsInRow.current} selectedSecuring={selectedSecuring} />}
+                      {selectedView === "sideView" &&
+                        <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
+                    </Canvas>
+                  </div>
 
                   {/* {selectedView === "stand" && <FrontView />} */}
 
-                  {/* <div className="button-container">
+                  <div className="button-container">
                     <button onClick={() => setModalVisible(false)}>Save and Close</button>
                     <button onClick={() => setModalVisible(false)}>Close</button>
-                  </div> */}
+                  </div>
                 </div>
               </div>
             </div>
