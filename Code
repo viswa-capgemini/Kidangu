@@ -35,3 +35,23 @@ useEffect(() => {
     container.removeEventListener('drop', handleDropEvent);
   };
 }, []);
+
+useEffect(() => {
+  const loadImages = async () => {
+    const updatedRects = await Promise.all(rects.map(async rect => {
+      if (typeof rect.imageUrl === 'string') {
+        const img = new window.Image();
+        img.src = rect.imageUrl;
+        await new Promise((res) => {
+          img.onload = res;
+        });
+        return { ...rect, imageUrl: img };
+      }
+      return rect;
+    }));
+
+    setRects(updatedRects);
+  };
+
+  loadImages();
+}, [rects]);
