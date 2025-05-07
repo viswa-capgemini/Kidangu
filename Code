@@ -1,0 +1,37 @@
+useEffect(() => {
+  const container = stageRef.current.container();
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow drop
+  };
+
+  const handleDropEvent = (e) => {
+    e.preventDefault();
+    const draggedItem = JSON.parse(e.dataTransfer.getData('draggedItem'));
+    const stage = stageRef.current;
+    const pointerPosition = stage.getPointerPosition();
+
+    setRects((prevRects) => [
+      ...prevRects,
+      {
+        id: `${draggedItem.name}${prevRects.length + 1}`,
+        x: pointerPosition.x,
+        y: pointerPosition.y,
+        width: rectSize,
+        height: rectSize,
+        color: draggedItem.color,
+        name: draggedItem.name,
+        fullName: draggedItem.fullName,
+        imageUrl: draggedItem.imageUrl,
+      },
+    ]);
+  };
+
+  container.addEventListener('dragover', handleDragOver);
+  container.addEventListener('drop', handleDropEvent);
+
+  return () => {
+    container.removeEventListener('dragover', handleDragOver);
+    container.removeEventListener('drop', handleDropEvent);
+  };
+}, []);
