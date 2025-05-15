@@ -6,10 +6,13 @@ import UploadDwg from './DwgUpload/UploadDwg';
 import EnquiryForm from './EnquiryForm/EnquiryForm';
 import EnquiryTable from './EnquiryTable/EnquiryTable';
 import ViewGA from './ViewGA/ViewGA';
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 function App() {
   return (
-    <Router> {/* ✅ Ensure Router wraps the entire app */}
+    <Provider store={store}>
+    <Router>
     <div className="App">
         <Routes>
             <Route path="/" element={<EnquiryTable />} />
@@ -18,9 +21,11 @@ function App() {
             <Route path="/upload-dwg" element={<UploadDwg />} />
             <Route path="/sidebar" element={<Sidebar />} />
             <Route path="/ga-view" element={<ViewGA />} />
+            {/* <Route path="/sidebar" element={<Sidebar />} /> */}
         </Routes>
     </div>
 </Router>
+</Provider>
     
   );
 }

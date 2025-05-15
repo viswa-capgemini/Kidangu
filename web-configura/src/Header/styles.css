@@ -333,8 +333,8 @@ td[rowspan] {
 .modal-content {
   display: flex;
   flex-direction: row;
-  width: 80vw;
-  height: 80vh;
+  width: 90vw;
+  height: 90vh;
   background: white;
   border-radius: 8px;
   overflow: hidden;
@@ -342,7 +342,7 @@ td[rowspan] {
 
 .properties-panel {
   display: flex;
-  flex: 40%;
+  flex: 25%;
   padding: 10px;
   border-bottom: 2px solid #ccc;
   background-color: #e7e6e6;
@@ -369,7 +369,7 @@ td[rowspan] {
 .canvas {
   flex: 60%;
   position: relative;
-  height: 80vh;
+  height: 90vh;
   overflow-x: auto;
   overflow-y: hidden; /* Prevent vertical scrolling unless needed */
   padding: 0; /* Remove padding that creates extra space */
@@ -379,7 +379,7 @@ td[rowspan] {
 
 /* Style the scrollbar for better appearance */
 .canvas::-webkit-scrollbar {
-  height: 8px;
+  height: 10px;
 }
 
 .canvas::-webkit-scrollbar-thumb {
@@ -693,11 +693,12 @@ td[rowspan] {
   padding: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   width: 160px;
-  z-index: 10;
+  z-index: 1000;
   margin-top: 8px;
   border: 1px solid #eaeaea;
   transform: translateX(-50%) translateY(10px);
   transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: auto;;
 }
 
 .dropdown-container.visible {
@@ -771,6 +772,10 @@ td[rowspan] {
   padding-right: 24px !important;
 }
 
+.dropdown-container .MuiPopover-root {
+  z-index: 999 !important;
+}
+
 /* Action buttons */
 .dropdown-actions {
   display: flex;
@@ -784,4 +789,25 @@ td[rowspan] {
   padding: 2px 8px;
   min-width: 0;
   flex: 1;
+}
+
+@font-face {
+  font-family: gbMedium;
+  src: url(../fonts/G&B-Medium.ttf);
+}
+
+@font-face {
+  font-family: gbregular;
+  src: url(../fonts/G&B-Regular.ttf);
+}
+
+.product-group-header {
+  font-family: gbMedium;
+}
+
+.product-group h4 {
+  font-family: gbMedium;
+  color: #333;
+  margin-bottom: 10px;
+  text-align: center;
 }

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, forwardRef, useImperat
 import { Stage, Layer, Rect, Image, Text, Group, Arrow, Transformer } from "react-konva";
 import { useLocation, useNavigate } from "react-router-dom";
 import { TextField, Button, MenuItem, Select, InputLabel, FormControl, FormHelperText, Grid, Paper, Typography } from '@mui/material';
-import useImage from "use-image";
+import { useImage} from "react-konva-utils";
 import "./styles.css";
 import sprs from "../assets/productimages/sprs-image.avif";
 import mts from "../assets/productimages/mts-image.png"
@@ -14,7 +14,6 @@ import pillar from "../assets/icons/pillar.png"
 import aisleSpace from "../assets/icons/aisle-space.webp"
 import door from "../assets/icons/door.png"
 import { Canvas, useThree, useLoader } from "@react-three/fiber";
-import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
 import { OrthographicCamera, Html, PerspectiveCamera, OrbitControls } from "@react-three/drei";
 import { TextureLoader } from "three";
 import standFront30 from "../assets/racking/height/stand-front-30.png";
@@ -34,6 +33,8 @@ import logWriter from "../logWriter"
 
 // svg image of the converted png
 // import rightView from "../assets/viewer-right-view.svg"
+import plusIcon from "../assets/icons/plus.png";
+import closeIcon from "../assets/icons/close-icon.jpg"
 import rightView from "../assets/rightview.png"
 import frontview1 from "../assets/frontview1.svg"
 import box from "../assets/racking/box-front.png"
@@ -45,21 +46,32 @@ import * as THREE from "three";
 import { Object3D } from 'three';
 import AxisHelper from "../Axis/AxisHelper";
 
+// For Redux store
+import { useSelector, useDispatch } from 'react-redux';
+import { incrementIdsInRow, decrementIdsInRow, setHeight, setNoOfLevels, setRects } from '../store';
+
 const GRID_SIZE = 50; // Cell size
 
-const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRackLoad, selectedNoOfLevels, idsInRow, selectedSecuring }, ref) => {
-  const { scene } = useThree();
+const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRackLoad, selectedNoOfLevels, selectedSecuring, selectedRect }, ref) => {
   const instancedMeshRef = useRef();
   const tempObject = useMemo(() => new Object3D(), []);
   const editIcon = useLoader(TextureLoader, edit);
-  // const [activeDropdown, setActiveDropdown] = useState(null);
   const [showDropdownId, setShowDropdownId] = useState(null);
-  const [height, setHeight] = useState(selectedHeight);
-  let showDropdown = useRef(false);
+  const [height, setHeight] = useState({});
+  const [width, setWidth] = useState({});
+  const [levels, setLevels] = useState({});
+  const idsInRow = useSelector(state => state.global.idsInRow);
+  const [underPass, setUnderPass] = useState({});
+  const rects = useSelector(state => state.global.rects);
+  const dispatch = useDispatch();
+  logWriter("rects, selectedRect", rects, selectedRect, false);
+
+  // height placement for the frames
+  const [adjustment, setAdjustment]= useState(0);
 
   // Calculate the center position of all frames for camera positioning
   const totalWidth = (idsInRow + 1) * 4.1;
-  const centerX = (totalWidth / 2) - 2;
+  const centerX = (totalWidth / 2) ;
 
   // References for exposing mesh positions
   const mesh1Ref = useRef();
@@ -136,8 +148,9 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       const boundingBox = new THREE.Box3().setFromObject(modelParts.frame1);
       const height = boundingBox.max.y - boundingBox.min.y;
       logWriter("Frame1 height", height, true);
+      logWriter("Adjustment value changed:", adjustment, false);
     }
-  }, [modelParts.frame1]);
+  }, [modelParts.frame1, adjustment]);
 
   useEffect(() => {
     if (modelParts.frame1 && instancedMeshRef.current) {
@@ -212,10 +225,161 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     logWriter("Edit Pallet", `Level: ${levelIndex}, Row: ${rowIndex}, ID in Row: ${idsInRow}`, true);
   }
 
-  const showDropDown = () => {
-    showDropdown.current = true
-    console.log("showDropdown", showDropdown.current);
+  const addNewFrame = (rowIndex) => {
+    // Logic to add a new frame or row
+    idsInRow += 1;
+    console.log("Plus icon clicked for row:", rowIndex, idsInRow);
   }
+
+  const handleHeightChange = (id, value) => {
+    // If changing either of the first two frames, update both to the same value
+    if (id === 0 || id === 1) {
+      setHeight(prev => ({
+        ...prev,
+        0: value,
+        1: value
+      }));
+    } else {
+      setHeight(prev => ({
+        ...prev,
+        [id]: value
+      }));
+    }
+
+    logWriter("height", height);
+
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return { ...rect, height: { ...height } };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+    rects.forEach((rect) => {
+      if(rect.id === selectedRect) {
+      console.log("Updated rects:", rect);
+      }
+    })
+  };
+
+  const handleLevelDropDownChange = (rowIndex, value) => {
+    // If changing either of the first two frames, update both to the same value
+    if (rowIndex === 0) {
+      setLevels(prev => ({
+        ...prev,
+        0: value
+      }));
+    } else {
+      // For other frames, just update the specific one
+      setLevels(prev => ({
+        ...prev,
+        [rowIndex]: value
+      }));
+    }
+    
+    logWriter("levels", levels, value);
+    
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return {
+          ...rect,
+          levels: {
+            ...levels,
+          },
+        };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+  };
+
+  const handleIncrementIdsInRow = (rowIndex) => {
+    dispatch(incrementIdsInRow());
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return {
+          ...rect,
+          idsInRow: rowIndex + 1,
+        };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+  };
+
+  const handleDecrementIdsInRow = (rowIndex) => {
+    dispatch(decrementIdsInRow());
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return {
+          ...rect,
+          idsInRow: rowIndex - 1,
+        };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+  };
+
+  const handleUnderPassChange = (index, value) => {
+    if (index === 0) {
+      setUnderPass(prev => ({
+        ...prev,
+        0: value
+      }));
+    } else {
+      // For other frames, just update the specific one
+      setUnderPass(prev => ({
+        ...prev,
+        [index]: value
+      }));
+    }
+    
+    logWriter("levels", underPass);
+    
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return {
+          ...rect,
+          underPass: {
+            ...underPass,
+          },
+        };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+  };
+
+  const handleWidthChange = (index, value) => {
+    if (index === 0) {
+      setWidth(prev => ({
+        ...prev,
+        0: value
+      }));
+    } else {
+      // For other frames, just update the specific one
+      setWidth(prev => ({
+        ...prev,
+        [index]: value
+      }));
+    }
+    
+    logWriter("width", width);
+    
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        return {
+          ...rect,
+          width: {
+            ...width,
+          },
+        };
+      }
+      return rect;
+    });
+    dispatch(setRects(updatedRects));
+  };
 
   // Function for reusing the clone method for deep cloning
   const clone = (object) => object?.clone(true);
@@ -224,168 +388,382 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     <>
       <OrthographicCamera
         makeDefault
-        position={[0, -1, 10]}
+        position={[centerX, -1, 10]}
         near={0.1}
         far={1000}
         zoom={90}
       />
 
-      <ambientLight intensity={0.6} />
+      <ambientLight intensity={1} />
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
 
       <group position={[0, -2, 0]}>
         {modelParts.frame1 &&
-          Array.from({ length: idsInRow + 2 }).map((_, index) => (
-            <primitive
-              key={index}
-              object={clone(modelParts.frame1)}
-              scale={[1, height, 1]}
-              position={[-2 + index * 4.1, 0, 0]}
-              onUpdate={(self) => {
-                self.position.set(-2 + index * 4.1, 0, 0);
-                self.updateMatrixWorld();
-              }}
-            />
-          ))
-        }
-        {modelParts.beam1 &&
-          Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
-            Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => (
+          Array.from({ length: idsInRow + 2 }).map((_, index) => {
+            let heightValue = selectedHeight; // Default height
+
+            // Look for a matching height value in the selected rect
+            rects.forEach((rect) => {
+              if (selectedRect === rect.id && rect.height && rect.height[index] !== undefined) {
+                heightValue = rect.height[index];
+              }
+              console.log("heightValue in 1", heightValue)
+            });
+
+            // Fallback to height array if available
+            if (height[index] !== undefined) {
+              heightValue = height[index];
+              console.log("heightValue in 2", heightValue);
+            }
+
+            const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
+
+            return (
               <primitive
-                key={`${levelIndex}-${rowIndex}`}
-                object={clone(modelParts.beam1)}
-                position={[-1.5 + rowIndex * 4.1, levelIndex - 1, 1]} // Adjust the vertical and horizontal spacing if needed
+                key={index}
+                object={clone(modelParts.frame1)}
+                scale={[1, heightValue, 1]}
+                position={[xPosition, 0, 0]}
                 onUpdate={(self) => {
-                  self.position.set(-1.5 + rowIndex * 4.1, levelIndex - 1, 1);
+                  // Get the original bounding box dimensions (before scaling)
+                  const originalObject = modelParts.frame1.clone();
+                  const originalBox = new THREE.Box3().setFromObject(originalObject);
+                  const originalHeight = originalBox.max.y - originalBox.min.y;
+
+                  const heightDifference = originalHeight * (heightValue - 1);
+
+                  self.position.set(
+                    xPosition,
+                    heightDifference / 3, // 1/3 is for the fixed height in the ground
+                    0
+                  );
                   self.updateMatrixWorld();
                 }}
               />
-            ))
-          )}
+            );
+          })
+        }
+        {modelParts.beam1 &&
+          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
+            let widthValue = selectedWidth;
+
+            rects.forEach((rect) => {
+              if (selectedRect === rect.id && rect.width && rect.width[rowIndex] !== undefined) {
+                widthValue = rect.width[rowIndex];
+              }
+            });
+
+            if (width[rowIndex] !== undefined) {
+              widthValue = width[rowIndex];
+            }
+            const frameLevels = levels?.[rowIndex] !== undefined
+              ? levels[rowIndex]
+              : (rowIndex <= 1 ? (levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
+
+            // const widthValue = width?.[rowIndex] ?? selectedWidth;
+
+            return Array.from({ length: frameLevels }).map((_, levelIndex) => {
+              if (underPass[rowIndex] && levelIndex === 0) {
+                return null;
+              }
+
+              return (
+                <primitive
+                  key={`${rowIndex}-${levelIndex}`}
+                  object={clone(modelParts.beam1)}
+                  scale={[1, widthValue, 1]} // Assuming beam scales along X-axis
+                  position={[-1.5 + rowIndex * 4.1, levelIndex - 1, 0.5]}
+                  onUpdate={(self) => {
+                    // Get the original bounding box dimensions (before scaling)
+                    const originalObject = modelParts.beam1.clone();
+                    const originalBox = new THREE.Box3().setFromObject(originalObject);
+                    const originalWidth = originalBox.max.x - originalBox.min.x;
+
+                    // Calculate how much the object has grown
+                    const widthDifference = originalWidth * (widthValue - 1);
+
+                    const fixLeftEnd = true;
+
+                    const xAdjustment = fixLeftEnd
+                      ? widthDifference / 10
+                      : -widthDifference / 4;
+
+                    setAdjustment(xAdjustment);
+
+                    self.position.set(
+                      -1.5 + rowIndex * 4.1 + xAdjustment,
+                      levelIndex - 1,
+                      0.5
+                    );
+
+                    self.updateMatrixWorld();
+                  }}
+                />
+              );
+            }).filter(Boolean);
+          })
+        }
         {selectedSecuring == 1 && modelParts.channel &&
-          Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
-            Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => (
+          Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) => {
+            if (underPass[levelIndex] && levelIndex === 0) {
+              return null;
+            }
+
+            return Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => (
               <primitive
                 key={`${levelIndex}-${rowIndex}`}
                 object={clone(modelParts.channel)}
-                position={[-2 + rowIndex * 4.1, levelIndex - 1, 1]} // Adjust the vertical and horizontal spacing if needed
+                position={[-2 + rowIndex * 4.1, levelIndex - 1, 1]}
                 onUpdate={(self) => {
                   self.position.set(-2 + rowIndex * 4.1, levelIndex - 1, 1);
                   self.updateMatrixWorld();
                 }}
               />
-            ))
-          )}
+            ));
+          }).filter(Boolean)}
 
-        {/* Edit Icons at the top of each row */}
         {modelParts.frame1 &&
-  Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) =>
-    Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
-      const shelfId = `row-${rowIndex}`;
-
-      return (
-        <Html
-          key={`edit-row-${rowIndex}`}
-          position={[rowIndex * 4.1, 4, 1.5]}
-          transform
-          occlude
-          style={{
-            pointerEvents: 'auto',
-          }}
-        >
-          <div className="edit-beam-compact">
-            <div
-              className="edit-icon"
-              onClick={() => {
-                // Toggle dropdown for this specific row
-                setShowDropdownId(prev => prev === shelfId ? null : shelfId);
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
-              </svg>
-            </div>
-            
-            {showDropdownId === shelfId && (
-              <div className="dropdown-container compact-dropdown">
-                <div className="dropdown-label">Edit Shelf Unit</div>
-
-                <FormControl fullWidth size="small" margin="dense">
-                  <InputLabel id={`height-label-${rowIndex}`}>Height</InputLabel>
-                  <Select
-                    labelId={`height-label-${rowIndex}`}
-                    id={`height-select-${rowIndex}`}
-                    value={height}
-                    label="Height"
-                    onChange={(e) => {
-                      setHeight(e.target.value);
-                    }}
-                  >
-                    <MenuItem value={1}>300 cm</MenuItem>
-                    <MenuItem value={1.1}>400 cm</MenuItem>
-                    <MenuItem value={1.2}>500 cm</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth size="small" margin="dense" sx={{ mt: 0.5 }}>
-                  <InputLabel>Width</InputLabel>
-                  <Select
-                    // value={selectedWidth || 1}
-                    label="Width"
-                    // onChange={(e) => setSelectedWidth(e.target.value)}
-                  >
-                    <MenuItem value={1}>100 cm</MenuItem>
-                    <MenuItem value={1.2}>120 cm</MenuItem>
-                    <MenuItem value={1.5}>150 cm</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <FormControl fullWidth size="small" margin="dense" sx={{ mt: 0.5 }}>
-                  <InputLabel id={`depth-label-${rowIndex}`}>Depth</InputLabel>
-                  <Select
-                    labelId={`depth-label-${rowIndex}`}
-                    id={`depth-select-${rowIndex}`}
-                    // value={selectedDepth || 1}
-                    label="Depth"
-                    onChange={(e) => {
-                      // setSelectedDepth(e.target.value);
-                    }}
-                  >
-                    <MenuItem value={1}>80 cm</MenuItem>
-                    <MenuItem value={1.1}>100 cm</MenuItem>
-                    <MenuItem value={1.2}>120 cm</MenuItem>
-                  </Select>
-                </FormControl>
-
-                <div className="dropdown-actions">
-                  <Button
-                    size="small"
-                    variant="contained"
-                    color="primary"
+          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
+            if (rowIndex === idsInRow) {
+              return (
+                <Html
+                  key={`plus-icon-${rowIndex}`}
+                  position={[rowIndex * 4.1 + 2.5 + (adjustment * 10), 1, 1.5]} // Position after the last frame
+                  transform
+                  occlude
+                  style={{
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div
+                    className="plus-icon"
                     onClick={() => {
-                      // Apply changes
-                      console.log("Applied changes:", { height, width: selectedWidth});
-                      setShowDropdownId(null);
+                      handleIncrementIdsInRow(rowIndex);
                     }}
                   >
-                    Apply
-                  </Button>
-                  <Button
-                    size="small"
-                    variant="outlined"
-                    onClick={() => setShowDropdownId(null)}
+                    <img src={plusIcon} alt="Add" width="20" height="20" />
+                  </div>
+                </Html>
+              );
+            }
+            return (
+              <primitive
+                key={`frame-${rowIndex}`}
+                object={clone(modelParts.frame1)}
+                scale={[1, selectedHeight, 1]}
+                position={[-2 + rowIndex * 4.1, 0, 0]}
+                onUpdate={(self) => {
+                  const boundingBox = new THREE.Box3().setFromObject(self);
+                  const heightOffset = boundingBox.max.y - boundingBox.min.y;
+
+                  self.position.set(-2 + rowIndex * 4.1, heightOffset * (selectedHeight - 1) / 2, 0);
+                  self.updateMatrixWorld();
+                }}
+              />
+            );
+          })}
+          {modelParts.frame1 &&
+          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
+            if (rowIndex === idsInRow && idsInRow > 0) {
+              return (
+                <Html
+                  key={`remove-icon-${rowIndex}`}
+                  position={[rowIndex * 4.1 + 2.5, 3.5, 1.5]} // Position after the last frame
+                  transform
+                  occlude
+                  style={{
+                    pointerEvents: 'auto',
+                  }}
+                >
+                  <div
+                    className="remove-icon"
+                    onClick={() => {
+                      handleDecrementIdsInRow(rowIndex);
+                    }}
                   >
-                    Cancel
-                  </Button>
+                    <img src={closeIcon} alt="Add" width="20" height="20" />
+                  </div>
+                </Html>
+              );
+            }
+            return (
+              <primitive
+                key={`frame-${rowIndex}`}
+                object={clone(modelParts.frame1)}
+                scale={[1, selectedHeight, 1]}
+                position={[-2 + rowIndex * 4.1, 0, 0]}
+                onUpdate={(self) => {
+                  const boundingBox = new THREE.Box3().setFromObject(self);
+                  const heightOffset = boundingBox.max.y - boundingBox.min.y;
+
+                  self.position.set(-2 + rowIndex * 4.1, heightOffset * (selectedHeight - 1) / 2, 0);
+                  self.updateMatrixWorld();
+                }}
+              />
+            );
+          })}
+        {modelParts.frame1 &&
+          Array.from({ length: Math.max(1, idsInRow + 1) }).map((_, index) => {
+            const rowIndex = index === 0 ? 0 : index + 1;
+            const dropdownLabel = index === 0 ? "Edit Shelf 1" : `Edit Add-On Shelf ${rowIndex - 1}`;
+            const positionX = index === 0 ? 0 : (index) * 4.1;
+
+            return (
+              <Html
+                key={`edit-icon-${index}`}
+                position={[positionX, 4, 1.5]} // Position above each frame
+                transform
+                occlude
+                style={{
+                  pointerEvents: 'auto',
+                  width: '80px',
+                }}
+              >
+                <div className="edit-beam-compact">
+                  <div
+                    className="edit-icon"
+                    onClick={() => {
+                      setShowDropdownId(prev => prev === rowIndex ? null : rowIndex);
+                    }}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                      <path fill="#4285F4" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                    </svg>
+                  </div>
+
+                  {showDropdownId === rowIndex && (
+                    <div className="dropdown-container compact-dropdown">
+                      <div className="dropdown-label">{dropdownLabel}</div>
+
+                      <div style={{ marginBottom: '8px' }}>
+                        <select
+                          name="heightValue"
+                          id="heightValue"
+                          className="frame-dropdown"
+                          value={height?.[rowIndex] || 1}
+                          onChange={(e) => {
+                            handleHeightChange(rowIndex, parseFloat(e.target.value));
+                          }}
+                          style={{
+                            background: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            padding: '2px',
+                            fontSize: '12px',
+                            width: '100%',
+                            marginBottom: '8px',
+                          }}
+                        >
+                          <option value="">Select</option>
+                          <option value="1">1000 cm</option>
+                          <option value="1.1">1100 cm</option>
+                          <option value="1.2">1200 cm</option>
+                        </select>
+                      </div>
+
+                      <div style={{ marginBottom: '8px' }}>
+                        <select
+                          name="levelsValue"
+                          id="levelsValue"
+                          className="level-dropdown"
+                          value={levels?.[index] !== undefined ? levels[index] : selectedNoOfLevels}
+                          onChange={(e) => {
+                            handleLevelDropDownChange(index, parseInt(e.target.value, 10));
+                          }}
+                          style={{
+                            background: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            padding: '2px',
+                            fontSize: '12px',
+                            width: '100%',
+                          }}
+                        >
+                          {/* <label>No of Levels</label> */}
+                          <option value="1">1</option>
+                          <option value="2">2</option>
+                          <option value="3">3</option>
+                          <option value="4">4</option>
+                          <option value="5">5</option>
+                        </select>
+                      </div>
+
+                      <div style={{ marginBottom: '8px' }}>
+                        <select
+                          name="underpass"
+                          id="underpass"
+                          className="underpass-dropdown"
+                          value={underPass?.[index] !== undefined ? underPass[index] : "1"}
+                          style={{
+                            background: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            padding: '2px',
+                            fontSize: '12px',
+                            width: '100%',
+                            marginBottom: '8px',
+                          }}
+                          onChange={(e) => {
+                            handleUnderPassChange(index, parseInt(e.target.value, 10));
+                          }}
+                        >
+                          <label>UnderPass</label>
+                          <option value="2">No</option>
+                          <option value="1">Yes</option>
+                        </select>
+                      </div>
+
+                      <div style={{ marginBottom: '8px' }}>
+                        <select
+                          name="widthValue"
+                          id="widthValue"
+                          className="widthValue-dropdown"
+                          value={width[rowIndex] || 1}
+                          style={{
+                            background: 'white',
+                            border: '1px solid #ccc',
+                            borderRadius: '4px',
+                            padding: '2px',
+                            fontSize: '12px',
+                            width: '100%',
+                            marginBottom: '8px',
+                          }}
+                          onChange={(e) => {
+                            handleWidthChange(rowIndex, parseFloat(e.target.value));
+                          }}
+                        >
+                          <option value="">Select an option</option>
+                          <option value="1">400 cm</option>
+                          <option value="1.1">500 cm</option>
+                          <option value="1.2">600 cm</option>
+                        </select>
+                      </div>
+
+                      <div className="dropdown-actions">
+                        <Button
+                          size="small"
+                          variant="contained"
+                          color="primary"
+                          onClick={() => {
+                            setShowDropdownId(null);
+                          }}
+                        >
+                          Apply
+                        </Button>
+                        <Button
+                          size="small"
+                          variant="outlined"
+                          onClick={() => setShowDropdownId(null)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        </Html>
-      );
-    })
-  )
-}
+              </Html>
+            );
+          })}
       </group>
     </>
   );
@@ -498,12 +876,14 @@ const Header = () => {
   const stageWidth = 1050;
   const stageHeight = 720;
   const rectSize = 100;
-  const [rects, setRects] = useState([]);
+  // const [rects, setRects] = useState([]);
+  const rects = useSelector(state => state.global.rects);
   const [position, setPosition] = useState({ x: 50, y: 50 });
   const [rectsByName, setRectsByName] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedRect, setSelectedRect] = useState(null);
   const [selectedHeight, setSelectedHeight] = useState(1);
+  const height = useSelector(state => state.global.height);
   const [selectedWidth, setSelectedWidth] = useState(1);
   const [selectedDepth, setSelectedDepth] = useState(1);
   const [selectedUpright, setSelectedUpright] = useState(null);
@@ -511,7 +891,7 @@ const Header = () => {
   const [selectedRackLoad, setSelectedRackLoad] = useState(1);
   const [selectedView, setSelectedView] = useState("stand");
   const [selectedElevation, setSelectedElevation] = useState(1);
-  const [selectedNoOfLevels, setSelectedNoOfLevels] = useState(5);
+  const selectedNoOfLevels = useSelector(state => state.global.noOfLevels);
   const [selectedSecuring, setSelectedSecuring] = useState(0);
   const [draggingCoordinates, setDraggingCoordinates] = useState({ x: 0, y: 0 });
   const [activeDragId, setActiveDragId] = useState(null);
@@ -521,15 +901,21 @@ const Header = () => {
   const standRef = useRef();
   const [topViewSPRImage] = useImage(topViewSPR); // Load image
   const [addOnSPRImage] = useImage(topViewSPRAddOn); // Load image
-  const [unit] = useImage(unitImage);
+  const [plusIconImage] = useImage(plusIcon); // Load image
   const location = useLocation();
   const enquiryNumber = location.state?.enquiryNumber || "N/A";
   const navigate = useNavigate();
   const transformerRef = useRef(null);
   const groupRefs = useRef({});
   const [selectedShape, setSelectedShape] = useState(null);
-  const idsInRow = useRef(0);
+  const idsInRow = useSelector(state => state.global.idsInRow);
   const canvasWrapperRef = useRef(null);
+  const isAddOn = useRef(false);
+  const dispatch = useDispatch();
+
+  // drop and drop images
+  const dragUrl = React.useRef();
+  const [images, setImages] = React.useState([]);
 
   useEffect(() => {
     if(canvasWrapperRef.current) {
@@ -540,12 +926,52 @@ const Header = () => {
     //   const rect = div.getBoundingClientRect();
     //   console.log("rect", rect.width, rect.height);
     // })
-  }, [idsInRow.current]);
+  }, [idsInRow]);
+
+  useEffect(() => {
+    const container = canvasWrapperRef.current.container();
+  
+    const handleDragOver = (e) => {
+      e.preventDefault(); // Necessary to allow drop
+    };
+  
+    const handleDropEvent = (e) => {
+      e.preventDefault();
+      const draggedItem = JSON.parse(e.dataTransfer.getData('draggedItem'));
+      const stage = canvasWrapperRef.current;
+      const pointerPosition = stage.getPointerPosition();
+
+      const newRects = [
+        ...rects,
+          {
+          id: `${draggedItem.name}${rects.length + 1}`,
+          x: pointerPosition.x,
+          y: pointerPosition.y,
+          width: rectSize,
+          height: rectSize,
+          color: draggedItem.color,
+          name: draggedItem.name,
+          fullName: draggedItem.fullName,
+          imageUrl: draggedItem.imageUrl,
+        },
+      ]
+
+      dispatch(setRects(newRects));
+    };
+  
+    container.addEventListener('dragover', handleDragOver);
+    container.addEventListener('drop', handleDropEvent);
+  
+    return () => {
+      container.removeEventListener('dragover', handleDragOver);
+      container.removeEventListener('drop', handleDropEvent);
+    };
+  }, []);
 
   const heightData = {
-    1: { name: "300", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10', scale: 1 },
-    2: { name: "400", partNo: "GXL 90-1.8", fullName: "GXL 90-4m", cost: '20', scale: 1.1 },
-    3: { name: "500", partNo: "GXL 90-2.0", fullName: "GXL 90-5m", cost: '30', scale: 1.2 },
+    1: { name: "1000", partNo: "GXL 90-1.6", fullName: "GXL 90-3m", cost: '10', scale: 1 },
+    2: { name: "1100", partNo: "GXL 90-1.8", fullName: "GXL 90-4m", cost: '20', scale: 1.1 },
+    3: { name: "1200", partNo: "GXL 90-2.0", fullName: "GXL 90-5m", cost: '30', scale: 1.2 },
   }
 
   const widthData = {
@@ -621,12 +1047,14 @@ const Header = () => {
       warehouse: {
         enquiry_id: enquiryNumber,
         warehousefile: `${enquiryNumber}.iam`,
+        warehousedwg: `${enquiryNumber}.dwg`,
+        work_parts_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts",
+        total_racks: rects.filter(rect => rect.fullName === "Shuttle Pallet Rack").length,
         dimensions: {
           width: stageWidth,
           length: 100,
           height: stageHeight,
         },
-        total_racks: rects.filter(rect => rect.fullName === "Shuttle Pallet Rack").length,
         total_doors: 0,
         total_windows: 0,
         total_pillars: 0,
@@ -634,34 +1062,184 @@ const Header = () => {
         windows: [],
         pillars: [],
         aisles: rects
-        .filter(rect => rect.fullName === "Aisle Space")
-        .map((rect, index) => ({
-          aisleId: rect.id,
-          productGroup: rect.fullName,
-          x_position: `${rect.x}`,
-          y_position: `${rect.y}`,
-          z_position: "0",
-          aisleIndex: index + 1,
-        })),
+          .filter(rect => rect.fullName === "Aisle Space")
+          .map((rect, index) => ({
+            aisleId: rect.id,
+            productGroup: rect.fullName,
+            x_position: `${rect.x}`,
+            y_position: `${rect.y}`,
+            z_position: "0",
+            aisleIndex: index + 1,
+          })),
         cross_aisles: [],
         aisle_spaces: [],
         products: rects
-          .filter(rect => rect.fullName === "Shuttle Pallet Rack")
-          .map((rect, index) => ({
-            productId: rect.id,
-            productGroup: rect.fullName,
-            sourceiamfile_path: "C:\\Users\\reetts\\Downloads\\SPR FULL ASSY\\SPR FULL ASSY\\UNIT.iam",
-            x_position: `${-rect.x}`,
-            y_position: `${-rect.y}`,
-            z_position: "0",
-            sourceiamFileName: rect.name === "Aisle Space" ? "" : "UNIT.iam",
-            rack_id: index + 1,
-            racksubAssembly: `${enquiryNumber}_Rack${index + 1}.iam`
-          }))
+  .filter(rect => rect.fullName === "Shuttle Pallet Rack")
+  .map((rect, index) => {
+    const rackId = index + 1;
+    
+    // Get the number of addon units from idsInRow property
+    const totalAddonUnits = rect.idsInRow || 0;
+    
+    // Function to convert height from meters to millimeters and return as string
+    const convertHeight = (heightInMeters) => {
+      return Math.round(heightInMeters * 1000).toString();
+    };
+    
+    // Get main unit height (index 0)
+    const mainUnitHeight = rect.height && rect.height[0] ? 
+      convertHeight(rect.height[0]) : "5100";
+    
+    // Get main unit levels (index 0)
+    const mainUnitLevels = rect.levels && rect.levels[0] ? 
+      rect.levels[0] : 4;
+    
+    // Generate shelf levels dynamically for main unit
+    const createMainUnitShelfLevels = () => Array.from({ length: mainUnitLevels }, (_, i) => ({
+      shelf: `${i + 1}`,
+      Level_height: "1700",
+      Pallet_height: "1500",
+      Securing: "mesh"
+    }));
+    
+    // Generate addon units dynamically
+    const addonUnits = Array.from({ length: totalAddonUnits }, (_, i) => {
+      // Get addon unit height (index 1, 2, 3, etc.)
+      // If specific height not available, use the height at index 1 or default
+      const addonUnitHeight = rect.height && rect.height[i + 1] ? 
+        convertHeight(rect.height[i + 1]) : 
+        (rect.height && rect.height[1] ? convertHeight(rect.height[1]) : "5100");
+      
+      // Get addon unit levels (index 1, 2, 3, etc.)
+      // If specific levels not available, use the levels at index 1 or default
+      const addonUnitLevels = rect.levels && rect.levels[i + 1] ? 
+        rect.levels[i + 1] : 
+        (rect.levels && rect.levels[1] ? rect.levels[1] : 4);
+      
+      // Generate shelf levels for this addon unit
+      const addonShelfLevels = Array.from({ length: addonUnitLevels }, (_, j) => ({
+        shelf: `${j + 1}`,
+        Level_height: "1700",
+        Pallet_height: "1500",
+        Securing: "mesh"
+      }));
+      
+      return {
+        Unit: `${i + 2}`, // Unit numbers start from 2 for addon units
+        Rack_Upright_total_Height: addonUnitHeight,
+        Rack_beam_span: "2700+10",
+        Rack_total_depth: "1000",
+        Maximum_Material_Height: "5502",
+        Maximum_loading_Height: "4762",
+        Rackclear_Height: "12000",
+        No_of_shelfLevels: addonUnitLevels.toString(),
+        load_kg: "1000",
+        decktype: "wooden",
+        Material_on_Ground: "no",
+        underpass: "no",
+        Rack_protection_left: "no",
+        Rack_protection_right: "no",
+        All_level_same: "no",
+
+        Safety: [
+          {
+            Upright_guard: "no",
+            Rowguard: "no"
+          }
+        ],
+
+        stability: [
+          {
+            "H/D Ratio =": " Height of the Last loading level / Depth of the unit",
+            TIE_BEAM: "no"
+          }
+        ],
+
+        parts: [
+          {
+            upright_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\IS HD S3 547 R2 - UPRIGHT GXL 90 LxT.ipt",
+            beam_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\beam.ipt"
+          }
+        ],
+
+        shelflevel: addonShelfLevels
+      };
+    });
+
+    return {
+      _comment1: `-----------------------------RACK ${rackId} ----------------------------`,
+      productId: rect.id,
+      productGroup: rect.fullName,
+      sourceiamfile_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\UNIT.iam",
+      Group_rule_sourcefile_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\SPR_Rule.txt",
+      Group_ilogic_sourcefile_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\ilogic_source\\SPR_iLogic_source.txt",
+      x_position: `${-rect.x}`,
+      y_position: `${-rect.y}`,
+      z_position: "0",
+      sourceiamFileName: "UNIT.iam",
+      rack_id: rackId,
+      racksubAssembly: `${enquiryNumber}_Rack${rackId}.iam`,
+      FaceUnitRow: "SingleFaceunitRow",
+      SignatureBoard: "No",
+      Safety: [
+        {
+          Rowguard: "No",
+          Rowguard_Height: "0",
+        }
+      ],
+      _comment2: `----------------------------RACK${rackId} UNITS ----------------------------`,
+      main_unit: [
+        {
+          Unit: "1",
+          Rack_Upright_total_Height: mainUnitHeight,
+          Rack_beam_span: "2700+10",
+          Rack_total_depth: "1000",
+          Maximum_Material_Height: "5502",
+          Maximum_loading_Height: "4762",
+          Rackclear_Height: "12000",
+          No_of_shelfLevels: mainUnitLevels.toString(),
+          load_kg: "1000",
+          decktype: "wooden",
+          Material_on_Ground: "no",
+          underpass: "no",
+          Rack_protection_left: "no",
+          Rack_protection_right: "no",
+          Addon_units_same: "no",
+          All_level_same: "no",
+          total_addonunits: totalAddonUnits.toString(),
+
+          Safety: [
+            {
+              Upright_guard: "no",
+              Rowguard: "No"
+            }
+          ],
+
+          stability: [
+            {
+              "H/D Ratio =": " Height of the Last loading level / Depth of the unit",
+              TIE_BEAM: "no",
+              ROW_CONNECTOR: "no"
+            }
+          ],
+
+          parts: [
+            {
+              upright_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\IS HD S3 547 R2 - UPRIGHT GXL 90 LxT.ipt",
+              beam_path: "C:\\Users\\reetts\\Desktop\\Godrej\\IPT_project\\3Dconfig\\parts\\beam.ipt"
+            }
+          ],
+
+          shelflevel: createMainUnitShelfLevels()
+        }
+      ],
+      addon_units: addonUnits
+    };
+  })
       }
     };
 
-    logWriter("Generated JSON:", JSON.stringify(warehouseJson, null, 2), true);
+    logWriter("Generated JSON:", JSON.stringify(warehouseJson, null, 2), false);
 
     // Save JSON dynamically into current context
     saveJSON.current = ((prevSaveJSON) => {
@@ -740,11 +1318,28 @@ const Header = () => {
     }
   }
 
-  const handleHeightChange = (event) => {
+  const handleHeightChange = (event, id) => {
     const newSelectedHeight = (event.target.value);
+    dispatch(setHeight(heightData[newSelectedHeight].scale));
     setSelectedHeight(newSelectedHeight);
     // setSelectedScale(heightData[newSelectedHeight].scale);
     selectedScale.current = heightData[newSelectedHeight].scale;
+    logWriter("height", height)
+
+    // Update the rect if it's the selected one
+    const matchingRectIndex = rects.findIndex(rect => rect.id === id);
+    if (matchingRectIndex !== -1) {
+      const updatedRects = rects.map((rect, idx) => {
+        if (idx === matchingRectIndex) {
+          return {
+            ...rect,
+            height: heightData[newSelectedHeight].scale,
+          };
+        }
+        return rect;
+      });
+      dispatch(setRects(updatedRects));
+    }
   };
 
   const handleWidthChange = (event) => {
@@ -764,7 +1359,7 @@ const Header = () => {
   }
 
   const handleLevelChange = (event) => {
-    setSelectedNoOfLevels(event.target.value);
+    dispatch(setNoOfLevels(event.target.value));
   }
 
   const handleDragMove = (index, e) => {
@@ -777,67 +1372,181 @@ const Header = () => {
 
     if (finalX !== newRects[index].x || finalY !== newRects[index].y) {
       newRects[index] = { ...newRects[index], x: finalX, y: finalY };
-      setRects(newRects);
+      dispatch(setRects(newRects));
     }
   };
 
-  const handleImageClick = (color, name, fullName, imageUrl, addOnSPRImage) => {
-    const margin = 10;
-    const rowHeight = rectSize + margin; // Fixed row height
-    const rowMap = { spr: 0, canti: 1, rack: 2, space: 3 }; // Define fixed row positions
-
-    setRects((prevRects) => {
-      // Filter only for the current type (spr, aisle, etc.)
-      let filteredRects = prevRects.filter(rect => rect.name.startsWith(name));
+  const handleImageClick = (color, name, fullName, imageUrl, addOnSPRImage, isAddOn) => {
+      const margin = 10;
+      const rowHeight = rectSize + margin;
+      
+      // Filter only for the current type
+      let filteredRects = rects.filter(rect => rect.name.startsWith(name));
       let count = filteredRects.length;
-      let newId = `${name}${count + 1}`; // Ensure uniqueness like spr1, spr2, canti1, canti2
-
+      let newId = `${name}${count + 1}`;
+      
+      // Handle special case for space/aisles
       if (name === 'space') {
         countsRef.current.space = 3;
-        return [
-          ...prevRects,
-          { id: `aisle1`, x: 0, y: stageHeight * 0.2, width: stageWidth, height: 50, color, name: "Aisle Space" },
-          { id: `aisle2`, x: 0, y: stageHeight * 0.5, width: stageWidth, height: 50, color, name: "Aisle Space" },
-          { id: `aisle3`, x: 0, y: stageHeight * 0.8, width: stageWidth, height: 50, color, name: "Aisle Space" },
+        const newRects = [
+          ...rects,
+          { 
+            id: `aisle1`, 
+            x: 0, 
+            y: stageHeight * 0.2, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
+          { 
+            id: `aisle2`, 
+            x: 0, 
+            y: stageHeight * 0.5, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
+          { 
+            id: `aisle3`, 
+            x: 0, 
+            y: stageHeight * 0.8, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
         ];
+        dispatch(setRects(newRects));
+        return;
       }
-
+      
+      // Calculate position for new rectangle
       let lastRect = filteredRects.length > 0 ? filteredRects[filteredRects.length - 1] : null;
       let x = count === 0 ? 0 : lastRect.x + rectSize;
       let y = lastRect ? lastRect.y : 0;
-
+      
+      // Handle row overflow
       let isNewRow = x + rectSize > stageWidth;
       if (isNewRow) {
         x = 0;
         y += rectSize + margin;
       }
-
-      // Count the number of IDs in the current row
-      idsInRow.current = filteredRects.filter(rect => rect.y === y).length;
-      logWriter(`Number of IDs in row ${y / rowHeight + 1}:`, idsInRow.current, true);
-
-      // Update count for the specific type (spr, canti, etc.)
+      
+      // Update count for the specific type
       countsRef.current[name] = count + 1;
-
-      return [
-        ...prevRects,
-        {
-          id: newId,  // Unique ID like spr1, spr2, canti1, canti2
-          x,
-          y,
-          width: rectSize,
-          height: rectSize,
-          color,
-          name: newId, // Ensure name is also unique
-          fullName: fullName,
-          imageUrl: name === "spr" ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) : color,
-          // imageUrl
-        },
-      ];
-    });
-  };
+      
+      // Determine the correct image URL based on conditions
+      const rectImageUrl = isAddOn 
+        ? (name === "spr" 
+        ? (isNewRow || count === 0 ? topViewSPRImage : addOnSPRImage) 
+        : color) 
+        : (name === "spr" 
+        ? topViewSPRImage 
+        : color);
+      
+      // Create new rectangle and update state
+      const newRect = {
+        id: newId,
+        x,
+        y,
+        width: rectSize,
+        height: rectSize,
+        color,
+        name: newId,
+        fullName: fullName,
+        imageUrl: rectImageUrl,
+      };
+      
+      dispatch(setRects([...rects, newRect]));
+    };
 
   const handleDragStart = (e, color, name, fullName, imageUrl, addOnSPRImage) => {
+    dragUrl.current = e.target.src;
+    const margin = 10;
+      const rowHeight = rectSize + margin;
+      
+      // Filter only for the current type
+      let filteredRects = rects.filter(rect => rect.name.startsWith(name));
+      let count = filteredRects.length;
+      let newId = `${name}${count + 1}`;
+      
+      // Handle special case for space/aisles
+      if (name === 'space') {
+        countsRef.current.space = 3;
+        const newRects = [
+          ...rects,
+          { 
+            id: `aisle1`, 
+            x: 0, 
+            y: stageHeight * 0.2, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
+          { 
+            id: `aisle2`, 
+            x: 0, 
+            y: stageHeight * 0.5, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
+          { 
+            id: `aisle3`, 
+            x: 0, 
+            y: stageHeight * 0.8, 
+            width: stageWidth, 
+            height: 50, 
+            color, 
+            name: "Aisle Space" 
+          },
+        ];
+        dispatch(setRects(newRects));
+        return;
+      }
+      
+      // Calculate position for new rectangle
+      let lastRect = filteredRects.length > 0 ? filteredRects[filteredRects.length - 1] : null;
+      let x = count === 0 ? 0 : lastRect.x + rectSize;
+      let y = lastRect ? lastRect.y : 0;
+      
+      // Handle row overflow
+      let isNewRow = x + rectSize > stageWidth;
+      if (isNewRow) {
+        x = 0;
+        y += rectSize + margin;
+      }
+      
+      // Update count for the specific type
+      countsRef.current[name] = count + 1;
+      
+      // Determine the correct image URL based on conditions
+      const rectImageUrl = isAddOn 
+        ? (name === "spr" 
+        ? (isNewRow || count === 0 ? topViewSPRImage : addOnSPRImage) 
+        : color) 
+        : (name === "spr" 
+        ? topViewSPRImage 
+        : color);
+      
+      // Create new rectangle and update state
+      const newRect = {
+        id: newId,
+        x,
+        y,
+        width: rectSize,
+        height: rectSize,
+        color,
+        name: newId,
+        fullName: fullName,
+        imageUrl: rectImageUrl,
+      };
+      
+      dispatch(setRects([...rects, newRect]));
     e.dataTransfer.setData(
       'draggedItem',
       JSON.stringify({ color, name, fullName, imageUrl, addOnSPRImage })
@@ -850,10 +1559,12 @@ const Header = () => {
     const stage = e.target.getStage();
     const pointerPosition = stage.getPointerPosition();
 
-    setRects((prevRects) => [
-      ...prevRects,
+    logWriter("draggedItem", draggedItem, pointerPosition);
+
+    const newRects = [
+      ...rects,
       {
-        id: `${draggedItem.name}${prevRects.length + 1}`,
+        id: `${draggedItem.name}${rects.length + 1}`,
         x: pointerPosition.x,
         y: pointerPosition.y,
         width: rectSize,
@@ -863,7 +1574,9 @@ const Header = () => {
         fullName: draggedItem.fullName,
         imageUrl: draggedItem.imageUrl,
       },
-    ]);
+    ]
+
+    dispatch(setRects(newRects));
   };
 
   // Function to find the nearest available position that does not overlap
@@ -1013,6 +1726,21 @@ const Header = () => {
     // setRects(updated);
   };
 
+  const URLImage = ({ image }) => {
+  const [img] = useImage(image.src);
+  return (
+    <Image
+      image={img}
+      x={image.x}
+      y={image.y}
+      // I will use offset to set origin to the center of the image
+      offsetX={img ? img.width / 2 : 0}
+      offsetY={img ? img.height / 2 : 0}
+      draggable
+    />
+  );
+};
+
   const COLUMNS = Math.floor(gridSize.width / GRID_SIZE);
   const ROWS = Math.floor(gridSize.height / GRID_SIZE);
 
@@ -1055,20 +1783,22 @@ const Header = () => {
       <div className="main-content">
         <div className="left-half">
           <div className="product-group">
-            <h1>Product Group</h1>
+            <h1 className="product-group-header">Product Group</h1>
             <div className="image-grid">
-              <div className="image-box" draggable onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}>
-                <img src={sprs} alt="Shuttle Pallet Racking" />
+              <div className="image-box"
+                // onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}
+                onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage, isAddOn.current = false)}>
+                <img src={topViewSPR} draggable="true" onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} alt="Shuttle Pallet Racking" />
               </div>
-              {/* <div className="image-box" onClick={() => handleImageClick('red', 'canti', 'Cantilever')}>
+              <div className="image-box">
                 <img src={canti} alt="Cantilever" />
-              </div> */}
-              {/* <div className="image-box">
-                <img src="{mts}" alt="Multi-Tier Racking" />
+              </div>
+              <div className="image-box">
+                <img src={mts} alt="Multi-Tier Racking" />
               </div>
               <div className="image-box">
                 <img src="image4.jpg" alt="Mobile Pallet Racking" />
-              </div> */}
+              </div>
             </div>
           </div>
           <div className="building-accessories">
@@ -1118,147 +1848,191 @@ const Header = () => {
             </text>
           </svg>
 
-          <Stage
-      width={stageWidth}
-      height={stageHeight}
-      className="konva-stage"
-      onDrop={(e) => handleDrop(e)}
-      onDragOver={(e) => e.preventDefault()}
-    >
-      <Layer>
-        {rects.map((rect, index) => (
-          <Group
-            key={rect.id}
-            ref={(el) => (groupRefs.current[rect.id] = el)}
-            draggable
-            // onClick={() => setSelectedShape(rect.id)}
-            onDblClick={() => rect.name !== "Aisle Space" ? handleRectClick(rect) : null}
-            onDragStart={() => setActiveDragId(rect.id)}
-            onTransformEnd={() => handleTransformEnd(rect, index)}
-            onDragMove={(e) => {
-              if (rect.name !== "Aisle Space") handleDragMove(index, e);
-
-              if (activeDragId === rect.id) {
-                const { x, y } = e.target.position();
-                setDraggingCoordinates({ x, y });
-              }
-            }}
-            onDragEnd={() => {
-              setDraggingCoordinates(null);
-              setActiveDragId(null);
-            }}
-            dragBoundFunc={(pos) => {
-              let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-              let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
-              return { x: newX, y: newY };
-            }}
+          <div 
+          className="konva-stage"
+          onDrop={(e) => {
+          e.preventDefault();
+          // register event position
+          canvasWrapperRef.current.setPointersPositions(e);
+          // add image
+          setImages(
+            images.concat([
+              {
+                ...canvasWrapperRef.current.getPointerPosition(),
+                src: dragUrl.current,
+              },
+            ])
+          );
+        }}
+        onDragOver={(e) => e.preventDefault()}
           >
-            {rect.name === "Aisle Space" ? (
-              <>
-                <Rect
-                  fill={rect.color}
-                  x={rect.x}
-                  y={rect.y}
-                  width={rect.width}
-                  height={rect.height}
-                />
-                <Text
-                  x={rect.x + rect.width / 2 - 30}
-                  y={rect.y + rect.height / 2 - 50}
-                  text={rect.name}
-                  fontSize={14}
-                  fill="black"
-                  fontStyle="bold"
-                  align="center"
-                  width={rectSize}
-                  height={rectSize}
-                  verticalAlign="middle"
-                />
-              </>
-            ) : (
-              <>
-                <Image
-                  image={rect.imageUrl}
-                  x={rect.x}
-                  y={rect.y}
-                  width={rect.width}
-                  height={rect.height}
-                />
-                <Text
-                  x={rect.x + rectSize / 4}
-                  y={rect.y + rectSize / 4}
-                  text={rect.name}
-                  fontSize={14}
-                  fill="black"
-                  fontStyle="bold"
-                  align="center"
-                  width={rectSize}
-                  height={rectSize}
-                  verticalAlign="middle"
-                />
-              </>
-            )}
+            <Stage
+              width={stageWidth}
+              height={stageHeight}
+              className="konva-stage"
+              // onMouseEnter={(e) => e.target.getStage().container().style.cursor = "pointer"}
+              // onMouseLeave={(e) => e.target.getStage().container().style.cursor = "default"}
+              ref={canvasWrapperRef}
+              onDrop={(e) => handleDrop(e)}
+              onDragOver={(e) => e.preventDefault()}
+            >
+              <Layer>
+                {images.map((image) => {
+              return <URLImage image={image} />;
+            })}
+                {rects.map((rect, index) => (
+                  <Group
+                    key={rect.id}
+                    ref={(el) => (groupRefs.current[rect.id] = el)}
+                    draggable
+                    // onClick={() => setSelectedShape(rect.id)}
+                    onDblClick={() => rect.name !== "Aisle Space" ? handleRectClick(rect) : null}
+                    onDragStart={() => setActiveDragId(rect.id)}
+                    onTransformEnd={() => handleTransformEnd(rect, index)}
+                    onDragMove={(e) => {
+                      if (rect.name !== "Aisle Space") handleDragMove(index, e);
 
-            {activeDragId === rect.id && draggingCoordinates && (
-              <>
-                <Text
-                  x={draggingCoordinates.x + 10}
-                  y={draggingCoordinates.y - 20}
-                  text={`X: ${draggingCoordinates.x}, Y: ${draggingCoordinates.y}`}
-                  fontSize={14}
-                  fill="black"
-                  fontStyle="bold"
-                />
-                <Group>
-                  <Arrow
-                    points={[0, draggingCoordinates.y, stageWidth, draggingCoordinates.y]}
-                    stroke="red"
-                    strokeWidth={2}
-                    pointerLength={10}
-                    pointerWidth={10}
-                  />
-                  <Text
-                    x={60}
-                    y={draggingCoordinates.y - 15}
-                    text={`X: ${draggingCoordinates.x}`}
-                    fontSize={14}
-                    fill="red"
-                    fontStyle="bold"
-                  />
-                  <Arrow
-                    points={[draggingCoordinates.x, 0, draggingCoordinates.x, stageHeight]}
-                    stroke="blue"
-                    strokeWidth={2}
-                    pointerLength={10}
-                    pointerWidth={10}
-                  />
-                  <Text
-                    x={draggingCoordinates.x + 5}
-                    y={5}
-                    text={`Y: ${draggingCoordinates.y}`}
-                    fontSize={14}
-                    fill="blue"
-                    fontStyle="bold"
-                    rotation={-90}
-                  />
-                </Group>
-              </>
-            )}
-          </Group>
-        ))}
+                      if (activeDragId === rect.id) {
+                        const { x, y } = e.target.position();
+                        setDraggingCoordinates({ x, y });
+                      }
+                    }}
+                    onDragEnd={() => {
+                      setDraggingCoordinates(null);
+                      setActiveDragId(null);
+                    }}
+                    dragBoundFunc={(pos) => {
+                      let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
+                      let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
+                      return { x: newX, y: newY };
+                    }}
+                  >
 
-<Transformer
-          ref={transformerRef}
-          rotateEnabled={true}
-          resizeEnabled={true}
-          anchorSize={8}
-          boundBoxFunc={(oldBox, newBox) => {
-            if (newBox.width < 5 || newBox.height < 5) return oldBox;
-            return newBox;
-          }}
-        />
-      </Layer>
-    </Stage>
+                    {/* This code is for adding the plus icon in the Konva Stage */}
+                    {/* {rect.name === "Shuttle Pallet Rack" ? (
+                null
+                ) : (
+                <>
+                {rect.name === `spr${countsRef.current.spr}` && rect.x + rect.width + 50 < stageWidth && (
+                  <Image
+                  image={plusIconImage}
+                  x={rect.x + rect.width + 10} // Position the plus icon next to the spr image
+                  y={rect.y + rect.height / 2 - 10} // Center the plus icon vertically
+                  width={40}
+                  height={40}
+                  onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage, isAddOn.current = true)} // Add new spr on click
+                  style={{ cursor: "pointer" }}
+                  />
+                )}
+                </>
+                )} */}
+                    {rect.name === "Aisle Space" ? (
+                      <>
+                        <Rect
+                          fill={rect.color}
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                        />
+                        <Text
+                          x={rect.x + rect.width / 2 - 30}
+                          y={rect.y + rect.height / 2 - 50}
+                          text={rect.name}
+                          fontSize={14}
+                          fill="black"
+                          fontStyle="bold"
+                          align="center"
+                          width={rectSize}
+                          height={rectSize}
+                          verticalAlign="middle"
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <KonvaImage
+                          image={rect.imageUrl}
+                          x={rect.x}
+                          y={rect.y}
+                          width={rect.width}
+                          height={rect.height}
+                        />
+                        <Text
+                          x={rect.x + rectSize / 4}
+                          y={rect.y + rectSize / 4}
+                          text={rect.name}
+                          fontSize={14}
+                          fill="black"
+                          fontStyle="bold"
+                          align="center"
+                          width={rectSize}
+                          height={rectSize}
+                          verticalAlign="middle"
+                        />
+                      </>
+                    )}
+
+                    {activeDragId === rect.id && draggingCoordinates && (
+                      <>
+                        <Text
+                          x={draggingCoordinates.x + 10}
+                          y={draggingCoordinates.y - 20}
+                          text={`X: ${draggingCoordinates.x}, Y: ${draggingCoordinates.y}`}
+                          fontSize={14}
+                          fill="black"
+                          fontStyle="bold"
+                        />
+                        <Group>
+                          <Arrow
+                            points={[0, draggingCoordinates.y, stageWidth, draggingCoordinates.y]}
+                            stroke="red"
+                            strokeWidth={2}
+                            pointerLength={10}
+                            pointerWidth={10}
+                          />
+                          <Text
+                            x={60}
+                            y={draggingCoordinates.y - 15}
+                            text={`X: ${draggingCoordinates.x}`}
+                            fontSize={14}
+                            fill="red"
+                            fontStyle="bold"
+                          />
+                          <Arrow
+                            points={[draggingCoordinates.x, 0, draggingCoordinates.x, stageHeight]}
+                            stroke="blue"
+                            strokeWidth={2}
+                            pointerLength={10}
+                            pointerWidth={10}
+                          />
+                          <Text
+                            x={draggingCoordinates.x + 5}
+                            y={5}
+                            text={`Y: ${draggingCoordinates.y}`}
+                            fontSize={14}
+                            fill="blue"
+                            fontStyle="bold"
+                            rotation={-90}
+                          />
+                        </Group>
+                      </>
+                    )}
+                  </Group>
+                ))}
+
+                <Transformer
+                  ref={transformerRef}
+                  rotateEnabled={true}
+                  resizeEnabled={true}
+                  anchorSize={8}
+                  boundBoxFunc={(oldBox, newBox) => {
+                    if (newBox.width < 5 || newBox.height < 5) return oldBox;
+                    return newBox;
+                  }}
+                />
+              </Layer>
+            </Stage>
+          </div>
 
           {modalVisible && selectedRect && (
             <div className="modal">
@@ -1303,7 +2077,15 @@ const Header = () => {
                     </div>
                     <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label htmlFor="height">Height:</label>
-                      <select name="height" id="height" onChange={handleHeightChange} value={selectedHeight}>
+                      <select
+                        name="height"
+                        id="height"
+                        onChange={(e) => {
+                          const newValue = e.target.value;
+                          handleHeightChange(e, selectedRect.id);
+                        }}
+                        value={selectedHeight}
+                      >
                         {Object.entries(heightData).map(([key, { name }]) => (
                           <option key={key} value={key}>
                             {name} cm
@@ -1311,6 +2093,7 @@ const Header = () => {
                         ))}
                       </select>
                     </div>
+
                     <div style={{ display: "flex", marginBottom: "0.5rem", alignItems: "center", gap: "10px" }}>
                       <label htmlFor="width">Width:</label>
                       <select name="width" id="width" onChange={handleWidthChange} value={selectedWidth}>
@@ -1374,51 +2157,7 @@ const Header = () => {
                         ))} */}
                       </input>
                     </div>
-                    <div className="cost">
-                      <table style={{ borderCollapse: "collapse", width: "100%", border: "1px solid black" }}>
-                        <thead>
-                          <tr>
-                            <th>Part No</th>
-                            <th>Part Name</th>
-                            <th>Quantity</th>
-                            <th>Price</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr>
-                            <td>{heightData[selectedHeight]?.partNo || "N/A"}</td>
-                            <td>{heightData[selectedHeight]?.fullName || "N/A"}</td>
-                            <td>4</td>
-                            <td>${heightData[selectedHeight]?.cost || "N/A"}</td>
-                          </tr>
-                          <tr>
-                            <td>{widthData[selectedWidth]?.partNo || "N/A"}</td>
-                            <td>{widthData[selectedWidth]?.fullName || "N/A"}</td>
-                            <td>1</td>
-                            <td>${widthData[selectedWidth]?.cost || "N/A"}</td>
-                          </tr>
-                          <tr>
-                            <td>{depthData[selectedDepth]?.partNo || "N/A"}</td>
-                            <td>{depthData[selectedDepth]?.fullName || "N/A"}</td>
-                            <td>7</td>
-                            <td>${depthData[selectedDepth]?.cost || "N/A"}</td>
-                          </tr>
-                          {/* Total Calculation Row */}
-                          <tr>
-                            <td colSpan="2"></td> {/* Empty columns */}
-                            <td><strong>Total:</strong></td>
-                            <td>
-                              ${(
-                                (heightData[selectedHeight]?.cost || 0) * 4 +
-                                (widthData[selectedWidth]?.cost || 0) * 1 +
-                                (depthData[selectedDepth]?.cost || 0) * 7
-                              ).toFixed(2)}
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
-
-                    </div>
+                    
                     <div className="view-groups">
                       <div className="view-groups-grid">
                         <div
@@ -1445,7 +2184,7 @@ const Header = () => {
                 </div>
                 <div className="canvas" style={{ whiteSpace: "nowrap" }}>
                   <div className="canvas-inner" style={{
-                    width: `${Math.max(100, (idsInRow.current + 2) * 100)}px`,
+                    width: `${Math.max(100, (idsInRow + 2) * 70)}px`,
                     height: '100%',
                   }}>
                     <Canvas
@@ -1455,9 +2194,9 @@ const Header = () => {
                         logWriter("Canvas Width:", gl.domElement.width, true);
                         logWriter("Canvas Height:", gl.domElement.height, true);
                       }}
-                      style={{ overflow: "auto", width: `${(idsInRow.current + 2) * 120}%`, height: "100%" }} >
+                      style={{ overflow: "auto", width: `${(idsInRow + 5) * 120}%`, height: "100%" }} >
                       {selectedView === "stand" &&
-                        <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={selectedScale.current} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} idsInRow={idsInRow.current} selectedSecuring={selectedSecuring} />}
+                        <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={height} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} selectedSecuring={selectedSecuring} selectedRect={selectedRect.id}/>}
                       {selectedView === "sideView" &&
                         <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
                     </Canvas>
@@ -1482,6 +2221,25 @@ const Header = () => {
 
       </div>
     </div>
+  );
+};
+
+// Component to handle image loading
+const KonvaImage = ({ imageUrl, x, y, width, height, ...props }) => {
+  const [image] = useImage("https://image.made-in-china.com/2f0j00bewGHvAtQJqs/L2500xd900xh4500mm-Single-Deep-Selective-Pallet-Heavy-Duty-Racking.webp");
+  
+  // useEffect(() => {
+  //   if (!imageUrl) return;
+  // }, [imageUrl]);
+  
+  return (
+    <Image
+      image={image}
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+    />
   );
 };
 
