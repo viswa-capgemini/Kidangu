@@ -1,0 +1,104 @@
+useEffect(() => {
+  const container = stageRef.current.container();
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // Necessary to allow drop
+  };
+
+  const handleDropEvent = (e) => {
+    e.preventDefault();
+    const draggedItem = JSON.parse(e.dataTransfer.getData('draggedItem'));
+    const stage = stageRef.current;
+    const pointerPosition = stage.getPointerPosition();
+
+    setRects((prevRects) => [
+      ...prevRects,
+      {
+        id: `${draggedItem.name}${prevRects.length + 1}`,
+        x: pointerPosition.x,
+        y: pointerPosition.y,
+        width: rectSize,
+        height: rectSize,
+        color: draggedItem.color,
+        name: draggedItem.name,
+        fullName: draggedItem.fullName,
+        imageUrl: draggedItem.imageUrl,
+      },
+    ]);
+  };
+
+  container.addEventListener('dragover', handleDragOver);
+  container.addEventListener('drop', handleDropEvent);
+
+  return () => {
+    container.removeEventListener('dragover', handleDragOver);
+    container.removeEventListener('drop', handleDropEvent);
+  };
+}, []);
+
+useEffect(() => {
+  const loadImages = async () => {
+    const updatedRects = await Promise.all(rects.map(async rect => {
+      if (typeof rect.imageUrl === 'string') {
+        const img = new window.Image();
+        img.src = rect.imageUrl;
+        await new Promise((res) => {
+          img.onload = res;
+        });
+        return { ...rect, imageUrl: img };
+      }
+      return rect;
+    }));
+
+    setRects(updatedRects);
+  };
+
+  loadImages();
+}, [rects]);
+
+// This code is for cost, Part BOM
+<div className="cost">
+                      <table style={{ borderCollapse: "collapse", width: "100%", border: "1px solid black" }}>
+                        <thead>
+                          <tr>
+                            <th>Part No</th>
+                            <th>Part Name</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr>
+                            <td>{heightData[selectedHeight]?.partNo || "N/A"}</td>
+                            <td>{heightData[selectedHeight]?.fullName || "N/A"}</td>
+                            <td>4</td>
+                            <td>${heightData[selectedHeight]?.cost || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td>{widthData[selectedWidth]?.partNo || "N/A"}</td>
+                            <td>{widthData[selectedWidth]?.fullName || "N/A"}</td>
+                            <td>1</td>
+                            <td>${widthData[selectedWidth]?.cost || "N/A"}</td>
+                          </tr>
+                          <tr>
+                            <td>{depthData[selectedDepth]?.partNo || "N/A"}</td>
+                            <td>{depthData[selectedDepth]?.fullName || "N/A"}</td>
+                            <td>7</td>
+                            <td>${depthData[selectedDepth]?.cost || "N/A"}</td>
+                          </tr>
+                          {/* Total Calculation Row */}
+                          <tr>
+                            <td colSpan="2"></td> {/* Empty columns */}
+                            <td><strong>Total:</strong></td>
+                            <td>
+                              ${(
+                                (heightData[selectedHeight]?.cost || 0) * 4 +
+                                (widthData[selectedWidth]?.cost || 0) * 1 +
+                                (depthData[selectedDepth]?.cost || 0) * 7
+                              ).toFixed(2)}
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+
+                    </div>
