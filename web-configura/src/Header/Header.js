@@ -293,19 +293,23 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     dispatch(setRects(updatedRects));
   };
 
-  const handleIncrementIdsInRow = (rowIndex) => {
-    dispatch(incrementIdsInRow());
-    const updatedRects = rects.map((rect) => {
-      if (selectedRect === rect.id) {
-        return {
-          ...rect,
-          idsInRow: rowIndex + 1,
-        };
-      }
-      return rect;
-    });
-    dispatch(setRects(updatedRects));
-  };
+  const handleIncrementIdsInRow = () => {
+  const updatedRects = rects.map((rect) => {
+    if (selectedRect === rect.id) {
+      // Get the current addOn value (default to 0 if undefined)
+      const currentAddOn = rect.addOn || 0;
+      
+      // Increment it by 1
+      return {
+        ...rect,
+        addOn: currentAddOn + 1,
+      };
+    }
+    return rect;
+  });
+  
+  dispatch(setRects(updatedRects));
+};
 
   const handleDecrementIdsInRow = (rowIndex) => {
     dispatch(decrementIdsInRow());
@@ -313,7 +317,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       if (selectedRect === rect.id) {
         return {
           ...rect,
-          idsInRow: rowIndex - 1,
+          addOn: rowIndex - 1,
         };
       }
       return rect;
@@ -398,51 +402,50 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
 
       <group position={[0, -2, 0]}>
-        {modelParts.frame1 &&
-          Array.from({ length: idsInRow + 2 }).map((_, index) => {
-            let heightValue = selectedHeight; // Default height
+        {modelParts.frame1 && rects.map((rect) => {
+          if (selectedRect === rect.id) {
+            const framesToRender = (rect.addOn || 0) + 2;
+            console.log("framesToRender", framesToRender)
 
-            // Look for a matching height value in the selected rect
-            rects.forEach((rect) => {
-              if (selectedRect === rect.id && rect.height && rect.height[index] !== undefined) {
+            return Array.from({ length: framesToRender }).map((_, index) => {
+              let heightValue = selectedHeight;
+
+              if (rect.height && rect.height[index] !== undefined) {
                 heightValue = rect.height[index];
               }
-              console.log("heightValue in 1", heightValue)
+              else if (height[index] !== undefined) {
+                heightValue = height[index];
+              }
+
+              const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
+
+              return (
+                <primitive
+                  key={`${rect.id}-frame-${index}`}
+                  object={clone(modelParts.frame1)}
+                  scale={[1, heightValue, 1]}
+                  position={[xPosition, 0, 0]}
+                  onUpdate={(self) => {
+                    const originalObject = modelParts.frame1.clone();
+                    const originalBox = new THREE.Box3().setFromObject(originalObject);
+                    const originalHeight = originalBox.max.y - originalBox.min.y;
+
+                    const heightDifference = originalHeight * (heightValue - 1);
+
+                    self.position.set(
+                      xPosition,
+                      heightDifference / 3, // 1/3 is for the fixed height in the ground
+                      0
+                    );
+                    self.updateMatrixWorld();
+                  }}
+                />
+              );
             });
+          }
+          return null; // Return null for non-selected rectangles
+        })}
 
-            // Fallback to height array if available
-            if (height[index] !== undefined) {
-              heightValue = height[index];
-              console.log("heightValue in 2", heightValue);
-            }
-
-            const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
-
-            return (
-              <primitive
-                key={index}
-                object={clone(modelParts.frame1)}
-                scale={[1, heightValue, 1]}
-                position={[xPosition, 0, 0]}
-                onUpdate={(self) => {
-                  // Get the original bounding box dimensions (before scaling)
-                  const originalObject = modelParts.frame1.clone();
-                  const originalBox = new THREE.Box3().setFromObject(originalObject);
-                  const originalHeight = originalBox.max.y - originalBox.min.y;
-
-                  const heightDifference = originalHeight * (heightValue - 1);
-
-                  self.position.set(
-                    xPosition,
-                    heightDifference / 3, // 1/3 is for the fixed height in the ground
-                    0
-                  );
-                  self.updateMatrixWorld();
-                }}
-              />
-            );
-          })
-        }
         {modelParts.beam1 &&
           Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
             let widthValue = selectedWidth;
@@ -1440,10 +1443,10 @@ const Header = () => {
       // Determine the correct image URL based on conditions
       const rectImageUrl = isAddOn 
         ? (name === "spr" 
-        ? (isNewRow || count === 0 ? topViewSPRImage : addOnSPRImage) 
+        ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) 
         : color) 
         : (name === "spr" 
-        ? topViewSPRImage 
+        ? imageUrl 
         : color);
       
       // Create new rectangle and update state
@@ -1457,6 +1460,7 @@ const Header = () => {
         name: newId,
         fullName: fullName,
         imageUrl: rectImageUrl,
+        addOn: 0,
       };
       
       dispatch(setRects([...rects, newRect]));
@@ -1786,9 +1790,9 @@ const Header = () => {
             <h1 className="product-group-header">Product Group</h1>
             <div className="image-grid">
               <div className="image-box"
-                // onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}
-                onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage, isAddOn.current = false)}>
-                <img src={topViewSPR} draggable="true" onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} alt="Shuttle Pallet Racking" />
+                onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPR, addOnSPRImage)}
+                onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPR, addOnSPRImage, isAddOn.current = false)}>
+                <img src={sprs} alt="Shuttle Pallet Racking" />
               </div>
               <div className="image-box">
                 <img src={canti} alt="Cantilever" />
@@ -1848,23 +1852,23 @@ const Header = () => {
             </text>
           </svg>
 
-          <div 
-          className="konva-stage"
-          onDrop={(e) => {
-          e.preventDefault();
-          // register event position
-          canvasWrapperRef.current.setPointersPositions(e);
-          // add image
-          setImages(
-            images.concat([
-              {
-                ...canvasWrapperRef.current.getPointerPosition(),
-                src: dragUrl.current,
-              },
-            ])
-          );
-        }}
-        onDragOver={(e) => e.preventDefault()}
+          <div
+            className="konva-stage"
+            onDrop={(e) => {
+              e.preventDefault();
+              // register event position
+              canvasWrapperRef.current.setPointersPositions(e);
+              // add image
+              setImages(
+                images.concat([
+                  {
+                    ...canvasWrapperRef.current.getPointerPosition(),
+                    src: dragUrl.current,
+                  },
+                ])
+              );
+            }}
+            onDragOver={(e) => e.preventDefault()}
           >
             <Stage
               width={stageWidth}
@@ -1877,9 +1881,6 @@ const Header = () => {
               onDragOver={(e) => e.preventDefault()}
             >
               <Layer>
-                {images.map((image) => {
-              return <URLImage image={image} />;
-            })}
                 {rects.map((rect, index) => (
                   <Group
                     key={rect.id}
@@ -2226,21 +2227,21 @@ const Header = () => {
 
 // Component to handle image loading
 const KonvaImage = ({ imageUrl, x, y, width, height, ...props }) => {
-  const [image] = useImage("https://image.made-in-china.com/2f0j00bewGHvAtQJqs/L2500xd900xh4500mm-Single-Deep-Selective-Pallet-Heavy-Duty-Racking.webp");
+  const [image] = useImage(imageUrl);
   
-  // useEffect(() => {
-  //   if (!imageUrl) return;
-  // }, [imageUrl]);
+  useEffect(() => {
+    if (!imageUrl) return;
+  }, [imageUrl]);
   
-  return (
+  return imageUrl ? (
     <Image
-      image={image}
+      image={imageUrl}
       x={x}
       y={y}
       width={width}
       height={height}
     />
-  );
+  ) : null;
 };
 
 export default Header;
