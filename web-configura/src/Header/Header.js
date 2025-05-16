@@ -294,22 +294,21 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
   };
 
   const handleIncrementIdsInRow = () => {
-  const updatedRects = rects.map((rect) => {
-    if (selectedRect === rect.id) {
-      // Get the current addOn value (default to 0 if undefined)
-      const currentAddOn = rect.addOn || 0;
-      
-      // Increment it by 1
-      return {
-        ...rect,
-        addOn: currentAddOn + 1,
-      };
-    }
-    return rect;
-  });
-  
-  dispatch(setRects(updatedRects));
-};
+    const updatedRects = rects.map((rect) => {
+      if (selectedRect === rect.id) {
+        // Get current addOn value or default to 0
+        const currentAddOn = rect.addOn || 0;
+        
+        return {
+          ...rect,
+          addOn: currentAddOn + 1,
+        };
+      }
+      return rect;
+    });
+    
+    dispatch(setRects(updatedRects));
+  };
 
   const handleDecrementIdsInRow = (rowIndex) => {
     dispatch(decrementIdsInRow());
@@ -317,7 +316,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       if (selectedRect === rect.id) {
         return {
           ...rect,
-          addOn: rowIndex - 1,
+          idsInRow: rowIndex - 1,
         };
       }
       return rect;
@@ -402,77 +401,86 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
       <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
 
       <group position={[0, -2, 0]}>
-        {modelParts.frame1 && rects.map((rect) => {
-          if (selectedRect === rect.id) {
-            const framesToRender = (rect.addOn || 0) + 2;
-            console.log("framesToRender", framesToRender)
+        {modelParts.frame1 && (() => {
+          // Find the selected rectangle to get its addOn value
+          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
 
-            return Array.from({ length: framesToRender }).map((_, index) => {
-              let heightValue = selectedHeight;
+          // Use the addOn value from the selected rectangle, or default to 0 if not found
+          const addOnValue = selectedRectObj?.addOn || 0;
 
-              if (rect.height && rect.height[index] !== undefined) {
-                heightValue = rect.height[index];
-              }
-              else if (height[index] !== undefined) {
-                heightValue = height[index];
-              }
+          // Render frames based on the addOn value of the selected rectangle
+          return Array.from({ length: addOnValue + 2 }).map((_, index) => {
+            let heightValue = selectedHeight; // Default height
 
-              const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
+            // Look for a matching height value in the selected rect
+            if (selectedRectObj?.height && selectedRectObj.height[index] !== undefined) {
+              heightValue = selectedRectObj.height[index];
+            }
+            // Fallback to height array if available
+            else if (height[index] !== undefined) {
+              heightValue = height[index];
+            }
 
-              return (
-                <primitive
-                  key={`${rect.id}-frame-${index}`}
-                  object={clone(modelParts.frame1)}
-                  scale={[1, heightValue, 1]}
-                  position={[xPosition, 0, 0]}
-                  onUpdate={(self) => {
-                    const originalObject = modelParts.frame1.clone();
-                    const originalBox = new THREE.Box3().setFromObject(originalObject);
-                    const originalHeight = originalBox.max.y - originalBox.min.y;
+            const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
 
-                    const heightDifference = originalHeight * (heightValue - 1);
+            return (
+              <primitive
+                key={`frame-${index}`}
+                object={clone(modelParts.frame1)}
+                scale={[1, heightValue, 1]}
+                position={[xPosition, 0, 0]}
+                onUpdate={(self) => {
+                  // Get the original bounding box dimensions (before scaling)
+                  const originalObject = modelParts.frame1.clone();
+                  const originalBox = new THREE.Box3().setFromObject(originalObject);
+                  const originalHeight = originalBox.max.y - originalBox.min.y;
 
-                    self.position.set(
-                      xPosition,
-                      heightDifference / 3, // 1/3 is for the fixed height in the ground
-                      0
-                    );
-                    self.updateMatrixWorld();
-                  }}
-                />
-              );
-            });
-          }
-          return null; // Return null for non-selected rectangles
-        })}
+                  const heightDifference = originalHeight * (heightValue - 1);
 
-        {modelParts.beam1 &&
-          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
+                  self.position.set(
+                    xPosition,
+                    heightDifference / 3, // 1/3 is for the fixed height in the ground
+                    0
+                  );
+                  self.updateMatrixWorld();
+                }}
+              />
+            );
+          });
+        })()}
+        {modelParts.beam1 && (() => {
+          // Find the selected rectangle to get its addOn value
+          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+
+          // Use the addOn value from the selected rectangle, or default to 0 if not found
+          const addOnValue = selectedRectObj?.addOn || 0;
+
+          return Array.from({ length: addOnValue + 1 }).map((_, rowIndex) => {
             let widthValue = selectedWidth;
 
-            rects.forEach((rect) => {
-              if (selectedRect === rect.id && rect.width && rect.width[rowIndex] !== undefined) {
-                widthValue = rect.width[rowIndex];
-              }
-            });
-
-            if (width[rowIndex] !== undefined) {
+            // Check if the selected rectangle has specific width for this row
+            if (selectedRectObj?.width && selectedRectObj.width[rowIndex] !== undefined) {
+              widthValue = selectedRectObj.width[rowIndex];
+            }
+            // Fallback to width array if available
+            else if (width[rowIndex] !== undefined) {
               widthValue = width[rowIndex];
             }
+
+            // Determine number of levels for this frame
             const frameLevels = levels?.[rowIndex] !== undefined
               ? levels[rowIndex]
               : (rowIndex <= 1 ? (levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
 
-            // const widthValue = width?.[rowIndex] ?? selectedWidth;
-
             return Array.from({ length: frameLevels }).map((_, levelIndex) => {
+              // Skip first level if underpass is enabled for this row
               if (underPass[rowIndex] && levelIndex === 0) {
                 return null;
               }
 
               return (
                 <primitive
-                  key={`${rowIndex}-${levelIndex}`}
+                  key={`beam-${rowIndex}-${levelIndex}`}
                   object={clone(modelParts.beam1)}
                   scale={[1, widthValue, 1]} // Assuming beam scales along X-axis
                   position={[-1.5 + rowIndex * 4.1, levelIndex - 1, 0.5]}
@@ -503,9 +511,9 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                   }}
                 />
               );
-            }).filter(Boolean);
-          })
-        }
+            }).filter(Boolean); // Remove null entries (from underpass)
+          });
+        })()}
         {selectedSecuring == 1 && modelParts.channel &&
           Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) => {
             if (underPass[levelIndex] && levelIndex === 0) {
@@ -525,9 +533,15 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
             ));
           }).filter(Boolean)}
 
-        {modelParts.frame1 &&
-          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
-            if (rowIndex === idsInRow) {
+        {modelParts.frame1 && (() => {
+          // Find the selected rectangle to get its addOn value
+          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+
+          // Use the addOn value from the selected rectangle, or default to 0 if not found
+          const addOnValue = selectedRectObj?.addOn || 0;
+
+          return Array.from({ length: addOnValue + 1 }).map((_, rowIndex) => {
+            if (rowIndex === addOnValue) {
               return (
                 <Html
                   key={`plus-icon-${rowIndex}`}
@@ -541,7 +555,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                   <div
                     className="plus-icon"
                     onClick={() => {
-                      handleIncrementIdsInRow(rowIndex);
+                      handleIncrementIdsInRow();
                     }}
                   >
                     <img src={plusIcon} alt="Add" width="20" height="20" />
@@ -549,22 +563,32 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                 </Html>
               );
             }
+
+            // Get height value for this specific frame
+            let heightValue = selectedHeight; // Default height
+
+            // Use rect-specific height if available
+            if (selectedRectObj?.height && selectedRectObj.height[rowIndex] !== undefined) {
+              heightValue = selectedRectObj.height[rowIndex];
+            }
+
             return (
               <primitive
                 key={`frame-${rowIndex}`}
                 object={clone(modelParts.frame1)}
-                scale={[1, selectedHeight, 1]}
+                scale={[1, heightValue, 1]}
                 position={[-2 + rowIndex * 4.1, 0, 0]}
                 onUpdate={(self) => {
                   const boundingBox = new THREE.Box3().setFromObject(self);
                   const heightOffset = boundingBox.max.y - boundingBox.min.y;
 
-                  self.position.set(-2 + rowIndex * 4.1, heightOffset * (selectedHeight - 1) / 2, 0);
+                  self.position.set(-2 + rowIndex * 4.1, heightOffset * (heightValue - 1) / 2, 0);
                   self.updateMatrixWorld();
                 }}
               />
             );
-          })}
+          });
+        })()}
           {modelParts.frame1 &&
           Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
             if (rowIndex === idsInRow && idsInRow > 0) {
@@ -605,8 +629,14 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
               />
             );
           })}
-        {modelParts.frame1 &&
-          Array.from({ length: Math.max(1, idsInRow + 1) }).map((_, index) => {
+        {modelParts.frame1 && (() => {
+          // Find the selected rectangle to get its addOn value
+          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+
+          // Use the addOn value from the selected rectangle, or default to 0 if not found
+          const addOnValue = selectedRectObj?.addOn || 0;
+
+          return Array.from({ length: Math.max(1, addOnValue + 1) }).map((_, index) => {
             const rowIndex = index === 0 ? 0 : index + 1;
             const dropdownLabel = index === 0 ? "Edit Shelf 1" : `Edit Add-On Shelf ${rowIndex - 1}`;
             const positionX = index === 0 ? 0 : (index) * 4.1;
@@ -766,7 +796,8 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                 </div>
               </Html>
             );
-          })}
+          });
+        })()}
       </group>
     </>
   );
@@ -1443,10 +1474,10 @@ const Header = () => {
       // Determine the correct image URL based on conditions
       const rectImageUrl = isAddOn 
         ? (name === "spr" 
-        ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) 
+        ? (isNewRow || count === 0 ? topViewSPRImage : addOnSPRImage) 
         : color) 
         : (name === "spr" 
-        ? imageUrl 
+        ? topViewSPRImage 
         : color);
       
       // Create new rectangle and update state
@@ -1790,9 +1821,9 @@ const Header = () => {
             <h1 className="product-group-header">Product Group</h1>
             <div className="image-grid">
               <div className="image-box"
-                onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPR, addOnSPRImage)}
-                onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPR, addOnSPRImage, isAddOn.current = false)}>
-                <img src={sprs} alt="Shuttle Pallet Racking" />
+                // onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}
+                onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage, isAddOn.current = false)}>
+                <img src={topViewSPR} draggable="true" onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} alt="Shuttle Pallet Racking" />
               </div>
               <div className="image-box">
                 <img src={canti} alt="Cantilever" />
@@ -1852,23 +1883,23 @@ const Header = () => {
             </text>
           </svg>
 
-          <div
-            className="konva-stage"
-            onDrop={(e) => {
-              e.preventDefault();
-              // register event position
-              canvasWrapperRef.current.setPointersPositions(e);
-              // add image
-              setImages(
-                images.concat([
-                  {
-                    ...canvasWrapperRef.current.getPointerPosition(),
-                    src: dragUrl.current,
-                  },
-                ])
-              );
-            }}
-            onDragOver={(e) => e.preventDefault()}
+          <div 
+          className="konva-stage"
+          onDrop={(e) => {
+          e.preventDefault();
+          // register event position
+          canvasWrapperRef.current.setPointersPositions(e);
+          // add image
+          setImages(
+            images.concat([
+              {
+                ...canvasWrapperRef.current.getPointerPosition(),
+                src: dragUrl.current,
+              },
+            ])
+          );
+        }}
+        onDragOver={(e) => e.preventDefault()}
           >
             <Stage
               width={stageWidth}
@@ -1881,6 +1912,9 @@ const Header = () => {
               onDragOver={(e) => e.preventDefault()}
             >
               <Layer>
+                {images.map((image) => {
+              return <URLImage image={image} />;
+            })}
                 {rects.map((rect, index) => (
                   <Group
                     key={rect.id}
@@ -2183,33 +2217,49 @@ const Header = () => {
                     </div>
                   </div>
                 </div>
-                <div className="canvas" style={{ whiteSpace: "nowrap" }}>
-                  <div className="canvas-inner" style={{
-                    width: `${Math.max(100, (idsInRow + 2) * 70)}px`,
-                    height: '100%',
-                  }}>
-                    <Canvas
-                      orthographic
-                      camera={{ position: [0, 0, 5], zoom: 10, near: 0.1, far: 1000 }}
-                      onCreated={({ gl }) => {
-                        logWriter("Canvas Width:", gl.domElement.width, true);
-                        logWriter("Canvas Height:", gl.domElement.height, true);
-                      }}
-                      style={{ overflow: "auto", width: `${(idsInRow + 5) * 120}%`, height: "100%" }} >
-                      {selectedView === "stand" &&
-                        <Stand ref={standRef} position={[0, 0, 0]} selectedHeight={height} selectedWidth={selectedWidth} selectedRackLoad={selectedRackLoad} selectedNoOfLevels={selectedNoOfLevels} selectedSecuring={selectedSecuring} selectedRect={selectedRect.id}/>}
-                      {selectedView === "sideView" &&
-                        <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
-                    </Canvas>
-                  </div>
+                {rects.map((rect, index) => {
+                  if (rect.id === selectedRect.id) {
+                    const addOn = rect.addOn;
 
-                  {/* {selectedView === "stand" && <FrontView />} */}
+                    return (
+                      <div key={`canvas-container-${rect.id}`} className="canvas" style={{ whiteSpace: "nowrap" }}>
+                        <div className="canvas-inner" style={{
+                          width: `${Math.max(100, (addOn + 2) * 70)}px`,
+                          height: '100%',
+                        }}>
+                          <Canvas
+                            orthographic
+                            camera={{ position: [0, 0, 5], zoom: 10, near: 0.1, far: 1000 }}
+                            onCreated={({ gl }) => {
+                              logWriter("Canvas Width:", gl.domElement.width, true);
+                              logWriter("Canvas Height:", gl.domElement.height, true);
+                            }}
+                            style={{ overflow: "auto", width: `${(addOn + 5) * 120}%`, height: "100%" }} >
+                            {selectedView === "stand" &&
+                              <Stand
+                                ref={standRef}
+                                position={[0, 0, 0]}
+                                selectedHeight={height}
+                                selectedWidth={selectedWidth}
+                                selectedRackLoad={selectedRackLoad}
+                                selectedNoOfLevels={selectedNoOfLevels}
+                                selectedSecuring={selectedSecuring}
+                                selectedRect={selectedRect.id}
+                              />}
+                            {selectedView === "sideView" &&
+                              <SideView position={[0, 0, 0]} selectedDepth={selectedDepth} />}
+                          </Canvas>
+                        </div>
 
-                  <div className="button-container">
-                    <button onClick={() => setModalVisible(false)}>Save and Close</button>
-                    <button onClick={() => setModalVisible(false)}>Close</button>
-                  </div>
-                </div>
+                        <div className="button-container">
+                          <button onClick={() => setModalVisible(false)}>Save and Close</button>
+                          <button onClick={() => setModalVisible(false)}>Close</button>
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null; // Return null for non-matching rectangles
+                })}
               </div>
             </div>
           )}
@@ -2227,21 +2277,21 @@ const Header = () => {
 
 // Component to handle image loading
 const KonvaImage = ({ imageUrl, x, y, width, height, ...props }) => {
-  const [image] = useImage(imageUrl);
+  const [image] = useImage("https://image.made-in-china.com/2f0j00bewGHvAtQJqs/L2500xd900xh4500mm-Single-Deep-Selective-Pallet-Heavy-Duty-Racking.webp");
   
-  useEffect(() => {
-    if (!imageUrl) return;
-  }, [imageUrl]);
+  // useEffect(() => {
+  //   if (!imageUrl) return;
+  // }, [imageUrl]);
   
-  return imageUrl ? (
+  return (
     <Image
-      image={imageUrl}
+      image={image}
       x={x}
       y={y}
       width={width}
       height={height}
     />
-  ) : null;
+  );
 };
 
 export default Header;
