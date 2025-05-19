@@ -232,65 +232,71 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
   }
 
   const handleHeightChange = (id, value) => {
+    const rectObj = rects.find(rect => rect.id === selectedRect);
+
+    let updatedHeight = { ...(rectObj?.height || { 0: 1, 1: 1 }) };
+
     // If changing either of the first two frames, update both to the same value
     if (id === 0 || id === 1) {
-      setHeight(prev => ({
-        ...prev,
-        0: value,
-        1: value
-      }));
+      updatedHeight[0] = value;
+      updatedHeight[1] = value;
     } else {
-      setHeight(prev => ({
-        ...prev,
-        [id]: value
-      }));
+      updatedHeight[id] = value;
     }
 
-    logWriter("height", height);
+    // Update the local state
+    setHeight(updatedHeight);
 
+    logWriter("height", updatedHeight);
+
+    // Use the updatedHeight object directly when updating Redux
     const updatedRects = rects.map((rect) => {
       if (selectedRect === rect.id) {
-        return { ...rect, height: { ...height } };
+        return { ...rect, height: updatedHeight };
       }
       return rect;
     });
+
     dispatch(setRects(updatedRects));
-    rects.forEach((rect) => {
-      if(rect.id === selectedRect) {
-      console.log("Updated rects:", rect);
-      }
-    })
+
+    // Log the updated rect
+    const updatedRect = updatedRects.find(rect => rect.id === selectedRect);
+    if (updatedRect) {
+      console.log("Updated rect:", updatedRect);
+    }
   };
 
   const handleLevelDropDownChange = (rowIndex, value) => {
+
+    const rectObj = rects.find(rect => rect.id === selectedRect);
+
+    let updatedLevels = { ...(rectObj?.levels || { 0: 1 }) };
+
     // If changing either of the first two frames, update both to the same value
     if (rowIndex === 0) {
-      setLevels(prev => ({
-        ...prev,
-        0: value
-      }));
+      updatedLevels[0] = value;
     } else {
-      // For other frames, just update the specific one
-      setLevels(prev => ({
-        ...prev,
-        [rowIndex]: value
-      }));
+      updatedLevels[rowIndex] = value;
     }
+
+    setLevels(updatedLevels);
     
     logWriter("levels", levels, value);
     
     const updatedRects = rects.map((rect) => {
       if (selectedRect === rect.id) {
-        return {
-          ...rect,
-          levels: {
-            ...levels,
-          },
-        };
+        return { ...rect, levels: updatedLevels };
       }
       return rect;
     });
+
     dispatch(setRects(updatedRects));
+
+    // Log the updated rect
+    const updatedRect = updatedRects.find(rect => rect.id === selectedRect);
+    if (updatedRect) {
+      console.log("Updated rect in levels:", updatedRect);
+    }
   };
 
   const handleIncrementIdsInRow = () => {
@@ -311,12 +317,12 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
   };
 
   const handleDecrementIdsInRow = (rowIndex) => {
-    dispatch(decrementIdsInRow());
     const updatedRects = rects.map((rect) => {
       if (selectedRect === rect.id) {
+        const currentAddOn = rect.addOn || 0;
         return {
           ...rect,
-          idsInRow: rowIndex - 1,
+          addOn: currentAddOn - 1,
         };
       }
       return rect;
@@ -355,33 +361,41 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
   };
 
   const handleWidthChange = (index, value) => {
+    const rectObj = rects.find(rect => rect.id === selectedRect);
+
+    let updatedWidth = { ...(rectObj?.width || { 0: 1}) };
     if (index === 0) {
-      setWidth(prev => ({
-        ...prev,
-        0: value
-      }));
+      updatedWidth[0] = value;
+      // setWidth(prev => ({
+      //   ...prev,
+      //   0: value
+      // }));
     } else {
-      // For other frames, just update the specific one
-      setWidth(prev => ({
-        ...prev,
-        [index]: value
-      }));
+      updatedWidth[index] = value;
+      // setWidth(prev => ({
+      //   ...prev,
+      //   [index]: value
+      // }));
     }
     
+    setWidth(updatedWidth);
     logWriter("width", width);
     
     const updatedRects = rects.map((rect) => {
       if (selectedRect === rect.id) {
-        return {
-          ...rect,
-          width: {
-            ...width,
-          },
-        };
+        return { ...rect, width: updatedWidth };
       }
       return rect;
     });
+
     dispatch(setRects(updatedRects));
+
+    // Log the updated rect
+    const updatedRect = updatedRects.find(rect => rect.id === selectedRect);
+    if (updatedRect) {
+      logWriter("Updated rect in width:", updatedRect);
+    }
+
   };
 
   // Function for reusing the clone method for deep cloning
@@ -415,9 +429,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
             // Look for a matching height value in the selected rect
             if (selectedRectObj?.height && selectedRectObj.height[index] !== undefined) {
               heightValue = selectedRectObj.height[index];
-            }
-            // Fallback to height array if available
-            else if (height[index] !== undefined) {
+            } else if (height[index] !== undefined) {
               heightValue = height[index];
             }
 
@@ -468,9 +480,9 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
             }
 
             // Determine number of levels for this frame
-            const frameLevels = levels?.[rowIndex] !== undefined
-              ? levels[rowIndex]
-              : (rowIndex <= 1 ? (levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
+            const frameLevels = selectedRectObj.levels?.[rowIndex] !== undefined
+              ? selectedRectObj.levels[rowIndex]
+              : (rowIndex <= 1 ? (selectedRectObj.levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
 
             return Array.from({ length: frameLevels }).map((_, levelIndex) => {
               // Skip first level if underpass is enabled for this row
@@ -532,7 +544,6 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
               />
             ));
           }).filter(Boolean)}
-
         {modelParts.frame1 && (() => {
           // Find the selected rectangle to get its addOn value
           const selectedRectObj = rects.find(rect => rect.id === selectedRect);
@@ -589,9 +600,13 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
             );
           });
         })()}
-          {modelParts.frame1 &&
-          Array.from({ length: idsInRow + 1 }).map((_, rowIndex) => {
-            if (rowIndex === idsInRow && idsInRow > 0) {
+        {modelParts.frame1 && (() => {
+          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+          const addOnValue = selectedRectObj?.addOn || 0;
+
+          return Array.from({ length: addOnValue + 1 }).map((_, rowIndex) => {
+            // Only show remove icon for the last frame and if there's at least one add-on
+            if (rowIndex === addOnValue && addOnValue > 0) {
               return (
                 <Html
                   key={`remove-icon-${rowIndex}`}
@@ -608,27 +623,16 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                       handleDecrementIdsInRow(rowIndex);
                     }}
                   >
-                    <img src={closeIcon} alt="Add" width="20" height="20" />
+                    <img src={closeIcon} alt="Remove" width="20" height="20" />
                   </div>
                 </Html>
               );
             }
-            return (
-              <primitive
-                key={`frame-${rowIndex}`}
-                object={clone(modelParts.frame1)}
-                scale={[1, selectedHeight, 1]}
-                position={[-2 + rowIndex * 4.1, 0, 0]}
-                onUpdate={(self) => {
-                  const boundingBox = new THREE.Box3().setFromObject(self);
-                  const heightOffset = boundingBox.max.y - boundingBox.min.y;
 
-                  self.position.set(-2 + rowIndex * 4.1, heightOffset * (selectedHeight - 1) / 2, 0);
-                  self.updateMatrixWorld();
-                }}
-              />
-            );
-          })}
+            // No need to render frames again since they're already rendered in the first block
+            return null;
+          }).filter(Boolean); // Filter out null values
+        })()}
         {modelParts.frame1 && (() => {
           // Find the selected rectangle to get its addOn value
           const selectedRectObj = rects.find(rect => rect.id === selectedRect);
@@ -1398,8 +1402,8 @@ const Header = () => {
 
   const handleDragMove = (index, e) => {
     const newRects = [...rects];
-    let newX = Math.max(0, Math.min(stageWidth - rects[index].width, e.target.x()));
-    let newY = Math.max(0, Math.min(stageHeight - rects[index].height, e.target.y()));
+    let newX = Math.max(0, Math.min(stageWidth - rects[index].rectSize, e.target.x()));
+    let newY = Math.max(0, Math.min(stageHeight - rects[index].rectSize, e.target.y()));
 
     // Find the nearest available position if overlapping
     let { x: finalX, y: finalY } = findNearestNonOverlappingPosition(newX, newY, index);
@@ -1474,10 +1478,10 @@ const Header = () => {
       // Determine the correct image URL based on conditions
       const rectImageUrl = isAddOn 
         ? (name === "spr" 
-        ? (isNewRow || count === 0 ? topViewSPRImage : addOnSPRImage) 
+        ? (isNewRow || count === 0 ? imageUrl : addOnSPRImage) 
         : color) 
         : (name === "spr" 
-        ? topViewSPRImage 
+        ? imageUrl 
         : color);
       
       // Create new rectangle and update state
@@ -1485,13 +1489,15 @@ const Header = () => {
         id: newId,
         x,
         y,
-        width: rectSize,
-        height: rectSize,
+        width: {0: 1},
+        height: {0: 1, 1: 1},
         color,
         name: newId,
         fullName: fullName,
         imageUrl: rectImageUrl,
         addOn: 0,
+        levels: {0: 5},
+        rectSize: rectSize,
       };
       
       dispatch(setRects([...rects, newRect]));
@@ -1638,9 +1644,9 @@ const Header = () => {
   // Check if a position is overlapping with any existing rectangle
   const isOverlapping1 = (x, y, existingRects) => {
     return existingRects.some(rect => (
-      x < rect.x + rect.width &&
+      x < rect.x + rectSize &&
       x + rectSize > rect.x &&
-      y < rect.y + rect.height &&
+      y < rect.y + rectSize &&
       y + rectSize > rect.y
     ));
   };
@@ -1650,10 +1656,10 @@ const Header = () => {
     return rects.some((rect, i) => {
       if (i !== index) {
         return (
-          x < rect.x + rect.width &&
-          x + rects[index].width > rect.x &&
-          y < rect.y + rect.height &&
-          y + rects[index].height > rect.y
+          x < rect.x + rectSize &&
+          x + rects[index].rectSize > rect.x &&
+          y < rect.y + rectSize &&
+          y + rects[index].rectSize > rect.y
         );
       }
       return false;
@@ -1685,8 +1691,8 @@ const Header = () => {
         let newX = x + dir.dx;
         let newY = y + dir.dy;
 
-        if (newX >= 0 && newX + rects[index].width <= stageWidth &&
-          newY >= 0 && newY + rects[index].height <= stageHeight &&
+        if (newX >= 0 && newX + rects[index].rectSize <= stageWidth &&
+          newY >= 0 && newY + rects[index].rectSize <= stageHeight &&
           !isOverlapping(newX, newY, index)) {
 
           return { x: newX, y: newY };
@@ -1749,8 +1755,8 @@ const Header = () => {
       ...rect,
       x: node.x(),
       y: node.y(),
-      width: rect.width * scaleX,
-      height: rect.height * scaleY,
+      width: rectSize * scaleX,
+      height: rectSize * scaleY,
     };
 
     node.scaleX(1);
@@ -1823,7 +1829,7 @@ const Header = () => {
               <div className="image-box"
                 // onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)}
                 onClick={() => handleImageClick('blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage, isAddOn.current = false)}>
-                <img src={topViewSPR} draggable="true" onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} alt="Shuttle Pallet Racking" />
+                <img src={sprs} draggable="true" onDragStart={(e) => handleDragStart(e, 'blue', 'spr', 'Shuttle Pallet Rack', topViewSPRImage, addOnSPRImage)} alt="Shuttle Pallet Racking" />
               </div>
               <div className="image-box">
                 <img src={canti} alt="Cantilever" />
@@ -1912,9 +1918,6 @@ const Header = () => {
               onDragOver={(e) => e.preventDefault()}
             >
               <Layer>
-                {images.map((image) => {
-              return <URLImage image={image} />;
-            })}
                 {rects.map((rect, index) => (
                   <Group
                     key={rect.id}
@@ -1937,8 +1940,8 @@ const Header = () => {
                       setActiveDragId(null);
                     }}
                     dragBoundFunc={(pos) => {
-                      let newX = Math.max(0, Math.min(stageWidth - rect.width, pos.x));
-                      let newY = Math.max(0, Math.min(stageHeight - rect.height, pos.y));
+                      let newX = Math.max(0, Math.min(stageWidth - rectSize, pos.x));
+                      let newY = Math.max(0, Math.min(stageHeight - rectSize, pos.y));
                       return { x: newX, y: newY };
                     }}
                   >
@@ -1967,12 +1970,12 @@ const Header = () => {
                           fill={rect.color}
                           x={rect.x}
                           y={rect.y}
-                          width={rect.width}
-                          height={rect.height}
+                          width={rectSize}
+                          height={rectSize}
                         />
                         <Text
-                          x={rect.x + rect.width / 2 - 30}
-                          y={rect.y + rect.height / 2 - 50}
+                          x={rect.x + rectSize / 2 - 30}
+                          y={rect.y + rectSize / 2 - 50}
                           text={rect.name}
                           fontSize={14}
                           fill="black"
@@ -1989,8 +1992,8 @@ const Header = () => {
                           image={rect.imageUrl}
                           x={rect.x}
                           y={rect.y}
-                          width={rect.width}
-                          height={rect.height}
+                          width={rectSize}
+                          height={rectSize}
                         />
                         <Text
                           x={rect.x + rectSize / 4}
