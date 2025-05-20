@@ -221,6 +221,17 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     });
   }, [selectedWidth]);
 
+  useEffect(() => {
+    rects.forEach((rect) => {
+      if (rect.id === selectedRect) {
+        setHeight(rect.height);
+        setWidth(rect.width);
+        setLevels(rect.levels);
+        setUnderPass(rect.underPass);
+      }
+    });
+  }, [rects, selectedRect]);
+
   const editPallet = (idsInRow, levelIndex, rowIndex) => {
     logWriter("Edit Pallet", `Level: ${levelIndex}, Row: ${rowIndex}, ID in Row: ${idsInRow}`, true);
   }
@@ -331,33 +342,35 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
   };
 
   const handleUnderPassChange = (index, value) => {
+
+    const rectObj = rects.find(rect => rect.id === selectedRect);
+
+    let updatedUnderPass = { ...(rectObj?.underPass || { 0: 1 }) };
+
     if (index === 0) {
-      setUnderPass(prev => ({
-        ...prev,
-        0: value
-      }));
+      updatedUnderPass[0] = value;
     } else {
-      // For other frames, just update the specific one
-      setUnderPass(prev => ({
-        ...prev,
-        [index]: value
-      }));
+      updatedUnderPass[index] = value
     }
+
+    setUnderPass(updatedUnderPass);    
     
-    logWriter("levels", underPass);
+    logWriter("underPass", underPass);
     
     const updatedRects = rects.map((rect) => {
       if (selectedRect === rect.id) {
-        return {
-          ...rect,
-          underPass: {
-            ...underPass,
-          },
-        };
+        return { ...rect, underPass: updatedUnderPass };
       }
       return rect;
     });
+
     dispatch(setRects(updatedRects));
+
+    // Log the updated rect
+    const updatedRect = updatedRects.find(rect => rect.id === selectedRect);
+    if (updatedRect) {
+      logWriter("Updated rect in updatedUnderPass:", updatedRect);
+    }
   };
 
   const handleWidthChange = (index, value) => {
@@ -366,16 +379,8 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
     let updatedWidth = { ...(rectObj?.width || { 0: 1}) };
     if (index === 0) {
       updatedWidth[0] = value;
-      // setWidth(prev => ({
-      //   ...prev,
-      //   0: value
-      // }));
     } else {
       updatedWidth[index] = value;
-      // setWidth(prev => ({
-      //   ...prev,
-      //   [index]: value
-      // }));
     }
     
     setWidth(updatedWidth);
@@ -416,116 +421,169 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
 
       <group position={[0, -2, 0]}>
         {modelParts.frame1 && (() => {
-          // Find the selected rectangle to get its addOn value
-          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+  // Find the selected rectangle to get its addOn value
+  const selectedRectObj = rects.find(rect => rect.id === selectedRect);
 
-          // Use the addOn value from the selected rectangle, or default to 0 if not found
-          const addOnValue = selectedRectObj?.addOn || 0;
+  // Use the addOn value from the selected rectangle, or default to 0 if not found
+  const addOnValue = selectedRectObj?.addOn || 0;
 
-          // Render frames based on the addOn value of the selected rectangle
-          return Array.from({ length: addOnValue + 2 }).map((_, index) => {
-            let heightValue = selectedHeight; // Default height
+  // Calculate positions based on widths of previous frames
+  const positions = [];
+  let currentPosition = -2; // Starting position of first frame
+  
+  // Calculate positions for each frame based on previous frame widths
+  for (let i = 0; i <= addOnValue + 1; i++) {
+    positions.push(currentPosition);
+    
+    // Get width of current frame
+    let currentWidth = 1; // Default width
+    if (selectedRectObj?.width && selectedRectObj.width[i] !== undefined) {
+      currentWidth = selectedRectObj.width[i];
+    } else if (width[i] !== undefined) {
+      currentWidth = width[i];
+    }
+    
+    // Calculate spacing based on width
+    // The base spacing is 4.1, but we adjust it based on the width
+    const widthAdjustment = (currentWidth - 1) * 4.1; // Scale the adjustment based on width difference
+    const spacing = 4.1 + widthAdjustment;
+    
+    // Update position for next frame
+    currentPosition += spacing;
+  }
 
-            // Look for a matching height value in the selected rect
-            if (selectedRectObj?.height && selectedRectObj.height[index] !== undefined) {
-              heightValue = selectedRectObj.height[index];
-            } else if (height[index] !== undefined) {
-              heightValue = height[index];
-            }
+  // Render frames based on the addOn value of the selected rectangle
+  return Array.from({ length: addOnValue + 2 }).map((_, index) => {
+    let heightValue = selectedHeight; // Default height
 
-            const xPosition = -2 + index * 4.1 + (index > 0 ? (index * adjustment * 10) : 0);
+    // Look for a matching height value in the selected rect
+    if (selectedRectObj?.height && selectedRectObj.height[index] !== undefined) {
+      heightValue = selectedRectObj.height[index];
+    } else if (height[index] !== undefined) {
+      heightValue = height[index];
+    }
 
-            return (
-              <primitive
-                key={`frame-${index}`}
-                object={clone(modelParts.frame1)}
-                scale={[1, heightValue, 1]}
-                position={[xPosition, 0, 0]}
-                onUpdate={(self) => {
-                  // Get the original bounding box dimensions (before scaling)
-                  const originalObject = modelParts.frame1.clone();
-                  const originalBox = new THREE.Box3().setFromObject(originalObject);
-                  const originalHeight = originalBox.max.y - originalBox.min.y;
+    // Use the pre-calculated position
+    const xPosition = positions[index];
 
-                  const heightDifference = originalHeight * (heightValue - 1);
+    return (
+      <primitive
+        key={`frame-${index}`}
+        object={clone(modelParts.frame1)}
+        scale={[1, heightValue, 1]}
+        position={[xPosition, 0, 0]}
+        onUpdate={(self) => {
+          // Get the original bounding box dimensions (before scaling)
+          const originalObject = modelParts.frame1.clone();
+          const originalBox = new THREE.Box3().setFromObject(originalObject);
+          const originalHeight = originalBox.max.y - originalBox.min.y;
 
-                  self.position.set(
-                    xPosition,
-                    heightDifference / 3, // 1/3 is for the fixed height in the ground
-                    0
-                  );
-                  self.updateMatrixWorld();
-                }}
-              />
+          const heightDifference = originalHeight * (heightValue - 1);
+
+          self.position.set(
+            xPosition,
+            heightDifference / 3, // 1/3 is for the fixed height in the ground
+            0
+          );
+          self.updateMatrixWorld();
+        }}
+      />
+    );
+  });
+})()}
+{modelParts.beam1 && (() => {
+  // Find the selected rectangle to get its addOn value
+  const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+
+  // Use the addOn value from the selected rectangle, or default to 0 if not found
+  const addOnValue = selectedRectObj?.addOn || 0;
+
+  // Calculate positions based on widths of previous frames
+  const positions = [];
+  let currentPosition = -2; // Starting position of first frame
+  
+  // Calculate positions for each frame based on previous frame widths
+  for (let i = 0; i <= addOnValue; i++) {
+    positions.push(currentPosition);
+    
+    // Get width of current frame
+    let currentWidth = 1; // Default width
+    if (selectedRectObj?.width && selectedRectObj.width[i] !== undefined) {
+      currentWidth = selectedRectObj.width[i];
+    } else if (width[i] !== undefined) {
+      currentWidth = width[i];
+    }
+    
+    // Calculate spacing based on width
+    const widthAdjustment = (currentWidth - 1) * 4.1;
+    const spacing = 4.1 + widthAdjustment;
+    
+    // Update position for next frame
+    currentPosition += spacing;
+  }
+
+  return Array.from({ length: addOnValue + 1 }).map((_, rowIndex) => {
+    let widthValue = selectedWidth;
+
+    // Check if the selected rectangle has specific width for this row
+    if (selectedRectObj?.width && selectedRectObj.width[rowIndex] !== undefined) {
+      widthValue = selectedRectObj.width[rowIndex];
+    }
+    // Fallback to width array if available
+    else if (width[rowIndex] !== undefined) {
+      widthValue = width[rowIndex];
+    }
+
+    // Determine number of levels for this frame
+    const frameLevels = selectedRectObj.levels?.[rowIndex] !== undefined
+      ? selectedRectObj.levels[rowIndex]
+      : (rowIndex <= 1 ? (selectedRectObj.levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
+
+    // Use the pre-calculated position, but adjust for beams (they're offset by 0.5 from frames)
+    const xPosition = positions[rowIndex] + 0.5;
+
+    return Array.from({ length: frameLevels }).map((_, levelIndex) => {
+      // Skip first level if underpass is enabled for this row
+      if (underPass[rowIndex] === 1 && levelIndex === 0) {
+        return null;
+      }
+
+      return (
+        <primitive
+          key={`beam-${rowIndex}-${levelIndex}`}
+          object={clone(modelParts.beam1)}
+          scale={[1, widthValue, 1]} // Assuming beam scales along X-axis
+          position={[xPosition, levelIndex - 1, 0.5]}
+          onUpdate={(self) => {
+            // Get the original bounding box dimensions (before scaling)
+            const originalObject = modelParts.beam1.clone();
+            const originalBox = new THREE.Box3().setFromObject(originalObject);
+            const originalWidth = originalBox.max.x - originalBox.min.x;
+
+            // Calculate how much the object has grown
+            const widthDifference = originalWidth * (widthValue - 1);
+
+            const fixLeftEnd = true;
+
+            const xAdjustment = fixLeftEnd
+              ? widthDifference / 10
+              : -widthDifference / 4;
+
+            setAdjustment(xAdjustment);
+
+            self.position.set(
+              xPosition + xAdjustment,
+              levelIndex - 1,
+              0.5
             );
-          });
-        })()}
-        {modelParts.beam1 && (() => {
-          // Find the selected rectangle to get its addOn value
-          const selectedRectObj = rects.find(rect => rect.id === selectedRect);
 
-          // Use the addOn value from the selected rectangle, or default to 0 if not found
-          const addOnValue = selectedRectObj?.addOn || 0;
-
-          return Array.from({ length: addOnValue + 1 }).map((_, rowIndex) => {
-            let widthValue = selectedWidth;
-
-            // Check if the selected rectangle has specific width for this row
-            if (selectedRectObj?.width && selectedRectObj.width[rowIndex] !== undefined) {
-              widthValue = selectedRectObj.width[rowIndex];
-            }
-            // Fallback to width array if available
-            else if (width[rowIndex] !== undefined) {
-              widthValue = width[rowIndex];
-            }
-
-            // Determine number of levels for this frame
-            const frameLevels = selectedRectObj.levels?.[rowIndex] !== undefined
-              ? selectedRectObj.levels[rowIndex]
-              : (rowIndex <= 1 ? (selectedRectObj.levels?.[0] || selectedNoOfLevels) : selectedNoOfLevels);
-
-            return Array.from({ length: frameLevels }).map((_, levelIndex) => {
-              // Skip first level if underpass is enabled for this row
-              if (underPass[rowIndex] && levelIndex === 0) {
-                return null;
-              }
-
-              return (
-                <primitive
-                  key={`beam-${rowIndex}-${levelIndex}`}
-                  object={clone(modelParts.beam1)}
-                  scale={[1, widthValue, 1]} // Assuming beam scales along X-axis
-                  position={[-1.5 + rowIndex * 4.1, levelIndex - 1, 0.5]}
-                  onUpdate={(self) => {
-                    // Get the original bounding box dimensions (before scaling)
-                    const originalObject = modelParts.beam1.clone();
-                    const originalBox = new THREE.Box3().setFromObject(originalObject);
-                    const originalWidth = originalBox.max.x - originalBox.min.x;
-
-                    // Calculate how much the object has grown
-                    const widthDifference = originalWidth * (widthValue - 1);
-
-                    const fixLeftEnd = true;
-
-                    const xAdjustment = fixLeftEnd
-                      ? widthDifference / 10
-                      : -widthDifference / 4;
-
-                    setAdjustment(xAdjustment);
-
-                    self.position.set(
-                      -1.5 + rowIndex * 4.1 + xAdjustment,
-                      levelIndex - 1,
-                      0.5
-                    );
-
-                    self.updateMatrixWorld();
-                  }}
-                />
-              );
-            }).filter(Boolean); // Remove null entries (from underpass)
-          });
-        })()}
+            self.updateMatrixWorld();
+          }}
+        />
+      );
+    }).filter(Boolean); // Remove null entries (from underpass)
+  });
+})()}
         {selectedSecuring == 1 && modelParts.channel &&
           Array.from({ length: selectedNoOfLevels }).map((_, levelIndex) => {
             if (underPass[levelIndex] && levelIndex === 0) {
@@ -730,7 +788,13 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                           name="underpass"
                           id="underpass"
                           className="underpass-dropdown"
-                          value={underPass?.[index] !== undefined ? underPass[index] : "1"}
+                          value={(() => {
+                            const selectedRectObj = rects.find(rect => rect.id === selectedRect);
+                            if (selectedRectObj?.underPass && selectedRectObj.underPass[index] !== undefined) {
+                              return selectedRectObj.underPass[index];
+                            }
+                            return underPass?.[index] !== undefined ? underPass[index] : "2";
+                          })()}
                           style={{
                             background: 'white',
                             border: '1px solid #ccc',
@@ -755,7 +819,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                           name="widthValue"
                           id="widthValue"
                           className="widthValue-dropdown"
-                          value={width[rowIndex] || 1}
+                          value={width?.[index] !== undefined ? width[index] : 1}
                           style={{
                             background: 'white',
                             border: '1px solid #ccc',
@@ -766,7 +830,7 @@ const Stand = forwardRef(({ position, selectedHeight, selectedWidth, selectedRac
                             marginBottom: '8px',
                           }}
                           onChange={(e) => {
-                            handleWidthChange(rowIndex, parseFloat(e.target.value));
+                            handleWidthChange(index, parseFloat(e.target.value));
                           }}
                         >
                           <option value="">Select an option</option>
@@ -1497,6 +1561,7 @@ const Header = () => {
         imageUrl: rectImageUrl,
         addOn: 0,
         levels: {0: 5},
+        underPass: {0: 2},
         rectSize: rectSize,
       };
       
