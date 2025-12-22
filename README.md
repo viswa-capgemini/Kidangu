@@ -9,3 +9,11 @@ For Setting up the project
 3. Setup the AWS credentials in config.js file
 4. Run node server.js from server folder
 5. Run npm start from web-configura folder
+
+
+
+Backend Antigravity
+python3 -m venv venv
+venv/Source/activate
+pip install -r requirements.txt   
+uvicorn app.main:app --reload --port 8000
