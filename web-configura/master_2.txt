@@ -1,0 +1,231 @@
+'Module GlobalSettings
+
+'End Module
+Public Module GlobalSettings
+
+    '--------------UPRIGHT GX & GXL  -------------------------------
+    ' Constants for length settings
+    Public Const UPRIGHT_MIN_LENGTH As Integer = 1500
+    Public Const UPRIGHT_MAX_LENGTH As Integer = 12000
+    Public Const UPRIGHT_STEP_VALUE As Integer = 100
+
+    ' Global thickness values array
+    Public ReadOnly UPRIGHT_ThicknessValues() As Double = {1.2, 1.6, 1.8, 2.0, 2.5, 3.15}
+    Public ReadOnly UPRIGHT_widthValues() As Double = {50, 70, 90, 110, 120}
+
+
+
+    '--------------UPRIGHT G Series  -------------------------------
+    Public ReadOnly UPRIGHT_G_ThicknessValues() As Double = {0.8, 1.0, 1.2}
+    Public Const UPRIGHT_G_MIN_LENGTH As Integer = 1495
+    Public Const UPRIGHT_G_MAX_LENGTH As Integer = 5995
+    Public Const UPRIGH_G_STEP_VALUE As Integer = 100
+
+    '---------------Beam -------------------
+
+    ' Constants for length settings
+    Public Const BEAM_MIN_LENGTH As Integer = 1000
+    Public Const BEAM_MAX_LENGTH As Integer = 4000
+    Public Const BEAM_STEP_VALUE As Integer = 100
+
+    Public ReadOnly BEAM_ThicknessValues() As Double = {1.0, 1.2, 1.5}
+
+    Public Const LIP_CNT_MIN_LENGTH As Integer = 2
+    Public Const LIP_CNT_MAX_LENGTH As Integer = 5
+    Public Const LIP_CNT_STEP_VALUE As Integer = 1
+
+    '-------------------------HorzBracing-------------------------
+
+    ' Constants for length settings
+    Public Const HORZBRAC_MIN_LENGTH As Integer = 100
+    Public Const HORZBRAC_MAX_LENGTH As Integer = 1500
+    Public Const HORZBRAC_STEP_VALUE As Integer = 1
+
+    Public ReadOnly HORZBRAC_ThicknessValues() As Double = {1.2, 1.4}
+
+    Public Const HORZBRAC_MIN_DEPTH As Integer = 500
+    Public Const HORZBRAC_MAX_DEPTH As Integer = 1500
+    Public Const HORZBRAC_STEP_DEPTH As Integer = 50
+
+
+    '-------------------------DIA Bracing-------------------------
+
+    ' Constants for length settings
+    Public Const DIAGBRAC_MIN_LENGTH As Integer = 100
+    Public Const DIAGBRAC_MAX_LENGTH As Integer = 1500
+    Public Const DIAGBRAC_STEP_VALUE As Integer = 1
+
+    Public ReadOnly DIAGBRAC_ThicknessValues() As Double = {1.2, 1.4}
+
+    Public Const DIAGBRAC_MIN_DEPTH As Integer = 500
+    Public Const DIAGBRAC_MAX_DEPTH As Integer = 1500
+    Public Const DIAGBRAC_STEP_DEPTH As Integer = 50
+
+    '------------------------- HD 6B RF PANEL(GSB)----------------------
+
+
+    Public Const HD6BRF_PANEL_MIN_WIDTH As Integer = 150
+    Public Const HD6BRF_PANEL_MAX_WIDTH As Integer = 300
+    Public Const HD6BRF_PANEL_STEP_WIDTH As Integer = 50
+
+
+    ' Constants for length settings
+    Public Const HD6BRF_PANEL_MIN_LENGTH As Integer = 600
+    Public Const HD6BRF_PANEL_MAX_LENGTH As Integer = 1500
+    Public Const HD6BRF_PANEL_STEP_VALUE As Integer = 50
+
+    Public ReadOnly HD6BRF_PANEL_ThicknessValues() As Double = {0.6, 0.7, 0.8, 1.0}
+
+    Public Const HD6BRF_PANEL_MIN_DEPTH As Integer = 500
+    Public Const HD6BRF_PANEL_MAX_DEPTH As Integer = 1500
+    Public Const HD6BRF_PANEL_STEP_DEPTH As Integer = 50
+
+    Public Const HD6BRF_PANEL_MIN_HEIGHT As Integer = 500
+    Public Const HD6BRF_PANEL_MAX_HEIGHT As Integer = 300
+    Public Const HD6BRF_PANEL_STEP_HEIGHT As Integer = 50
+
+
+    '--------------------------HD 6B FLAT END PANEL----------------------------
+
+
+    Public Const HD6B_FLAT_END_PANEL_MIN_WIDTH As Integer = 200
+    Public Const HD6B_FLAT_END_PANEL_MAX_WIDTH As Integer = 300
+    Public Const HD6B_FLAT_END_PANEL_STEP_WIDTH As Integer = 100
+
+
+    ' Constants for length settings
+    Public Const HD6B_FLAT_END_PANEL_MIN_LENGTH As Integer = 800
+    Public Const HHD6B_FLAT_END_PANEL_MAX_LENGTH As Integer = 1200
+    Public Const HD6B_FLAT_END_PANEL_STEP_VALUE As Integer = 200
+
+    Public ReadOnly HD6B_FLAT_END_PANEL_ThicknessValues() As Double = {1.2, 1.6}
+
+    Public Const HD6B_FLAT_END_PANEL_MIN_DEPTH As Integer = 500
+    Public Const HD6B_FLAT_END_PANEL_MAX_DEPTH As Integer = 1500
+    Public Const HD6B_FLAT_END_PANEL_STEP_DEPTH As Integer = 50
+
+    Public Const HD6B_FLAT_END_PANEL_MIN_HEIGHT As Integer = 500
+    Public Const HD6B_FLAT_END_PANEL_MAX_HEIGHT As Integer = 300
+    Public Const HD6B_FLAT_END_PANEL_STEP_HEIGHT As Integer = 50
+
+
+    '-----------------------------------RF 4B PLAIN PANEL---------------------------
+
+    Public Const RF4B_PLAIN_PANEL_MIN_WIDTH As Integer = 150
+    Public Const RF4B_PLAIN_PANEL_MAX_WIDTH As Integer = 250
+    Public Const RF4B_PLAIN_PANEL_STEP_WIDTH As Integer = 50
+
+
+    ' Constants for length settings
+    Public Const RF4B_PLAIN_PANEL_MIN_LENGTH As Integer = 900
+    Public Const RF4B_PLAIN_PANEL_MAX_LENGTH As Integer = 3000
+    Public Const RF4B_PLAIN_PANEL_STEP_VALUE As Integer = 1
+
+    Public ReadOnly RF4B_PLAIN_PANEL_ThicknessValues() As Double = {1.2}
+
+    Public Const RF4B_PLAIN_PANEL_MIN_DEPTH As Integer = 500
+    Public Const RF4B_PLAIN_PANEL_MAX_DEPTH As Integer = 1500
+    Public Const RF4B_PLAIN_PANEL_STEP_DEPTH As Integer = 50
+
+    Public Const RF4B_PLAIN_PANEL_MIN_HEIGHT As Integer = 500
+    Public Const RF4B_PLAIN_PANEL_MAX_HEIGHT As Integer = 300
+    Public Const RF4B_PLAIN_PANEL_STEP_HEIGHT As Integer = 50
+
+    '--------------------------4B PANEL-----------------------------
+
+    Public Const PANEL_4B_MIN_WIDTH As Integer = 20
+    Public Const PANEL_4B_MAX_WIDTH As Integer = 100
+    Public Const PANEL_4B_STEP_WIDTH As Integer = 1
+
+
+    ' Constants for length settings
+    Public Const PANEL_4BL_MIN_LENGTH As Integer = 1000
+    Public Const PANEL_4B_LENGTH As Integer = 3000
+    Public Const PANEL_4BL_STEP_VALUE As Integer = 100
+
+    Public ReadOnly PANEL_4BL_ThicknessValues() As Double = {1.2, 1.5, 2.0}
+
+    Public Const PANEL_4BL_MIN_DEPTH As Integer = 500 'not used 
+    Public Const PANEL_4BL_MAX_DEPTH As Integer = 1500
+    Public Const PANEL_4B_STEP_DEPTH As Integer = 50
+
+    Public Const PANEL_4B_MIN_HEIGHT As Integer = 10
+    Public Const PANEL_4BL_MAX_HEIGHT As Integer = 50
+    Public Const PANEL_4B_STEP_HEIGHT As Integer = 1
+
+    '--------------------Chnl_4B_PanelSupportBar---------------------------
+
+    Public Const CHNL_4B_PSB_MIN_WIDTH As Integer = 20
+    Public Const PCHNL_4B_PSB_MAX_WIDTH As Integer = 100
+    Public Const CHNL_4B_PSB_STEP_WIDTH As Integer = 1
+
+
+    ' Constants for length settings
+    Public Const CHNL_4B_PSB_MIN_LENGTH As Integer = 600
+    Public Const CHNL_4B_PSB_MAX_LENGTH As Integer = 1500
+    Public Const CHNL_4B_PSB_STEP_VALUE As Integer = 50
+
+    Public ReadOnly CHNL_4B_PSB_ThicknessValues() As Double = {1.6}
+
+    Public Const CHNL_4B_PSBL_MIN_DEPTH As Integer = 500 'not used 
+    Public Const CHNL_4B_PSB_MAX_DEPTH As Integer = 1500
+    Public Const CHNL_4B_PSB_STEP_DEPTH As Integer = 50
+
+    Public Const CHNL_4B_PSB_MIN_HEIGHT As Integer = 48
+    Public Const CHNL_4B_PSB_MAX_HEIGHT As Integer = 48
+    Public Const CHNL_4B_PSB_STEP_HEIGHT As Integer = 1
+
+
+
+
+
+
+    '--------------------Welded PanelSupportBar---------------------------
+
+    'Public Const PLT_SUPBAR_WLD_MIN_WIDTH As Integer = 20
+    'Public Const PLT_SUPBAR_WLD_MAX_WIDTH As Integer = 100
+    'Public Const PLT_SUPBAR_WLD_STEP_WIDTH As Integer = 1
+
+
+    ' Constants for length settings
+    Public Const PLT_SUPBAR_WLD_MIN_LENGTH As Integer = 600
+    Public Const PLT_SUPBAR_WLD_MAX_LENGTH As Integer = 1200
+    Public Const PLT_SUPBAR_WLD_STEP_LENGTH As Integer = 50
+
+    Public ReadOnly PLT_SUPBAR_WLD_ThicknessValues() As Double = {1.2, 1.5, 2, 2.5, 3.15}
+
+    'Public Const PLT_SUPBAR_WLD_MIN_DEPTH As Integer = 500 'not used 
+    'Public Const PLT_SUPBAR_WLD_MAX_DEPTH As Integer = 1500
+    'Public Const PLT_SUPBAR_WLD_STEP_DEPTH As Integer = 50
+
+    'Public Const PLT_SUPBAR_WLD_MIN_HEIGHT As Integer = 48
+    'Public Const PLT_SUPBAR_WLD_MAX_HEIGHT As Integer = 48
+    'Public Const CPLT_SUPBAR_WLD_STEP_HEIGHT As Integer = 1
+
+    '----------------------TIE BEAM HEM+ -----------------
+
+
+
+
+    ' Constants for length settings
+    Public Const TIE_BEAMHEM__MIN_LENGTH As Integer = 900
+    Public Const TIE_BEAMHEM_MAX_LENGTH As Integer = 4500
+    Public Const TIE_BEAMHEM_STEP_VALUE As Integer = 100
+
+    Public ReadOnly TIE_BEAMHEML_ThicknessValues() As Double = {1.5}
+
+
+    Public Const TIE_BEAMHEM_MIN_HEIGHT As Integer = 110
+    Public Const TIE_BEAMHEM_MAX_HEIGHT As Integer = 110
+    Public Const TIE_BEAMHEM_STEP_HEIGHT As Integer = 1
+
+    '----------------------Angle Welded Beam GSB------------
+    Public ReadOnly ANGLE_WELDED_BEAM_PSB_ThicknessValues() As Double = {1.5}
+
+    'Cross Aisle Channel
+
+    Public ReadOnly ChnlCAX65_ThicknessValues() As Double = {1.5}
+
+End Module
+
+

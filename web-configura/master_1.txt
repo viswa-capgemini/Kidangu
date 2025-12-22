@@ -1,0 +1,3182 @@
+Imports System.Windows.Forms.VisualStyles.VisualStyleElement
+Imports FxResources.System
+Imports WinFormsComboBox = System.Windows.Forms.ComboBox
+
+Public Class Master_Entry
+    Private Sub Master_Entry_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+
+        '--------------------------------------------------------------
+        'Component gropu    Clear any existing items
+        ComboBox2.Items.Clear()
+
+        ' Add   options
+        ComboBox2.Items.Add("Structural Components")
+        ComboBox2.Items.Add("Level Accessories")
+        ComboBox2.Items.Add("Rack Accessories")
+        ComboBox2.Items.Add("Catwalk Accessories")
+        ComboBox2.Items.Add("Material Handling Equipment(MHE)")
+        ComboBox2.Items.Add("Stock Keeping Unit(SKU)")
+        ComboBox2.Items.Add("Civil Layout Accessories")
+        ComboBox2.Items.Add("Rack Full sample Assembly")
+
+
+        ' Select the first item
+        If ComboBox2.Items.Count > 0 Then
+            ComboBox2.SelectedIndex = 0
+        End If
+
+        '-----------------------------------------------------
+        'Component Type    Clear any existing items
+        ComboBox3.Items.Clear()
+
+        ' Add   options
+        'ComboBox3.Items.Add("Structural Components ")
+        'ComboBox3.Items.Add("Rack Full sample Assembly")
+        'ComboBox3.Items.Add("Level Accessories")
+        'ComboBox3.Items.Add("Rack Accessories")
+        'ComboBox3.Items.Add("Civil Layout Accessories")
+        'ComboBox3.Items.Add("Catwalk Accessories")
+        'ComboBox3.Items.Add("Material Handling Equipment(MHE)")
+        'ComboBox3.Items.Add("Stock Keeping Unit(SKU)")
+
+
+        ' Select the first item
+        If ComboBox3.Items.Count > 0 Then
+            ComboBox3.SelectedIndex = 0
+        End If
+
+
+        '--------------------------------------------------------------
+        'GFA   Clear any existing items
+        ComboBox5.Items.Clear()
+
+        ' Add   options
+        ComboBox5.Items.Add("GFA")
+        ComboBox5.Items.Add("NON GFA")
+
+        ' Select the first item
+        If ComboBox5.Items.Count > 0 Then
+            ComboBox5.SelectedIndex = 0
+        End If
+
+
+        '--------------------------------------------------------------
+        'Colour    Clear any existing items
+        ComboBox4.Items.Clear()
+
+
+        ' Add   options
+        ComboBox4.Items.Add("NONE")
+        ComboBox4.Items.Add("Sky Blue-SB")
+        ComboBox4.Items.Add("Deep Orange-OR")
+        ComboBox4.Items.Add("Galvanised-GA")
+        ComboBox4.Items.Add("Graphite Grey-GG")
+
+        ComboBox4.Items.Add("GREY")
+        ComboBox4.Items.Add("LG+GG")
+        ComboBox4.Items.Add("Light Grey-LG")
+
+        ComboBox4.Items.Add("Orange")
+        ComboBox4.Items.Add("Oxford Blue-OB")
+        ComboBox4.Items.Add("PP (Light Grey)-LG")
+        ComboBox4.Items.Add("RAL 2004")
+        ComboBox4.Items.Add("RAL 7035-LG")
+        ComboBox4.Items.Add("SHELL WHITE-SW")
+
+        ComboBox4.Items.Add("Yellow-YE")
+        ComboBox4.Items.Add("Yellow (RAL 1006)-YE")
+        ComboBox4.Items.Add("GREEN PALVS")
+        ComboBox4.Items.Add("Foam")
+        ComboBox4.Items.Add("Acrylic")
+        ComboBox4.Items.Add("Plastic")
+        ComboBox4.Items.Add("RUBBER")
+        ComboBox4.Items.Add("Nylon")
+        ComboBox4.Items.Add("STD")
+
+
+
+
+        ' Select the first item
+        If ComboBox4.Items.Count > 0 Then
+            ComboBox4.SelectedIndex = 0
+        End If
+
+
+        ComboBox1.Text = ""
+        ComboBox2.Text = ""
+        ComboBox3.Text = ""
+
+        'ComboBox5.Text = ""
+        ComboBox6.Items.Clear()
+        ComboBox6.Text = ""
+
+        TextBox2.Text = ""
+        TextBox7.Text = ""
+
+        'ComboBox11.Items.Clear()
+        'ComboBox11.Text = ""
+        ComboBox10.Items.Clear()
+        ComboBox10.Text = ""
+
+
+        ComboBox13.Enabled = True
+        Label23.Enabled = True
+
+
+        ComboBox13.Items.Clear()
+
+
+        For i As Integer = 10 To 50 Step 1
+            ComboBox13.Items.Add(i)
+        Next
+
+        If ComboBox13.Items.Count > 0 Then
+            ComboBox13.SelectedIndex = 0
+        End If
+
+
+
+    End Sub
+
+
+
+    ' Add this event handler for ComboBox2's SelectedIndexChanged event
+    Private Sub ComboBox2_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox2.SelectedIndexChanged
+
+
+        'Component Type    Clear any existing items
+        ComboBox3.Items.Clear()
+
+        If ComboBox3.Items.Count > 0 Then
+            ComboBox3.SelectedIndex = 0
+        End If
+
+        TextBox2.Text = ""
+        TextBox7.Text = ""
+
+        If ComboBox2.SelectedItem IsNot Nothing Then
+            ' Get the selected item
+            Dim selectedItem As String = ComboBox2.SelectedItem.ToString()
+
+            ' Use Select Case (VB.NET's version of switch)
+            Select Case selectedItem
+
+
+                Case "Structural Components"
+                    '-----------------------------------------------------
+                    'Component Type    Clear any existing items
+                    ComboBox3.Items.Clear()
+
+                    ' Add   options
+                    ComboBox3.Items.Add("Upright")
+                    ComboBox3.Items.Add("Beams")
+                    ComboBox3.Items.Add("Beams+Cleat")
+                    ComboBox3.Items.Add("Beam Connector")
+                    ComboBox3.Items.Add("Sigma Beams")
+                    ComboBox3.Items.Add("Shuttle Beams")
+                    ComboBox3.Items.Add("Horizontal Bracing")
+                    ComboBox3.Items.Add("Diagonal Bracing")
+                    ComboBox3.Items.Add("Bracing Spacer")
+                    ComboBox3.Items.Add("Base plate")
+                    ComboBox3.Items.Add("Base plate with Jack bolt")
+                    ComboBox3.Items.Add("Shim")
+                    ComboBox3.Items.Add("Cement pad")
+                    ComboBox3.Items.Add("Stiffeners")
+                    ComboBox3.Items.Add("Bottom Stiffeners")
+
+                    ComboBox3.Items.Add("Splice")
+                    ComboBox3.Items.Add("Rear Splice")
+
+
+
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+
+
+                Case "Level Accessories"
+                    ' Code for Level Accessories
+
+                    'Component Type    Clear any existing items
+                    ComboBox3.Items.Clear()
+
+                    ' Add   options
+                    ComboBox3.Items.Add("Decking panel")
+                    ComboBox3.Items.Add("Grating Decking panel")
+                    ComboBox3.Items.Add("Panel")
+                    ComboBox3.Items.Add("Shelf Panel")
+                    ComboBox3.Items.Add("Shelf Panel stiffener")
+                    ComboBox3.Items.Add("Shelf Panel stopper")
+                    ComboBox3.Items.Add("Catwalk panels")
+                    ComboBox3.Items.Add("Panel support Bar")
+                    ComboBox3.Items.Add("Pallet Stopper")
+                    ComboBox3.Items.Add("Fixed divider")
+                    ComboBox3.Items.Add("Mid mesh divider")
+                    ComboBox3.Items.Add("Adjustable divider")
+                    ComboBox3.Items.Add("Strip type divider")
+                    ComboBox3.Items.Add("Tube divider")
+                    ComboBox3.Items.Add("Fork Entry Bar")
+                    ComboBox3.Items.Add("GOH bays")
+                    ComboBox3.Items.Add("Guided Type Pallet Support")
+                    ComboBox3.Items.Add("P&D Station")
+                    ComboBox3.Items.Add("Underpass Rear Mesh")
+                    ComboBox3.Items.Add("Drum Caddle ")
+                    ComboBox3.Items.Add("Pallet")
+                    ComboBox3.Items.Add("Plan Bracing")
+                    ComboBox3.Items.Add("Pallet Rail")
+                    ComboBox3.Items.Add("Pallet Guide")
+                    ComboBox3.Items.Add("Entry Arm")
+                    ComboBox3.Items.Add("Mid support Arm")
+
+
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+                Case "Rack Accessories"
+
+
+                    ComboBox3.Items.Clear()
+                    ' Add   options
+                    ComboBox3.Items.Add("Upright Guard")
+                    ComboBox3.Items.Add("Upright Connector (G50)")
+                    ComboBox3.Items.Add("Upright deflector")
+                    ComboBox3.Items.Add("Upright protector")
+                    ComboBox3.Items.Add("Row guard")
+                    ComboBox3.Items.Add("Mesh Cladding")
+                    ComboBox3.Items.Add("Row Connector")
+                    ComboBox3.Items.Add("Back Tie Rod")
+                    ComboBox3.Items.Add("Wall connector")
+                    ComboBox3.Items.Add("Tie Beam")
+                    ComboBox3.Items.Add("Sign board")
+                    ComboBox3.Items.Add("Nylon Netting")
+                    ComboBox3.Items.Add("Stability Beam")
+                    ComboBox3.Items.Add("Boltless stability beam")
+                    ComboBox3.Items.Add("Mezzanine column guard")
+                    ComboBox3.Items.Add("Cross Ties & Turn buckle")
+                    ComboBox3.Items.Add("Cross bracing cleat")
+                    ComboBox3.Items.Add("Knee bracing")
+                    ComboBox3.Items.Add("Pheripery Mesh cldding")
+                    ComboBox3.Items.Add("Chequered plate")
+                    ComboBox3.Items.Add("Threaded pipe")
+
+                    ComboBox3.Items.Add("End Cladding G50")
+                    ComboBox3.Items.Add("Rear Cladding G50")
+                    ComboBox3.Items.Add("Inner Cladding G50")
+                    ComboBox3.Items.Add(" ")
+                    ComboBox3.Items.Add(" ")
+                    ComboBox3.Items.Add(" ")
+                    ComboBox3.Items.Add(" ")
+                    ComboBox3.Items.Add(" ")
+
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+
+                Case "Catwalk Accessories"
+
+                    ' Code for Catwalk Accessories
+                    'Component Type    Clear any existing items
+                    ComboBox3.Items.Clear()
+                    ' Add   options
+                    ComboBox3.Items.Add("Walkway panel")
+                    ComboBox3.Items.Add("Gap panel")
+                    ComboBox3.Items.Add("Column gap panel")
+                    ComboBox3.Items.Add("Panel fixing clamp")
+                    ComboBox3.Items.Add("Angle welded beam GSB")
+                    ComboBox3.Items.Add("Tie beams")
+                    ComboBox3.Items.Add("Tie beams+PSB")
+                    ComboBox3.Items.Add("Cross Aisle beams")
+                    ComboBox3.Items.Add("Cross Aisle beams+PSB")
+                    ComboBox3.Items.Add("PSB Beams")
+                    ComboBox3.Items.Add("Beam L-Angle")
+
+                    ComboBox3.Items.Add("Joist Beam")
+                    ComboBox3.Items.Add("J-Clamp ")
+                    ComboBox3.Items.Add("Cross Aisle Channel")
+                    ComboBox3.Items.Add("Cross Aisle Channel Splice")
+                    ComboBox3.Items.Add("OH Stability beam Hem+")
+                    ComboBox3.Items.Add("Kick plate")
+
+                    ComboBox3.Items.Add("Aisle beading")
+                    ComboBox3.Items.Add("Joist beam end cover")
+                    ComboBox3.Items.Add("Formed Angle")
+                    ComboBox3.Items.Add("Catwalk Support bracket")
+                    ComboBox3.Items.Add("Chequered plate")
+                    ComboBox3.Items.Add("Chequered plate for VRC")
+                    ComboBox3.Items.Add("VRC tie beams")
+                    ComboBox3.Items.Add("VRC Cross aisle beams")
+                    ComboBox3.Items.Add("Picking Aisle Channel (G50)")
+                    ComboBox3.Items.Add("Cross Aisle channel (G50)")
+                    ComboBox3.Items.Add("Angle welded beam (Hem+)")
+                    ComboBox3.Items.Add("Railing Pipe and accessories")
+
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+
+
+                Case "Material Handling Equipment(MHE)"
+
+                    ' Code for Material Handling Equipment(MHE)
+
+                    'Component Type    Clear any existing items
+                    ComboBox3.Items.Clear()
+                    ' Add   options
+                    ComboBox3.Items.Add("Stacker")
+                    ComboBox3.Items.Add("Forklift")
+                    ComboBox3.Items.Add("Articulated forklift")
+                    ComboBox3.Items.Add("Reach truck")
+                    ComboBox3.Items.Add("HPT")
+                    ComboBox3.Items.Add("Trolley")
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+                Case "Stock Keeping Unit(SKU)"
+
+                    ' Code for Stock Keeping Unit(SKU)
+
+                    'Component Type    Clear any existing items
+                    ComboBox3.Items.Clear()
+                    ' Add   options
+                    ComboBox3.Items.Add("Pallets")
+                    ComboBox3.Items.Add("Bins")
+                    ComboBox3.Items.Add("Crates")
+                    ComboBox3.Items.Add("Gunny bags")
+                    ComboBox3.Items.Add("Loose items")
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+                Case "Civil Layout Accessories"
+
+
+                    ComboBox3.Items.Clear()
+
+                    ' Add   options
+                    ComboBox3.Items.Add("Aisle Ties")
+                    ComboBox3.Items.Add("Sliding gate")
+                    ComboBox3.Items.Add("Swing gate")
+                    ComboBox3.Items.Add("VRC")
+                    ComboBox3.Items.Add("Spiral chute")
+                    ComboBox3.Items.Add("Gravity chute")
+                    ComboBox3.Items.Add("Conveyors")
+                    ComboBox3.Items.Add("Vertiflow")
+                    ComboBox3.Items.Add("Staircase")
+                    ComboBox3.Items.Add("MHE Stopper")
+                    ComboBox3.Items.Add("Bracing tower")
+
+                    ' Select the first item
+                    If ComboBox3.Items.Count > 0 Then
+                        ComboBox3.SelectedIndex = 0
+                    End If
+
+
+                Case "Rack Full sample Assembly"
+                    ' Code for Rack Full sample Assembly
+                    MessageBox.Show("TBD----Rack Full sample Assembly selected")
+                    ' Add your specific logic here
+
+                Case Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Unexpected selection")
+            End Select
+        End If
+    End Sub
+
+
+
+
+
+
+    Private Sub PopulateLength(ByVal minValue As Integer, ByVal maxValue As Integer,
+                          Optional ByVal stepValue As Integer = 50,
+                          Optional ByVal enableComboBox As Boolean = True)
+        ' First set the enabled state of the ComboBox
+        ComboBox8.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox8.Items.Clear()
+
+        If enableComboBox = True Then
+
+            ' Validate inputs to prevent errors
+            If minValue > maxValue Then
+                ' Swap values if min is greater than max
+                Dim temp As Integer = minValue
+                minValue = maxValue
+                maxValue = temp
+            End If
+
+            ' Ensure step is positive
+            If stepValue <= 0 Then
+                stepValue = 1 ' Default to 1 if step is invalid
+            End If
+
+            ' Populate the ComboBox
+            For i As Integer = minValue To maxValue Step stepValue
+                ComboBox8.Items.Add(i)
+            Next
+
+        Else
+            'ComboBox8.Items.Add("NA")
+            ComboBox8.Text = ""
+        End If
+
+        ' Select the first item if available
+        If ComboBox8.Items.Count > 0 Then
+            ComboBox8.SelectedIndex = 0
+        End If
+    End Sub
+
+
+
+    Private Sub PopulateThickness(ByVal thicknessValues() As Double, Optional ByVal enableComboBox As Boolean = True)
+        ' Set the enabled state of the fixed ComboBox6
+        ComboBox6.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox6.Items.Clear()
+
+        If enableComboBox = True Then
+            ' Add all values to the ComboBox
+            ComboBox6.Items.AddRange(thicknessValues.Cast(Of Object)().ToArray())
+
+        Else
+            ComboBox6.Text = ""
+        End If
+
+        ' Select first item
+        If ComboBox6.Items.Count > 0 Then
+            ComboBox6.SelectedIndex = 0
+        End If
+    End Sub
+
+
+    Private Sub Populate_width(ByVal minValue As Integer, ByVal maxValue As Integer,
+                          Optional ByVal stepValue As Integer = 50,
+                          Optional ByVal enableComboBox As Boolean = True)
+        ' First set the enabled state of the ComboBox
+        ComboBox12.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox12.Items.Clear()
+
+        If enableComboBox = True Then
+
+            ' Validate inputs to prevent errors
+            If minValue > maxValue Then
+                ' Swap values if min is greater than max
+                Dim temp As Integer = minValue
+                minValue = maxValue
+                maxValue = temp
+            End If
+
+            ' Ensure step is positive
+            If stepValue <= 0 Then
+                stepValue = 1 ' Default to 1 if step is invalid
+            End If
+
+            ' Populate the ComboBox
+            For i As Integer = minValue To maxValue Step stepValue
+                ComboBox12.Items.Add(i)
+            Next
+
+        Else
+            ComboBox12.Text = ""
+        End If
+
+
+
+        ' Select the first item if available
+        If ComboBox12.Items.Count > 0 Then
+            ComboBox12.SelectedIndex = 0
+        End If
+    End Sub
+    Private Sub Populate_height(ByVal minValue As Integer, ByVal maxValue As Integer,
+                          Optional ByVal stepValue As Integer = 50,
+                          Optional ByVal enableComboBox As Boolean = True)
+        ' First set the enabled state of the ComboBox
+        ComboBox13.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox13.Items.Clear()
+
+        If enableComboBox = True Then
+
+            ' Validate inputs to prevent errors
+            If minValue > maxValue Then
+                ' Swap values if min is greater than max
+                Dim temp As Integer = minValue
+                minValue = maxValue
+                maxValue = temp
+            End If
+
+            ' Ensure step is positive
+            If stepValue <= 0 Then
+                stepValue = 1 ' Default to 1 if step is invalid
+            End If
+
+            ' Populate the ComboBox
+            For i As Integer = minValue To maxValue Step stepValue
+                ComboBox13.Items.Add(i)
+            Next
+
+        Else
+            ComboBox13.Text = ""
+        End If
+
+        ' Select the first item if available
+        If ComboBox13.Items.Count > 0 Then
+            ComboBox13.SelectedIndex = 0
+        End If
+    End Sub
+
+
+
+    Private Sub Populate_LIP_ConnectorCount(ByVal minValue As Integer, ByVal maxValue As Integer,
+                          Optional ByVal stepValue As Integer = 50,
+                          Optional ByVal enableComboBox As Boolean = True)
+        ' First set the enabled state of the ComboBox
+        ComboBox10.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox10.Items.Clear()
+
+        If enableComboBox = True Then
+
+            ' Validate inputs to prevent errors
+            If minValue > maxValue Then
+                ' Swap values if min is greater than max
+                Dim temp As Integer = minValue
+                minValue = maxValue
+                maxValue = temp
+            End If
+
+            ' Ensure step is positive
+            If stepValue <= 0 Then
+                stepValue = 1 ' Default to 1 if step is invalid
+            End If
+
+            ' Populate the ComboBox
+            For i As Integer = minValue To maxValue Step stepValue
+                ComboBox10.Items.Add(i)
+            Next
+
+        Else
+            ComboBox10.Text = ""
+        End If
+
+
+        ' Select the first item if available
+        If ComboBox10.Items.Count > 0 Then
+            ComboBox10.SelectedIndex = 0
+        End If
+    End Sub
+
+    Private Sub Populate_Depth(ByVal minValue As Integer, ByVal maxValue As Integer,
+                          Optional ByVal stepValue As Integer = 50,
+                          Optional ByVal enableComboBox As Boolean = True)
+        ' First set the enabled state of the ComboBox
+        ComboBox9.Enabled = enableComboBox
+
+        ' Clear existing items
+        ComboBox9.Items.Clear()
+
+        If enableComboBox = True Then
+
+            ' Validate inputs to prevent errors
+            If minValue > maxValue Then
+                ' Swap values if min is greater than max
+                Dim temp As Integer = minValue
+                minValue = maxValue
+                maxValue = temp
+            End If
+
+            ' Ensure step is positive
+            If stepValue <= 0 Then
+                stepValue = 1 ' Default to 1 if step is invalid
+            End If
+
+            ' Populate the ComboBox
+            For i As Integer = minValue To maxValue Step stepValue
+                ComboBox9.Items.Add(i)
+            Next
+
+        Else
+            ComboBox9.Text = ""
+        End If
+
+        ' Select the first item if available
+        If ComboBox9.Items.Count > 0 Then
+            ComboBox9.SelectedIndex = 0
+        End If
+    End Sub
+
+
+    Private Sub PopulateComboBoxRange(ByVal comboBox As System.Windows.Forms.ComboBox,
+                                 ByVal minValue As Integer,
+                                 ByVal maxValue As Integer,
+                                 ByVal stepValue As Integer,
+                                 Optional ByVal enableComboBox As Boolean = True)
+        ' Set the enabled state of the ComboBox
+        comboBox.Enabled = enableComboBox
+
+        ' Clear existing items
+        comboBox.Items.Clear()
+
+        ' Ensure step is positive
+        Dim steps As Integer = Math.Abs(stepValue)
+        If steps = 0 Then steps = 1 ' Prevent zero step
+
+        ' Handle both ascending and descending ranges
+        If minValue <= maxValue Then
+            ' Ascending range
+            For i As Integer = minValue To maxValue Step steps
+                comboBox.Items.Add(i)
+            Next
+        Else
+            ' Descending range
+            For i As Integer = minValue To maxValue Step -steps
+                comboBox.Items.Add(i)
+            Next
+        End If
+
+        ' Select the first item if available
+        If comboBox.Items.Count > 0 Then
+            comboBox.SelectedIndex = 0
+        End If
+    End Sub
+
+
+    Private Sub Update_Upright_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+            ComboBox6.SelectedIndex >= 0 AndAlso
+            ComboBox8.SelectedIndex >= 0 AndAlso
+            ComboBox4.SelectedIndex >= 0 Then
+
+
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+            'Dim selectedItem As String = ComboBox1.SelectedItem.ToString()
+
+            Dim Short_description As String
+            Dim description As String
+            Dim Long_description As String
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            TextBox3.Text = ""
+            TextBox4.Text = ""
+
+            Select Case modelType
+
+                Case "UPRIGHT G"
+
+                    If Thickness.Contains("0.8") Then
+
+                        TextBox3.Text = "IS/BL/S3/101"
+                        TextBox4.Text = "R2"
+
+
+                    ElseIf Thickness.Contains("1") Then
+
+                        If full_Colorcode.Contains("RAL 7035") Then
+                            TextBox3.Text = "IS/BM/S3/291"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = "IS/BL/S3/101"
+                            TextBox4.Text = "R2"
+
+                        End If
+
+
+                    ElseIf Thickness.Contains("1.2") Then
+
+                        If full_Colorcode.Contains("RAL 7035") Then
+                            TextBox3.Text = "IS/BM/S3/291"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = "IS/BL/S3/101"
+                            TextBox4.Text = "R0"
+                        End If
+
+                    End If
+
+                    ' Format the description: "Upright G50 1 L1495 OB"
+                    Short_description = $"{modelType}{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+                    ' Format the second description: "Upright G50 - L1495 x T1 OB"
+                    description = $"{modelType}{widthbox} - L{Lengthbox} x T{Thickness} {Colorcode}"
+
+                    Long_description = $"{modelType}{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+                Case "UPRIGHT GX"
+
+
+                    If Thickness.Contains("1.2") Then
+
+                        TextBox3.Text = "IS/HD/S3/1388"
+                        TextBox4.Text = "R0"
+
+
+                    ElseIf Thickness.Contains("1.5") Then
+
+                        TextBox3.Text = "IS/HD/S3/1143"
+                        TextBox4.Text = "R0"
+
+                    ElseIf Thickness.Contains("1.6") Then
+
+                        TextBox3.Text = "IS/HD/S3/1187"
+                        TextBox4.Text = "R1"
+
+
+                    ElseIf Thickness.Contains("1.8") Then
+
+                        TextBox3.Text = "IS/HD/S3/1187"
+                        TextBox4.Text = "R1"
+
+
+                    ElseIf Thickness.Contains("2.0") Then
+
+                        TextBox3.Text = "IS/HD/S3/1187"
+                        TextBox4.Text = "R1"
+
+                    End If
+
+
+                    ' Format the description: "Upright GX70 1.2 L1500 SB"
+                    Short_description = $"{modelType}{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+                    ' Format the second description: "Upright GX 70 - 1500 x 1.2"
+                    description = $"{modelType}{widthbox} - L{Lengthbox} x T{Thickness}"
+
+                    Long_description = $"{modelType} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+                Case "UPRIGHT GXL"
+
+
+
+                    If Thickness.Contains("1.6") Then
+
+                        TextBox3.Text = "IS/HD/S3/547"
+                        TextBox4.Text = "R2"
+
+
+                    ElseIf Thickness.Contains("1.8") Then
+
+                        If widthbox.Contains("90") Then
+
+                            TextBox3.Text = "IS/HD/S3/547"
+                            TextBox4.Text = "R2"
+                        ElseIf widthbox.Contains("110") Then
+
+                            TextBox3.Text = "IS/HD/S3/548"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = "IS/HD/S3/547"
+                            TextBox4.Text = "R2"
+
+                        End If
+
+
+                    ElseIf Thickness.Contains("2.0") Then
+
+                        If widthbox.Contains("90") Then
+
+                            TextBox3.Text = "IS/HD/S3/547"
+                            TextBox4.Text = "R2"
+
+                        ElseIf widthbox.Contains("110") Then
+
+                            TextBox3.Text = "IS/HD/S3/548"
+                            TextBox4.Text = "R1"
+
+                        ElseIf widthbox.Contains("120") Then
+
+                            TextBox3.Text = "IS/HD/S3/549"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = "Need to check "
+                            TextBox4.Text = " "
+
+                        End If
+
+
+                    ElseIf Thickness.Contains("2.5") Then
+
+                        If widthbox.Contains("110") Then
+
+                            TextBox3.Text = "IS/HD/S3/548"
+                            TextBox4.Text = "R1"
+
+                        ElseIf widthbox.Contains("120") Then
+
+                            TextBox3.Text = "IS/HD/S3/549"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = "Need to check "
+                            TextBox4.Text = " "
+
+                        End If
+
+
+                    ElseIf Thickness.Contains("3.15") Then
+
+                        If widthbox.Contains("110") Then
+
+                            TextBox3.Text = "IS/HD/S3/548"
+                            TextBox4.Text = "R1"
+
+                        ElseIf widthbox.Contains("120") Then
+
+                            TextBox3.Text = "IS/HD/S3/549"
+                            TextBox4.Text = "R1"
+                        Else
+                            TextBox3.Text = " "
+                            TextBox4.Text = " "
+                            MessageBox.Show("Width parameter need to check")
+
+                        End If
+                    Else
+
+
+                    End If
+
+                    ' Format the description: "UPRIGHT GXL W90 1.6 L1500 SB"
+                    Short_description = $"{modelType}{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+                    ' Format the second description: "Upright GXL 90 - 1500 x 1.6"
+                    description = $"{modelType} {widthbox} - L{Lengthbox} x T{Thickness}"
+
+                    Long_description = $"{modelType} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+                Case Else
+
+                    ' If any ComboBox doesn't have a selection, clear or show a message
+                    TextBox2.Text = "Please select all options"
+                    TextBox7.Text = "Please select all options"
+                    TextBox8.Text = "Please select all options"
+
+            End Select
+
+
+
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+
+    Private Sub Update_beam_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Beam GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim Lipconnector As String = ComboBox10.Text      ' e.g. "2"
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+            ' Extract the H-code from the model name
+            Dim hCode As String = ExtractHCode(modelType)
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the description: "BEAM GBHX H75 1.5 L1000 OR"
+            Dim Short_description As String = $"{modelType} {Thickness} L{Lengthbox} {Colorcode}"
+
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+
+            If ComboBox11.Enabled = True Then
+                Dim Data20S As String = ComboBox11.SelectedItem.ToString()      ' e.g. "20S"
+                ' Format the second description:    'Beam GBHX 1000x50x75-1.5 3 LIP 20S
+                Dim description As String = $"{modelType}  {Lengthbox} x 50 X {hCode} - {Thickness} {Lipconnector} LIP {Data20S}"
+                TextBox7.Text = description
+
+
+                Dim Long_description As String = $"{modelType}  {Lengthbox} x 50 X {hCode} - {Thickness} {Lipconnector} LIP {Data20S} {documentbox}"
+                TextBox8.Text = Long_description
+
+            Else
+                ' Format the second description:    'Beam GBHX 1000x50x75-1.5 3 LIP
+                Dim description As String = $"{modelType}  {Lengthbox} x 50 X {hCode} - {Thickness} {Lipconnector} LIP"
+                TextBox7.Text = description
+
+                Dim Long_description As String = $"{modelType}  {Lengthbox} x 50 X {hCode} - {Thickness} {Lipconnector} LIP {documentbox}"
+                TextBox8.Text = Long_description
+
+            End If
+
+
+
+
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+    ' Function to extract H-code from model name
+    Private Function ExtractHCode(modelName As String) As String
+        ' Check if the string is not empty
+        If String.IsNullOrEmpty(modelName) Then
+            Return String.Empty
+        End If
+
+        ' Split the string by spaces
+        Dim parts As String() = modelName.Split(" "c)
+
+        ' Check if there are parts and the last part starts with "H"
+        If parts.Length > 0 AndAlso parts(parts.Length - 1).StartsWith("H", StringComparison.OrdinalIgnoreCase) Then
+            Return parts(parts.Length - 1)
+        End If
+
+        ' If no H-code found, return empty string
+        Return String.Empty
+    End Function
+
+
+    Private Sub Update_Description()
+
+        If ComboBox3.SelectedItem IsNot Nothing Then
+            ' Get the selected item
+            Dim selectedItem As String = ComboBox3.SelectedItem.ToString()
+            Dim selectedPanel As String = ComboBox1.SelectedItem.ToString()
+
+            ' Use Select Case (VB.NET's version of switch)
+            Select Case selectedItem
+                Case "Upright"
+
+                    Update_Upright_Description()
+
+                Case "Beams"
+
+                    Update_beam_Description()
+
+                Case "Horizontal Bracing"
+                    Update_bracing_Description()
+
+
+                Case "Diagonal Bracing"
+                    Update_bracing_Description()
+
+                Case "Panel support Bar"
+
+                    'Dim selectedPanel As String = ComboBox1.SelectedItem.ToString()
+
+                    ' Switch case based on ComboBox1's value
+                    Select Case selectedPanel
+                        Case "Chnl 4B PSB"
+
+                            Update_Chnl_4B_PanelSupportBar_Description()
+
+                        Case "PLTSUPBAR WLD"
+
+                            Update_Welded_PanelSupportBar_Description()
+
+                    End Select
+
+
+
+                Case "Decking panel"
+
+
+
+
+                    ' Switch case based on ComboBox1's value
+                    Select Case selectedPanel
+                        Case "HD 6B RF PANEL(GSB)"
+                            ' Actions for HD 6B RF PANEL(GSB)
+                            Update_HD6BRFPanel_Description()
+
+                        Case "HD 6B FLAT END PANEL"
+                            ' Actions for HD 6B FLAT END PANEL
+                            Update_HD6BFlatEndPanel_Description()
+
+                        Case "RF 4B PLAIN PANEL"
+                            ' Actions for RF 4B PLAIN PANEL
+                            Update_RF4BPlainPane_Description()
+
+                        Case "4B PANEL"
+                            ' Actions for 4B PANEL
+                            Update_4BPanel_Description()
+                        Case Else
+                            ' Default case for any other value
+                    End Select
+
+
+                Case "Tie Beam"
+
+                    Update_TIE_BM_HEM_Description()
+
+
+
+                Case "Angle welded beam GSB"
+
+                    Update_AngleWeldedBeamGSB_Description()
+
+                Case "Cross Aisle Channel"
+
+
+                    Select Case selectedPanel
+
+                        Case "Chnl CA X65"
+
+                            Update_ChnlCAX65B_Description()
+
+                    End Select
+
+            End Select
+        End If
+
+    End Sub
+
+
+    Private Sub Update_bracing_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "UHORZ BRAC GX"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+
+            Dim upright_info As String = ComboBox7.Text          ' e.g. "W70"
+            Dim Depth_info As String = ComboBox9.Text          ' e.g. "500"
+
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            If CheckBox1.Checked = True Then
+
+                'HORZ BRAC GX W90 1.2 L388 GA
+                Dim Short_description As String = $"{modelType} {upright_info} {Thickness} L{Lengthbox} {Colorcode}"
+
+                ' Set the formatted text to TextBox2
+                TextBox2.Text = Short_description
+
+                'Horz Bracing - GX - 388 (500 D)
+
+                ' Format the second description: "Horz Bracing - GX - 388 (500 D) "
+                Dim description As String = $"{modelType} - {Lengthbox} ({Depth_info} D) "
+                TextBox7.Text = description
+
+                Dim Long_description As String = $"{modelType} {upright_info} {Thickness} L{Lengthbox} {Colorcode} {documentbox}"
+                TextBox8.Text = Long_description
+
+            Else
+
+                'DIAG BRAC GL 1.4 L717 GA
+
+                Dim Short_description As String = $"{modelType} {Thickness} L{Lengthbox} {Colorcode}"
+
+                ' Set the formatted text to TextBox2
+                TextBox2.Text = Short_description
+
+                'Diag Bracing - GLX - 717 (500 D)
+
+                ' Format the second description: "Horz Bracing - GX - 388 (500 D) "
+                Dim description As String = $"{modelType} - {Lengthbox} ({Depth_info} D) "
+                TextBox7.Text = description
+
+                Dim Long_description As String = $"{modelType} {Thickness} L{Lengthbox} {Colorcode} {documentbox}"
+                TextBox8.Text = Long_description
+
+
+            End If
+
+
+
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+
+
+    Private Sub ComboBox3_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox3.SelectedIndexChanged
+
+
+        '-----------------------------------------------------
+        'Component Type    Clear any existing items
+        ComboBox1.Items.Clear()
+
+        ComboBox1.Text = ""
+
+        ComboBox8.Items.Clear()
+        ComboBox8.Text = ""
+
+        ComboBox6.Items.Clear()
+        ComboBox6.Text = ""
+        ComboBox7.Items.Clear()
+        ComboBox7.Text = ""
+
+        TextBox2.Text = ""
+        TextBox7.Text = ""
+
+        'ComboBox7.Enabled = False
+        'CheckBox1.Enabled = False
+        'CheckBox1.Checked = False
+        'ComboBox9.Enabled = False
+        'Label16.Enabled = False
+        'ComboBox10.Enabled = False
+        'Label17.Enabled = False
+
+        '---------------
+        '---------------
+
+        ' Check if all ComboBoxes have selections
+        If ComboBox2.SelectedItem IsNot Nothing AndAlso
+           ComboBox3.SelectedItem IsNot Nothing Then
+
+
+            ' Get the selected values
+
+            Dim selectedCategory As String = ComboBox2.SelectedItem.ToString()
+            Dim selectedItems As String = ComboBox3.SelectedItem.ToString()
+
+            '-------------------- Structural Components ----------------------------
+
+            If selectedCategory = "Structural Components" Then
+
+
+                Select Case selectedItems
+
+                    Case "Upright"
+
+                        ' Add  upright options
+                        ComboBox1.Items.Add("UPRIGHT G")
+                        ComboBox1.Items.Add("UPRIGHT GX")
+                        ComboBox1.Items.Add("UPRIGHT GXL")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+
+                    Case "Beams"
+
+                        'Thickness -1.5 ,Length -1000 to 4000
+                        ' Add  Beams options
+                        ComboBox1.Items.Add("BEAM GBX")
+                        ComboBox1.Items.Add("BEAM GBHX")
+                        'Thickness -1.2 ,Length -1000 to 4000
+
+                        ComboBox1.Items.Add("BEAM HEM+")
+                        'Step beam 
+                        ComboBox1.Items.Add("BEAM GSB")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+
+
+
+                    Case "Horizontal Bracing"
+
+
+                        ComboBox1.Items.Add("HORZ BRAC-G50")
+                        ComboBox1.Items.Add("HORZ BRAC-GLX")
+                        ComboBox1.Items.Add("HORZ BRAC-GX")
+
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                        ' Add  upright options
+                        ComboBox7.Items.Add("W50")
+                        ComboBox7.Items.Add("W70")
+                        ComboBox7.Items.Add("W90")
+                        ComboBox7.Items.Add("W110")
+                        ComboBox7.Items.Add("W120")
+
+                        ' Select the first item
+                        If ComboBox7.Items.Count > 0 Then
+                            ComboBox7.SelectedIndex = 0
+                        End If
+
+
+
+
+                    Case "Diagonal Bracing"
+
+                        ComboBox1.Items.Add("DIAG BRAC-GLX")
+                        ComboBox1.Items.Add("DIAG BRAC-GX")
+
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                        ' Add  upright options
+                        ComboBox7.Items.Add("W50")
+                        ComboBox7.Items.Add("W70")
+                        ComboBox7.Items.Add("W90")
+                        ComboBox7.Items.Add("W110")
+                        ComboBox7.Items.Add("W120")
+
+                        ' Select the first item
+                        If ComboBox7.Items.Count > 0 Then
+                            ComboBox7.SelectedIndex = 0
+                        End If
+
+
+
+
+                    Case "Bracing Spacer GX"
+
+
+                    Case "Base plate"
+
+
+                    Case "Shim"
+
+
+                    Case "Stiffeners"
+
+
+                    Case "Splice"
+
+                    Case "Rear Splice"
+
+
+
+                    Case "Beams+Cleat"
+
+
+
+                    Case Else
+                        MessageBox.Show("Structural Components-Not Applicable filed")
+
+                End Select
+
+
+
+                '-------------------- Level Accessories ----------------------------
+            ElseIf selectedCategory = "Level Accessories" Then
+
+                'If selectedCategory = "xxxxxx" Then
+                'Else
+                '    ' Handle unexpected selection
+                '    MessageBox.Show("Level Accessories-Not Applicable filed")
+
+
+                'End If
+
+
+                Select Case selectedItems
+
+                    Case "Decking panel"
+
+                        ComboBox1.Items.Add("HD 6B RF PANEL(GSB)") '6 Bend - RF Panel (GSB) 
+                        ComboBox1.Items.Add("HD 6B FLAT END PANEL")
+                        ComboBox1.Items.Add("RF 4B PLAIN PANEL")
+                        ComboBox1.Items.Add("4B PANEL")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case "Grating Decking panel"
+
+                    Case "Shelf Panel"
+
+                    Case "Panel support Bar"
+
+                        ComboBox1.Items.Add("Chnl 4B PSB")
+                        ComboBox1.Items.Add("PLTSUPBAR WLD")
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                    Case "Pallet Stopper"
+
+
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case "Fork Entry Bar"
+
+                        ComboBox1.Items.Add("Fork Entry Bar")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                    Case "Guided Type Pallet Support"
+
+                        ComboBox1.Items.Add("With Stopper")
+                        ComboBox1.Items.Add("Without Stopper")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case "Pallet support bar (Flat type)"
+
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+                    Case "P&D Station"
+
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                    Case "Underpass Rear Mes"
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+                    Case "Drum Caddle"
+
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                    Case "Pallet"
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+                    Case "Plan Bracing"
+
+                        ComboBox1.Items.Add("NA")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case Else
+                        MessageBox.Show("Level Accessories-Not Applicable filed")
+
+                End Select
+
+
+                '-------------------- Rack Accessories ----------------------------
+
+            ElseIf selectedCategory = "Rack Accessories" Then
+
+                Select Case selectedItems
+
+                    Case "Upright Guard"
+
+                    Case "Row guard"
+                    Case "Mesh Cladding"
+                    Case "Row Connector"
+
+                    Case "Back Tie Rod"
+
+                    Case "Wall connector"
+
+                    Case "Tie Beam"
+
+                        ComboBox1.Items.Add("TIE BM HEM+")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+                    Case "Sign board"
+
+                    Case "Nylon Netting"
+                    Case Else
+                        MessageBox.Show("Rack Accessories-Not Applicable filed")
+
+                End Select
+
+
+
+                '-------------------- Catwalk Accessoriess ----------------------------
+
+            ElseIf selectedCategory = "Catwalk Accessories" Then
+
+
+                Select Case selectedItems
+
+                    Case "Walkway panel"
+                    Case "Gap panel"
+                    Case "Column gap panel"
+                    Case "Panel fixing clamp"
+                    Case "Angle welded beam GSB"
+
+                        ComboBox1.Items.Add("Angle Welded Beam GSB")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case "Tie beams"
+                    Case "Tie beams+PSB"
+                    Case "Cross Aisle beams"
+                    Case "Cross Aisle beams+PSB"
+                    Case "PSB Beams"
+                    Case "Beam L-Angle"
+                    Case "Joist Beam"
+                    Case "J-Clamp "
+                    Case "Cross Aisle Channel"
+
+                        ComboBox1.Items.Add("Chnl CA X65")
+
+                        ' Select the first item
+                        If ComboBox1.Items.Count > 0 Then
+                            ComboBox1.SelectedIndex = 0
+                        End If
+
+
+                    Case "Cross Aisle Channel Splice"
+                    Case "OH Stability beam Hem+"
+                    Case "Kick plate"
+                    Case "Aisle beading"
+                    Case "Joist beam end cover"
+                    Case "Formed Angle"
+                    Case "Catwalk Support bracket"
+                    Case "Chequered plate"
+                    Case "Chequered plate for VRC"
+                    Case "VRC tie beams"
+                    Case "VRC Cross aisle beams"
+                    Case "Picking Aisle Channel (G50)"
+                    Case "Cross Aisle channel (G50)"
+                    Case "Angle welded beam (Hem+)"
+                    Case "Railing Pipe and accessories"
+                    Case Else
+                        MessageBox.Show("Catwalk Accessories-Not Applicable filed")
+
+                End Select
+
+                '-------------------- Material Handling Equipment(MHE) ----------------
+
+            ElseIf selectedCategory = "Material Handling Equipment(MHE)" Then
+
+
+
+                Select Case selectedItems
+
+                    Case "Stacker"
+
+                    Case "Forklift"
+                    Case "Articulated forklift"
+                    Case "Reach truck"
+                    Case "Pallet truck"
+                    Case "HPT"
+                    Case "Trolley"
+                    Case "Tow tractor"
+                    Case "Double deep Reach truch"
+                    Case "TSP"
+
+                    Case Else
+                        MessageBox.Show("Material Handling Equipment(MHE)-Not Applicable filed")
+
+                End Select
+
+
+                '-------------------- Stock Keeping Unit(SKU)---------------------------
+
+            ElseIf selectedCategory = "Stock Keeping Unit(SKU)" Then
+
+
+
+                Select Case selectedItems
+
+                    Case "Pallets"
+                    Case "Bins"
+                    Case "Crates"
+                    Case "Gunny bags"
+                    Case "Loose items"
+                    Case Else
+                        MessageBox.Show("Stock Keeping Unit(SKU)-Not Applicable filed")
+
+                End Select
+
+
+
+                '-------------------- Civil Layout Accessories--------------------------
+
+            ElseIf selectedCategory = "Civil Layout Accessories" Then
+
+
+                Select Case selectedItems
+
+                    Case "Aisle Ties"
+                    Case ("Sliding gate")
+                    Case ("Swing gate")
+                    Case ("VRC")
+                    Case ("Spiral chute")
+                    Case ("Gravity chute")
+                    Case ("Conveyors")
+                    Case ("Vertiflow")
+                    Case ("Staircase")
+                    Case ("MHE Stopper")
+                    Case ("Bracing tower")
+                    Case Else
+                        MessageBox.Show("Civil Layout Accessories-Not Applicable filed")
+
+                End Select
+
+
+
+                '-------------------- Rack Full sample Assembly--------------------------
+
+            ElseIf selectedCategory = "Rack Full sample Assembly" Then
+
+
+
+                Select Case selectedItems
+
+                    Case ""
+                    Case Else
+                        MessageBox.Show("Rack Full sample Assembly-Not Applicable filed")
+
+                End Select
+
+
+            Else
+                ' Default case when no specific combination is matched
+                'ClearAllFields()
+            End If
+
+
+        Else
+            ' If any ComboBox doesn't have a selection
+            'ClearAllFields()
+        End If
+
+
+
+
+
+
+    End Sub
+    Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox1.SelectedIndexChanged
+
+
+        ' Check if all ComboBoxes have selections
+        If ComboBox1.SelectedItem IsNot Nothing AndAlso
+           ComboBox2.SelectedItem IsNot Nothing AndAlso
+           ComboBox3.SelectedItem IsNot Nothing Then
+
+            ' Get the selected values
+            Dim selectedItem As String = ComboBox1.SelectedItem.ToString()
+            Dim selectedCategory As String = ComboBox2.SelectedItem.ToString()
+            Dim selectedSubcategory As String = ComboBox3.SelectedItem.ToString()
+
+            ' Process based on the combination of selections
+
+            PopulateComboBoxRange(ComboBox14, 40, 65, 5, False)
+
+            '-------------------- Structural Components ----------------------------
+
+            If selectedCategory = "Structural Components" Then
+
+
+                If selectedSubcategory = "Upright" Then
+
+
+                    '--------------UPRIGHT -------------------------------
+
+                    '----Weight -------------
+                    TextBox5.Text = ""
+
+                    '----UNSPSC CODE -------------
+                    TextBox6.Text = ""
+
+                    '----Short Description -------------
+                    TextBox2.Text = ""
+
+                    '----Description   -------------
+                    TextBox7.Text = ""
+
+                    '----Long Description -------------
+                    TextBox8.Text = ""
+
+                    '----Drawing # -------------
+                    TextBox3.Text = " "
+
+                    '----Rev No -------------
+                    TextBox4.Text = " "
+
+
+                    Select Case selectedItem
+
+                        Case "UPRIGHT G"
+
+                            'Populate_width
+
+                            ComboBox12.Items.Add("50")
+                            ' Select the first item if available
+                            If ComboBox12.Items.Count > 0 Then
+                                ComboBox12.SelectedIndex = 0
+                            End If
+
+                            PopulateThickness(GlobalSettings.UPRIGHT_G_ThicknessValues, True)
+                            PopulateLength(GlobalSettings.UPRIGHT_G_MIN_LENGTH, GlobalSettings.UPRIGHT_G_MAX_LENGTH, GlobalSettings.UPRIGH_G_STEP_VALUE, True)
+
+                        Case "UPRIGHT GX"
+
+                            'Populate_width
+
+                            ComboBox12.Items.AddRange(GlobalSettings.UPRIGHT_widthValues.Cast(Of Object)().ToArray())
+                            ' Select the first item if available
+                            If ComboBox12.Items.Count > 0 Then
+                                ComboBox12.SelectedIndex = 0
+                            End If
+
+                            PopulateLength(GlobalSettings.UPRIGHT_MIN_LENGTH, GlobalSettings.UPRIGHT_MAX_LENGTH, GlobalSettings.UPRIGHT_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.UPRIGHT_ThicknessValues, True)
+
+                        Case "UPRIGHT GXL"
+
+                            'Populate_width
+
+                            ComboBox12.Items.AddRange(GlobalSettings.UPRIGHT_widthValues.Cast(Of Object)().ToArray())
+                            ' Select the first item if available
+                            If ComboBox12.Items.Count > 0 Then
+                                ComboBox12.SelectedIndex = 0
+                            End If
+
+
+                            PopulateLength(GlobalSettings.UPRIGHT_MIN_LENGTH, GlobalSettings.UPRIGHT_MAX_LENGTH, GlobalSettings.UPRIGHT_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.UPRIGHT_ThicknessValues, True)
+                        Case Else
+
+                    End Select
+
+
+
+                    Populate_height(0, 0, 0, False)
+                    Populate_Depth(0, 0, 0, False)
+
+
+                ElseIf selectedSubcategory = "Beams" Then
+
+                    '----Weight -------------
+                    TextBox5.Text = ""
+
+                    '----UNSPSC CODE -------------
+                    TextBox6.Text = ""
+
+                    '----Short Description -------------
+                    TextBox2.Text = ""
+
+                    '----Description   -------------
+                    TextBox7.Text = ""
+
+                    '----Long Description -------------
+                    TextBox8.Text = ""
+
+
+                    Populate_20s()
+                    PopulateLength(GlobalSettings.BEAM_MIN_LENGTH, GlobalSettings.BEAM_MAX_LENGTH, GlobalSettings.BEAM_STEP_VALUE, True)
+                    PopulateThickness(GlobalSettings.BEAM_ThicknessValues, True)
+                    'LIp connector
+                    Populate_LIP_ConnectorCount(GlobalSettings.LIP_CNT_MIN_LENGTH, GlobalSettings.LIP_CNT_MAX_LENGTH, GlobalSettings.LIP_CNT_STEP_VALUE, True)
+
+
+
+                    Select Case selectedItem
+
+                        Case "BEAM GBX"
+                        Case "BEAM GBHX"
+
+
+                        Case "BEAM HEM + "
+
+                        Case "BEAM GSB"
+
+
+
+                        Case Else
+
+                    End Select
+
+
+
+                ElseIf selectedSubcategory = "Horizontal Bracing" Then
+
+                    ComboBox7.Enabled = False
+                    CheckBox1.Enabled = True
+                    CheckBox1.Checked = False
+
+                    Populate_Depth(GlobalSettings.HORZBRAC_MIN_DEPTH, GlobalSettings.HORZBRAC_MAX_DEPTH, GlobalSettings.HORZBRAC_STEP_DEPTH, True)
+                    PopulateLength(GlobalSettings.HORZBRAC_MIN_LENGTH, GlobalSettings.HORZBRAC_MAX_LENGTH, GlobalSettings.HORZBRAC_STEP_VALUE, True)
+                    PopulateThickness(GlobalSettings.HORZBRAC_ThicknessValues, True)
+
+
+
+                    Select Case selectedItem
+
+                        Case "HORZ BRAC-G50"
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/554"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R2"
+                        Case "HORZ BRAC-GLX"
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/LS/S3/07"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R8"
+
+                        Case "HORZ BRAC-GX"
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/559"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R4"
+
+                        Case Else
+
+                    End Select
+
+
+                ElseIf selectedSubcategory = "Diagonal Bracing" Then
+
+
+                    ComboBox7.Enabled = False
+                    CheckBox1.Enabled = True
+                    CheckBox1.Checked = False
+
+                    Populate_Depth(GlobalSettings.DIAGBRAC_MIN_DEPTH, GlobalSettings.DIAGBRAC_MAX_DEPTH, GlobalSettings.DIAGBRAC_STEP_DEPTH, True)
+                    PopulateLength(GlobalSettings.DIAGBRAC_MIN_LENGTH, GlobalSettings.DIAGBRAC_MAX_LENGTH, GlobalSettings.DIAGBRAC_STEP_VALUE, True)
+                    PopulateThickness(GlobalSettings.DIAGBRAC_ThicknessValues, True)
+
+                    Select Case selectedItem
+
+                        Case "DIAG BRAC-GLX"
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/LS/S3/07"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R8"
+                        Case "DIAG BRAC-GX"
+
+                            ''----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/559"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R4"
+
+
+                        Case Else
+
+                    End Select
+
+                ElseIf selectedSubcategory = "Bracing Spacer GX" Then
+                ElseIf selectedSubcategory = "Base plate" Then
+                ElseIf selectedSubcategory = "Shim" Then
+
+                ElseIf selectedSubcategory = "Stiffeners" Then
+                ElseIf selectedSubcategory = "Bottom Stiffeners" Then
+                ElseIf selectedSubcategory = "Splice" Then
+                ElseIf selectedSubcategory = "Rear Splice" Then
+                ElseIf selectedSubcategory = "Beams+Cleat" Then
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Structural Components-Not Applicable filed")
+
+                End If
+
+
+
+                '-------------------- Level Accessories ----------------------------
+            ElseIf selectedCategory = "Level Accessories" Then
+
+                If selectedSubcategory = "Decking panel" Then
+
+                    Select Case selectedItem
+                        Case "HD 6B RF PANEL(GSB)"
+                            ' Actions for HD 6B RF PANEL(GSB)
+
+                            ' Call with all parameters
+
+                            Populate_width(GlobalSettings.HD6BRF_PANEL_MIN_WIDTH, GlobalSettings.HD6BRF_PANEL_MAX_WIDTH, GlobalSettings.HD6BRF_PANEL_STEP_WIDTH, True)
+                            PopulateLength(GlobalSettings.HD6BRF_PANEL_MIN_LENGTH, GlobalSettings.HD6BRF_PANEL_MAX_LENGTH, GlobalSettings.HD6BRF_PANEL_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.HD6BRF_PANEL_ThicknessValues, True)
+                            Populate_height(GlobalSettings.HD6BRF_PANEL_MIN_HEIGHT, GlobalSettings.HD6BRF_PANEL_MAX_HEIGHT, GlobalSettings.HD6BRF_PANEL_STEP_HEIGHT, False)
+                            Populate_Depth(GlobalSettings.HD6BRF_PANEL_MIN_DEPTH, GlobalSettings.HD6BRF_PANEL_MAX_DEPTH, GlobalSettings.HD6BRF_PANEL_STEP_DEPTH, False)
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/1226"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R1"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+
+                        Case "HD 6B FLAT END PANEL"
+                            ' Actions for HD 6B FLAT END PANEL
+
+                            ' Call with all parameters
+
+                            Populate_width(GlobalSettings.HD6B_FLAT_END_PANEL_MIN_WIDTH, GlobalSettings.HD6B_FLAT_END_PANEL_MAX_WIDTH, GlobalSettings.HD6B_FLAT_END_PANEL_STEP_WIDTH, True)
+                            PopulateLength(GlobalSettings.HD6B_FLAT_END_PANEL_MIN_LENGTH, GlobalSettings.HHD6B_FLAT_END_PANEL_MAX_LENGTH, GlobalSettings.HD6B_FLAT_END_PANEL_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.HD6B_FLAT_END_PANEL_ThicknessValues, True)
+                            Populate_height(GlobalSettings.HD6B_FLAT_END_PANEL_MIN_HEIGHT, GlobalSettings.HD6B_FLAT_END_PANEL_MAX_HEIGHT, GlobalSettings.HD6B_FLAT_END_PANEL_STEP_HEIGHT, False)
+                            Populate_Depth(GlobalSettings.HD6B_FLAT_END_PANEL_MIN_DEPTH, GlobalSettings.HD6B_FLAT_END_PANEL_MAX_DEPTH, GlobalSettings.HD6B_FLAT_END_PANEL_STEP_DEPTH, False)
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/789"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R1"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+                        Case "RF 4B PLAIN PANEL"
+                            ' Actions for RF 4B PLAIN PANEL
+
+
+                            '-----------------------------------RF 4B PLAIN PANEL---------------------------
+
+                            ' Call with all parameters
+
+                            Populate_width(GlobalSettings.RF4B_PLAIN_PANEL_MIN_WIDTH, GlobalSettings.RF4B_PLAIN_PANEL_MAX_WIDTH, GlobalSettings.RF4B_PLAIN_PANEL_STEP_WIDTH, True)
+                            PopulateLength(GlobalSettings.RF4B_PLAIN_PANEL_MIN_LENGTH, GlobalSettings.RF4B_PLAIN_PANEL_MAX_LENGTH, GlobalSettings.RF4B_PLAIN_PANEL_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.RF4B_PLAIN_PANEL_ThicknessValues, True)
+                            Populate_height(GlobalSettings.RF4B_PLAIN_PANEL_MIN_HEIGHT, GlobalSettings.RF4B_PLAIN_PANEL_MAX_HEIGHT, GlobalSettings.RF4B_PLAIN_PANEL_STEP_HEIGHT, False)
+                            Populate_Depth(GlobalSettings.RF4B_PLAIN_PANEL_MIN_DEPTH, GlobalSettings.RF4B_PLAIN_PANEL_MAX_DEPTH, GlobalSettings.RF4B_PLAIN_PANEL_STEP_DEPTH, False)
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/819"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R1"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+                        Case "4B PANEL"
+                            ' Actions for 4B PANEL
+
+
+                            '--------------------------4B PANEL-----------------------------
+
+                            ' Call with all parameters
+
+                            Populate_width(GlobalSettings.PANEL_4B_MIN_WIDTH, GlobalSettings.PANEL_4B_MAX_WIDTH, GlobalSettings.PANEL_4B_STEP_WIDTH, True)
+                            PopulateLength(GlobalSettings.PANEL_4BL_MIN_LENGTH, GlobalSettings.PANEL_4B_LENGTH, GlobalSettings.PANEL_4BL_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.PANEL_4BL_ThicknessValues, True)
+                            Populate_Depth(GlobalSettings.PANEL_4BL_MIN_DEPTH, GlobalSettings.PANEL_4BL_MAX_DEPTH, GlobalSettings.PANEL_4B_STEP_DEPTH, False)
+                            Populate_height(GlobalSettings.PANEL_4B_MIN_HEIGHT, GlobalSettings.PANEL_4BL_MAX_HEIGHT, GlobalSettings.PANEL_4B_STEP_HEIGHT, True)
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/822"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R2"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+                        Case Else
+
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+                    End Select
+
+                    ' Add more conditions for other combinations as needed
+
+                ElseIf selectedSubcategory = "Grating Decking panel" Then
+                ElseIf selectedSubcategory = "Shelf Panel" Then
+                ElseIf selectedSubcategory = "Catwalk panels" Then
+
+
+
+                ElseIf selectedSubcategory = "Panel support Bar" Then
+
+                    ' Switch case based on ComboBox1's value
+                    Select Case selectedItem
+                        Case "Chnl 4B PSB"
+
+
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/1625"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R0"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+
+                            Populate_width(GlobalSettings.CHNL_4B_PSB_MIN_WIDTH, GlobalSettings.PCHNL_4B_PSB_MAX_WIDTH, GlobalSettings.CHNL_4B_PSB_STEP_WIDTH, False)
+                            PopulateLength(GlobalSettings.CHNL_4B_PSB_MIN_LENGTH, GlobalSettings.CHNL_4B_PSB_MAX_LENGTH, GlobalSettings.CHNL_4B_PSB_STEP_VALUE, True)
+                            PopulateThickness(GlobalSettings.CHNL_4B_PSB_ThicknessValues, True)
+                            Populate_height(GlobalSettings.CHNL_4B_PSB_MIN_HEIGHT, GlobalSettings.CHNL_4B_PSB_MAX_HEIGHT, GlobalSettings.CHNL_4B_PSB_STEP_HEIGHT, True)
+                            Populate_Depth(GlobalSettings.CHNL_4B_PSBL_MIN_DEPTH, GlobalSettings.CHNL_4B_PSB_MAX_DEPTH, GlobalSettings.CHNL_4B_PSB_STEP_DEPTH, False)
+
+
+
+
+                        Case "PLTSUPBAR WLD"
+
+
+
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/292"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R7"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+
+                            Populate_width(0, 0, 0, False)
+                            PopulateLength(GlobalSettings.PLT_SUPBAR_WLD_MIN_LENGTH, GlobalSettings.PLT_SUPBAR_WLD_MAX_LENGTH, GlobalSettings.PLT_SUPBAR_WLD_STEP_LENGTH, True)
+                            PopulateThickness(GlobalSettings.PLT_SUPBAR_WLD_ThicknessValues, True)
+                            Populate_height(0, 0, 0, False)
+                            Populate_Depth(0, 0, 0, False)
+
+
+
+                        Case Else
+                            ' Default case for any other value
+
+                    End Select
+
+                ElseIf selectedSubcategory = "Pallet Stopper" Then
+                ElseIf selectedSubcategory = "Fork Entry Bar" Then
+                ElseIf selectedSubcategory = "Guided Type Pallet Support" Then
+                ElseIf selectedSubcategory = "P&D Station" Then
+                ElseIf selectedSubcategory = "Underpass Rear Mesh" Then
+                ElseIf selectedSubcategory = "Drum Caddle" Then
+                ElseIf selectedSubcategory = "Pallet" Then
+                ElseIf selectedSubcategory = "Fork Entry Bar" Then
+                ElseIf selectedSubcategory = "Plan Bracing" Then
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Level Accessories-Not Applicable filed")
+
+                End If
+
+                '-------------------- Rack Accessories ----------------------------
+
+            ElseIf selectedCategory = "Rack Accessories" Then
+
+
+                If selectedSubcategory = "Upright Guard" Then
+
+                ElseIf selectedSubcategory = "Row guard" Then
+                ElseIf selectedSubcategory = "Mesh Cladding" Then
+                ElseIf selectedSubcategory = "Row Connector" Then
+                ElseIf selectedSubcategory = "Back Tie Rod" Then
+                ElseIf selectedSubcategory = "Wall connector" Then
+
+                ElseIf selectedSubcategory = "Tie Beam" Then
+
+
+
+                    Select Case selectedItem
+                        Case "TIE BM HEM+"
+                            ' Actions for HD 6B RF PANEL(GSB)
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/579"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R2"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+                    End Select
+                    ' Call with all parameters
+
+                    Populate_width(0, 0, 0, False)
+                    PopulateLength(GlobalSettings.TIE_BEAMHEM__MIN_LENGTH, GlobalSettings.TIE_BEAMHEM_MAX_LENGTH, GlobalSettings.TIE_BEAMHEM_STEP_VALUE, True)
+                    PopulateThickness(GlobalSettings.TIE_BEAMHEML_ThicknessValues, True)
+                    Populate_height(GlobalSettings.TIE_BEAMHEM_MIN_HEIGHT, GlobalSettings.TIE_BEAMHEM_MAX_HEIGHT, GlobalSettings.TIE_BEAMHEM_STEP_HEIGHT, True)
+                    Populate_Depth(0, 0, 0, False)
+
+
+
+                ElseIf selectedSubcategory = "Sign board" Then
+                ElseIf selectedSubcategory = "Nylon Netting" Then
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Rack Accessories-Not Applicable filed")
+
+                End If
+
+
+
+                '-------------------- Catwalk  Accessories ----------------------------
+
+            ElseIf selectedCategory = "Catwalk Accessories" Then
+
+                If selectedSubcategory = ("Walkway panel") Then
+                ElseIf selectedSubcategory = ("Gap panel") Then
+                ElseIf selectedSubcategory = ("Column gap panel") Then
+                ElseIf selectedSubcategory = ("Panel fixing clamp") Then
+                ElseIf selectedSubcategory = ("Angle welded beam GSB") Then
+
+
+                    Select Case selectedItem
+
+                        Case "Angle Welded Beam GSB"
+
+                            ComboBox14.Enabled = True
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/1186"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R0"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+
+                            'k factor
+                            PopulateComboBoxRange(ComboBox14, 40, 65, 5, True)
+
+                            Populate_width(0, 0, 0, False)
+                            PopulateLength(1000, 4000, 50, True)
+                            PopulateThickness(GlobalSettings.ANGLE_WELDED_BEAM_PSB_ThicknessValues, True)
+                            Populate_height(120, 120, 1, True)
+                            Populate_Depth(20, 20, 1, True)
+
+
+
+
+                    End Select
+
+
+
+
+
+                ElseIf selectedSubcategory = ("Tie beams") Then
+                ElseIf selectedSubcategory = ("Tie beams+PSB") Then
+                ElseIf selectedSubcategory = ("Cross Aisle beams") Then
+                ElseIf selectedSubcategory = ("Cross Aisle beams+PSB") Then
+                ElseIf selectedSubcategory = ("PSB Beams") Then
+                ElseIf selectedSubcategory = ("Beam LElseIf selectedSubcategory = Angle") Then
+
+                ElseIf selectedSubcategory = ("Joist Beam") Then
+                ElseIf selectedSubcategory = ("JElseIf selectedSubcategory = Clamp ") Then
+                ElseIf selectedSubcategory = ("Cross Aisle Channel") Then
+
+                    Select Case selectedItem
+
+                        Case "Chnl CA X65"
+
+                            '----Weight -------------
+                            TextBox5.Text = ""
+
+                            '----Drawing # -------------
+                            TextBox3.Text = "IS/HD/S3/1325"
+
+                            '----Rev No -------------
+                            TextBox4.Text = "R0"
+
+                            '----UNSPSC CODE -------------
+                            TextBox6.Text = ""
+
+                            '----Short Description -------------
+                            TextBox2.Text = ""
+
+                            '----Description   -------------
+                            TextBox7.Text = ""
+
+                            '----Long Description -------------
+                            TextBox8.Text = ""
+
+
+
+                            Populate_width(0, 0, 0, False)
+                            PopulateLength(500, 2800, 10, True)
+                            PopulateThickness(GlobalSettings.ChnlCAX65_ThicknessValues, True)
+                            Populate_height(150, 150, 1, True)
+                            Populate_Depth(0, 0, 1, False)
+
+                    End Select
+
+
+                ElseIf selectedSubcategory = ("Cross Aisle Channel Splice") Then
+                ElseIf selectedSubcategory = ("OH Stability beam Hem+") Then
+                ElseIf selectedSubcategory = ("Kick plate") Then
+
+                ElseIf selectedSubcategory = ("Aisle beading") Then
+                ElseIf selectedSubcategory = ("Joist beam end cover") Then
+                ElseIf selectedSubcategory = ("Formed Angle") Then
+                ElseIf selectedSubcategory = ("Catwalk Support bracket") Then
+                ElseIf selectedSubcategory = ("Chequered plate") Then
+                ElseIf selectedSubcategory = ("Chequered plate for VRC") Then
+                ElseIf selectedSubcategory = ("VRC tie beams") Then
+                ElseIf selectedSubcategory = ("VRC Cross aisle beams") Then
+                ElseIf selectedSubcategory = ("Picking Aisle Channel (G50)") Then
+                ElseIf selectedSubcategory = ("Cross Aisle channel (G50)") Then
+                ElseIf selectedSubcategory = ("Angle welded beam (Hem+)") Then
+                ElseIf selectedSubcategory = ("Railing Pipe and accessories") Then
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Catwalk Accessories-Not Applicable filed")
+
+                End If
+
+                '-------------------- Material Handling Equipment(MHE) ----------------
+
+            ElseIf selectedCategory = "Material Handling Equipment(MHE)" Then
+
+                If selectedSubcategory = "Stacker" Then
+
+                ElseIf selectedSubcategory = "Forklift" Then
+                ElseIf selectedSubcategory = "Articulated forklift" Then
+                ElseIf selectedSubcategory = "Reach truck" Then
+                ElseIf selectedSubcategory = "HPT" Then
+                ElseIf selectedSubcategory = "Trolley" Then
+
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Material Handling Equipment(MHE)-Not Applicable filed")
+
+                End If
+
+                '-------------------- Stock Keeping Unit(SKU)---------------------------
+
+            ElseIf selectedCategory = "Stock Keeping Unit(SKU)" Then
+
+
+                If selectedSubcategory = "Pallets" Then
+
+                ElseIf selectedSubcategory = "Bins" Then
+                ElseIf selectedSubcategory = "Crates" Then
+                ElseIf selectedSubcategory = "Gunny bag" Then
+                ElseIf selectedSubcategory = "Loose items" Then
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Stock Keeping Unit(SKU)-Not Applicable filed")
+
+                End If
+
+
+                '-------------------- Civil Layout Accessories--------------------------
+
+            ElseIf selectedCategory = "Civil Layout Accessories" Then
+
+
+                If selectedSubcategory = "Aisle Ties" Then
+                ElseIf selectedSubcategory = ("Sliding gate") Then
+                ElseIf selectedSubcategory = ("Swing gate") Then
+                ElseIf selectedSubcategory = ("VRC") Then
+                ElseIf selectedSubcategory = ("Spiral chute") Then
+                ElseIf selectedSubcategory = ("Gravity chute") Then
+                ElseIf selectedSubcategory = ("Conveyors") Then
+                ElseIf selectedSubcategory = ("Vertiflow") Then
+                ElseIf selectedSubcategory = ("Staircase") Then
+                ElseIf selectedSubcategory = ("MHE Stopper") Then
+                ElseIf selectedSubcategory = ("Bracing tower") Then
+
+
+                Else
+                    ' Handle unexpected selection
+                    MessageBox.Show("Civil Layout Accessories-Not Applicable filed")
+
+                End If
+
+
+
+                '-------------------- Rack Full sample Assembly--------------------------
+
+            ElseIf selectedCategory = "Rack Full sample Assembly" Then
+
+            Else
+                ' Default case when no specific combination is matched
+                'ClearAllFields()
+            End If
+        Else
+            ' If any ComboBox doesn't have a selection
+            'ClearAllFields()
+        End If
+
+
+
+
+
+
+        If ComboBox1.SelectedItem IsNot Nothing Then
+            ' Get the selected item
+            Dim selectedItem As String = ComboBox1.SelectedItem.ToString()
+
+            ' Use Select Case (VB.NET's version of switch)
+            Select Case selectedItem
+                Case "BEAM GSB D20 H60"
+                    Populate_20s()
+                Case "BEAM GSB D20 H70"
+                    Populate_20s()
+                Case "BEAM GSB D20 H80"
+                    Populate_20s()
+                Case "BEAM GSB D20 H90"
+                    Populate_20s()
+                Case "BEAM GSB D20 H100"
+                    Populate_20s()
+                Case "BEAM GSB D20 H110"
+                    Populate_20s()
+                Case "BEAM GSB D20 H120"
+                    Populate_20s()
+
+                Case Else
+
+                    'ComboBox11.Items.Add("NA")
+                    ComboBox11.Enabled = False
+
+                    ' Handle unexpected selection
+                    'MessageBox.Show("Not Applicable")
+
+            End Select
+
+
+        End If
+
+
+
+
+
+
+
+
+
+    End Sub
+
+
+
+
+
+    Private Sub Update_HD6BRFPanel_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.SelectedItem.ToString()      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the short description: "HD 6BP GSB W300 1 L1000 GA"
+            Dim Short_description As String = $"{modelType} W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "6 Bend - RF Panel (GSB) - 300 x 1000 x 1"
+            Dim description As String = $"6 Bend - RF Panel (GSB) - W{widthbox}x L{Lengthbox} x T{Thickness}"
+
+
+            Dim Long_description As String = $"{modelType} W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+    Private Sub Update_HD6BFlatEndPanel_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.SelectedItem.ToString()      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the short description: "Panel 6BFLT W200 1.2 L800 GA"
+            Dim Short_description As String = $"Panel 6BFLT W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "HD 6B PANEL-FLAT END-200x800x1.2"
+            Dim description As String = $"HD 6B PANEL-FLAT END-W{widthbox}x L{Lengthbox} x T{Thickness}"
+
+
+            Dim Long_description As String = $"{modelType} W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+    Private Sub Update_RF4BPlainPane_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.SelectedItem.ToString()      ' e.g. "300"
+
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the short description: "4BP PLAIN W250 1.2 L2096 GA "
+            Dim Short_description As String = $"4BP PLAIN W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "RF 4 Bend Panel - Plain- 250 x 1.2 x 2996"
+            Dim description As String = $"RF 4 Bend Panel - Plain-W{widthbox}x T{Thickness} x L{Lengthbox}"
+
+
+            Dim Long_description As String = $"{modelType} W{widthbox} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+
+    Private Sub Update_4BPanel_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox13.SelectedItem >= 0 AndAlso
+            ComboBox4.SelectedIndex >= 0 Then
+
+            ComboBox13.Enabled = True
+            Label23.Enabled = True
+
+
+            'ComboBox13.Items.Clear()
+
+
+            'For i As Integer = 10 To 50 Step 1
+            '    ComboBox13.Items.Add(i)
+            'Next
+
+            'If ComboBox13.Items.Count > 0 Then
+            '    ComboBox13.SelectedIndex = 0
+            'End If
+
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.SelectedItem.ToString()      ' e.g. "300"
+            Dim heightbox As String = ComboBox13.Text
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+
+            ' Format the short description: "4BP PLAIN W250 1.2 L2096 GA "
+            Dim Short_description As String = $"4BP PLAIN W{widthbox} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "4 Bend Panel- 45mm height - 1.2 x 1000"
+            Dim description As String = $"4 Bend Panel-H{heightbox}mm height - T{Thickness} x L{Lengthbox}"
+
+
+            Dim Long_description As String = $"{modelType} W{widthbox} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+    Private Sub ProcessDefaultPanel()
+        ' Default handling for unrecognized panel types
+        TextBox1.Text = "Please select a valid panel type"
+
+        ' Clear other controls
+        TextBox2.Text = ""
+        TextBox3.Text = ""
+
+        ' Reset other ComboBoxes if needed
+        ComboBox4.SelectedIndex = -1
+    End Sub
+
+
+
+
+
+    Private Sub Populate_20s()
+
+        ComboBox11.Enabled = True
+
+        ComboBox11.Items.Clear()
+        ' Add  upright options
+        ComboBox11.Items.Add("20 S")
+
+        ' Select the first item
+        If ComboBox11.Items.Count > 0 Then
+            ComboBox11.SelectedIndex = 0
+        End If
+
+    End Sub
+
+
+
+
+
+
+    Private Sub Update_Chnl_4B_PanelSupportBar_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox13.SelectedItem >= 0 AndAlso
+            ComboBox4.SelectedIndex >= 0 Then
+
+            ComboBox13.Enabled = True
+            Label23.Enabled = True
+
+
+            'ComboBox13.Items.Clear()
+
+
+            'For i As Integer = 10 To 50 Step 1
+            '    ComboBox13.Items.Add(i)
+            'Next
+
+            'If ComboBox13.Items.Count > 0 Then
+            '    ComboBox13.SelectedIndex = 0
+            'End If
+
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text     ' e.g. "300"
+            Dim heightbox As String = ComboBox13.Text
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+
+            ' Format the short description: "4Chnl 4B PSB H48 1.6 L600 SB "
+            Dim Short_description As String = $"4Chnl 4B PSB H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "Panel Support Bar D600 SB"
+            Dim description As String = $"Panel Support Bar D{Lengthbox} {Colorcode}"
+
+
+            Dim Long_description As String = $"{modelType} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode} {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+    Private Sub Update_Welded_PanelSupportBar_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox13.SelectedItem >= 0 AndAlso
+            ComboBox4.SelectedIndex >= 0 Then
+
+
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text     ' e.g. "300"
+            Dim heightbox As String = ComboBox13.Text
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+
+            ' Format the short description: "PLTSUPBAR WLD 1.5 L750 SB "
+            Dim Short_description As String = $"PLTSUPBAR WLD T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the  description: "Welded Type PSB - 1050 x 1.5"
+            Dim description As String = $"Welded Type PSB -L{Lengthbox} X T{Thickness}"
+
+
+            Dim Long_description As String = $"{modelType} T{Thickness} L{Lengthbox} {Colorcode} {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+    Private Sub Update_TIE_BM_HEM_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+            Dim heightbox As String = ComboBox13.Text
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the description: "TIE BM HEM+ H110 1.5 L900 OR"
+            Dim Short_description As String = $"{modelType} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the second description: "TIEBEAM HEM+ H110 1.5 L900 OR"
+            Dim description As String = $"{modelType} - H{heightbox} T{Thickness} L{Lengthbox}"
+
+            Dim Long_description As String = $"{modelType} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+
+    Private Sub Update_AngleWeldedBeamGSB_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+            Dim heightbox As String = ComboBox13.Text
+            Dim Depth_info As String = ComboBox9.Text          ' e.g. "500"
+            Dim k_info As String = ComboBox14.Text
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Format the description: "Angle Welded Beam GSB H120 x L1550 x D20 x T1.2 (K=40)"
+            Dim Short_description As String = $"Angle Welded Beam GSB H{heightbox} X L{Lengthbox} X D{Depth_info} X T{Thickness} (K={k_info}){Colorcode}"
+
+            ' Format the second description: "TIEBEAM HEM+ H110 1.5 L900 OR"
+            Dim description As String = $"{modelType} - H{heightbox} L{Lengthbox} D{Depth_info} T{Thickness}(K={k_info})"
+
+            Dim Long_description As String = $"{modelType} H{heightbox} L{Lengthbox} D{Depth_info} T{Thickness}(K={k_info}) {Colorcode}  {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+
+    Private Sub Update_ChnlCAX65B_Description()
+
+        ' Check if all required ComboBoxes have selected items
+        If ComboBox1.SelectedIndex >= 0 AndAlso
+       ComboBox6.SelectedIndex >= 0 AndAlso
+       ComboBox8.SelectedIndex >= 0 AndAlso
+       ComboBox4.SelectedIndex >= 0 Then
+
+            ' Get values from each ComboBox
+            Dim modelType As String = ComboBox1.SelectedItem.ToString()       ' e.g. "Upright GX70"
+            Dim Thickness As String = ComboBox6.SelectedItem.ToString()        ' e.g. "1.2"
+            Dim Lengthbox As String = ComboBox8.SelectedItem.ToString()      ' e.g. "1500"
+            Dim widthbox As String = ComboBox12.Text      ' e.g. "300"
+            Dim documentbox As String = TextBox3.Text.ToString()              ' e.g. "IS/HD/S3/1226"
+            Dim heightbox As String = ComboBox13.Text
+            Dim Depth_info As String = ComboBox9.Text          ' e.g. "500"
+            Dim k_info As String = ComboBox14.Text
+
+            ' Extract only the code after hyphen from ComboBox4
+            Dim full_Colorcode As String = ComboBox4.SelectedItem.ToString()          ' e.g. "SB"
+            Dim Colorcode As String = ""
+
+
+            ' Check if the string contains a hyphen
+            If full_Colorcode.Contains("-") Then
+                ' Extract the part after the hyphen
+                Colorcode = full_Colorcode.Substring(full_Colorcode.IndexOf("-") + 1).Trim()
+            Else
+                ' If no hyphen, use the full string
+                Colorcode = full_Colorcode
+            End If
+
+
+            ' Extract the X value
+            Dim xValue As Integer = ExtractXValue(modelType)
+
+            ' Use the extracted value
+            'MessageBox.Show("The X value is: " & xValue.ToString())
+
+
+
+            ' Format the description: "Chnl CA X65 H150 2 L510 GA"
+            Dim Short_description As String = $"{modelType} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode}"
+
+            ' Format the second description: "Cross Aisle Channel 150 x 2.0 x 510 (X=65)"
+            Dim description As String = $"Cross Aisle Channel H{heightbox} X T{Thickness} X L{Lengthbox} (X={xValue.ToString()})  )"
+
+            Dim Long_description As String = $"{modelType} H{heightbox} T{Thickness} L{Lengthbox} {Colorcode} {documentbox}"
+
+            ' Set the formatted text to TextBox2
+            TextBox2.Text = Short_description
+            TextBox7.Text = description
+            TextBox8.Text = Long_description
+        Else
+            ' If any ComboBox doesn't have a selection, clear or show a message
+            TextBox2.Text = "Please select all options"
+            TextBox7.Text = "Please select all options"
+            TextBox8.Text = "Please select all options"
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Extracts the numeric value after "X" from a model type string
+    ''' </summary>
+    ''' <param name="modelType">The model type string (e.g., "Chnl CA X65")</param>
+    ''' <returns>The extracted numeric value as Integer, or 0 if not found</returns>
+    Private Function ExtractXValue(ByVal modelType As String) As Integer
+        Try
+            ' Check if the string is not empty
+            If String.IsNullOrEmpty(modelType) Then
+                Return 0
+            End If
+
+            ' Find the position of "X" in the string
+            Dim xPosition As Integer = modelType.IndexOf("X")
+
+            ' If "X" is not found or it's the last character, return 0
+            If xPosition < 0 OrElse xPosition = modelType.Length - 1 Then
+                Return 0
+            End If
+
+            ' Extract the substring starting after "X"
+            Dim valueSubstring As String = modelType.Substring(xPosition + 1)
+
+            ' Extract numeric characters
+            Dim numericValue As String = ""
+            For Each c As Char In valueSubstring
+                If Char.IsDigit(c) Then
+                    numericValue &= c
+                Else
+                    ' Stop at the first non-digit character
+                    Exit For
+                End If
+            Next
+
+            ' Convert to integer and return
+            If Not String.IsNullOrEmpty(numericValue) Then
+                Return Integer.Parse(numericValue)
+            Else
+                Return 0
+            End If
+        Catch ex As Exception
+            ' Handle any exceptions and return 0
+            Return 0
+        End Try
+    End Function
+
+    Private Sub ComboBox6_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox6.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox4_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox4.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox8_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox8.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub CheckBox1_CheckedChanged(sender As Object, e As EventArgs) Handles CheckBox1.CheckedChanged
+
+        ' Enable or disable ComboBox7 based on CheckBox1's checked state
+        ComboBox7.Enabled = CheckBox1.Checked
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox9_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox9.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox7_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox7.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox10_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox10.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox12_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox12.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox5_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox5.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox13_TextChanged(sender As Object, e As EventArgs) Handles TextBox13.TextChanged
+        Update_Description()
+    End Sub
+
+    Private Sub TextBox12_TextChanged(sender As Object, e As EventArgs) Handles TextBox12.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox1_TextChanged(sender As Object, e As EventArgs) Handles TextBox1.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox10_TextChanged(sender As Object, e As EventArgs) Handles TextBox10.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox5_TextChanged(sender As Object, e As EventArgs) Handles TextBox5.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox3_TextChanged(sender As Object, e As EventArgs) Handles TextBox3.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox4_TextChanged(sender As Object, e As EventArgs) Handles TextBox4.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub TextBox6_TextChanged(sender As Object, e As EventArgs) Handles TextBox6.TextChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox13_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox13.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub ComboBox14_SelectedIndexChanged(sender As Object, e As EventArgs) Handles ComboBox14.SelectedIndexChanged
+        'Update_Description()
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+
+        Update_Description()
+    End Sub
+End Class
