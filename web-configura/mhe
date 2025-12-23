@@ -1,0 +1,16 @@
+ 
+PALLET OVERHANG	100	 	 	 	 	 	 	 	 	 
+ 	Picking aisle width (mm)	Pallet to pallet width	Cross aisle width (mm)	End Aisle width (mm)	Capacity (Kg)	Max loading height (mm)	Overall height Lowered (mm)	Straddle Outer to outer (mm)	Straddle height (mm)	 
+Forklift	4200	4000	2000	100	1000	5500	2700	1350	140	 
+Electric stacker with platform	3100	2900	2000	100	1000	5500	2700	1350	140	 
+Articulated forklift	2400	2200	3000	500	1000	10600	4800	1350	140	 
+Reach truck	3200	3000	2000	100	1000	9000	3900	1350	140	 
+Pallet truck	3000	2800	2800	1800	1000	2500	2000	1350	140	 
+Tow tractor	2000	1800	1800	850	1500	6200	5300	1350	140	 
+Double deep Reach truch	3200	3000	2000	100	1000	9000	3900	1350	140	 
+TSP	1800	1600	3000	500	1000	10600	4800	1350	140	 
+Custom1	4200	4000	2000	100	1000	5500	2700	1350	140	 
+Custom2	3100	2900	2000	100	1000	5500	2700	1350	140	 
+Custom3	2400	2200	3000	500	1000	10600	4800	1350	140	 
+ 	 	 	 	 	 	 	 	 	 	 
+ 	 	 	 	 	 	 	 	 	 	 
