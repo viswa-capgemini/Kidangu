@@ -1,0 +1,68 @@
+sir, shall i create new table for attribute definition and refer the table in MHE and part master.  i need you suggestion.
+ 
+Column Name	Data Type	Constraints / Default	Purpose / Notes
+id	uuid	PRIMARY KEY, DEFAULT gen_random_uuid()	Unique row id
+attribute_key	text	NOT NULL, UNIQUE	Key used inside mhes.attributes JSON (e.g., MFH)
+display_name	text	NOT NULL	UI label (e.g., “Maximum Fork Height”)
+unit	text	(nullable)	mm / kg / m (not needed for enum/string/boolean)
+data_type	text	NOT NULL	number / enum /  string / boolean
+min_value	numeric	(nullable)	Lower bound (only for number)
+max_value	numeric	(nullable)	Upper bound (only for number)
+default_value	jsonb	(nullable)	Default value (supports number/string/boolean)
+is_required	boolean	NOT NULL DEFAULT false	Field mandatory in UI/validation
+allowed_values	jsonb	(nullable)	Enum list (e.g., ["electric","diesel"])
+description	text	(nullable)	Helper text / tooltip
+is_active	boolean	NOT NULL DEFAULT true	Enable/disable attribute
+created_by	text	(nullable)	Audit: created user
+created_at	timestamptz	NOT NULL DEFAULT now()	Audit: created time
+updated_by	text	(nullable)	Audit: updated user
+updated_at	timestamptz	NOT NULL DEFAULT now()	Audit: updated time
+ 
+ 
+ 
+values like 
+('PART', 'Width',     'Width',     'mm', 'number', 1, 5000,  '100'::jsonb, true,  NULL, 'Part width in mm',     true, 'system'),
+
+('PART', 'Height',    'Height',    'mm', 'number', 1, 5000,  '100'::jsonb, true,  NULL, 'Part height in mm',    true, 'system'),
+
+('PART', 'Thickness', 'Thickness', 'mm', 'number', 0.1, 200, '2'::jsonb,   true,  NULL, 'Material thickness',   true, 'system');
+
+('MFH', 'Maximum Fork Height', 'mm', 'number', 2000, 6000, '3000'::jsonb, true,  NULL, 'Maximum lift height of the forks', true, 'system'),
+
+('LoadAtMFH', 'Load at MFH', 'kg', 'number', 500, 2000, '1000'::jsonb, true,  NULL, 'Rated load capacity at maximum fork height', true, 'system'),
+
+('WorkingAisle', 'Working Aisle', 'mm', 'number', 2500, 6000, '3000'::jsonb, true,  NULL, 'Minimum working aisle required for operation', true, 'system'),
+
+('CrossAisle', 'Cross Aisle', 'mm', 'number', 2500, 8000, '3500'::jsonb, false, NULL, 'Recommended cross aisle width', true, 'system')
+ 
+MHE table structure 
+ 
+Column Name	Data Type	Constraints / Default	Purpose / Notes
+id	uuid	PRIMARY KEY, DEFAULT gen_random_uuid()	Unique MHE id
+name	text	NOT NULL	MHE name (e.g., “Fork Lift - FL1A”)
+manufacturer	text	(nullable)	Manufacturer name
+brand	text	(nullable)	Brand name
+model	text	(nullable)	Model identifier
+mhe_type	text	(nullable)	Type (e.g., ReachTruck/Forklift/Stacker)
+mhe_category	text	(nullable)	Category (e.g., VNA/Counterbalance)
+glb_file_path	text	(nullable)	3D file path/location
+attributes	jsonb	NOT NULL DEFAULT '{}'::jsonb	Values-only dynamic attributes (e.g., {
+"MFH": 3500,
+  "LoadAtMFH": 1200,
+  "WorkingAisle": 3200,
+  "CrossAisle": 3500,
+  "CollapsedHeight": 2100,
+  "PowerSource": "electric",
+  "PickingAisleWidth": 3200,
+  "PalletToPalletWidth": 1200,
+  "EndAisleWidth": 3000,
+  "Capacity": 1400,
+  "MaxLoadingHeight": 6000,
+  "OverallHeightLowered": 2100,
+  "StraddleOuterToOuter": 1350,
+  "StraddleHeight": 120})
+is_active	boolean	NOT NULL DEFAULT true	Active/inactive flag
+is_deleted	boolean	NOT NULL DEFAULT false	Soft delete flag
+created_by	text	(nullable)	Audit: created user
+ 
+ 
