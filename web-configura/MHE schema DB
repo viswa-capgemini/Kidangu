@@ -65,4 +65,7 @@ is_active	boolean	NOT NULL DEFAULT true	Active/inactive flag
 is_deleted	boolean	NOT NULL DEFAULT false	Soft delete flag
 created_by	text	(nullable)	Audit: created user
  
- 
+ AKIA4JKI67
+FIJN246WKO
+"VClaKuV5XdpSoAAP4r/
+wMAEilicoK5Hx07d80e/h"
