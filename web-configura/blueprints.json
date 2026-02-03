@@ -1,0 +1,48 @@
+{
+    "SPR_Row": {
+        "ProductGroup": "SPR_V2",
+        "Rules": [
+            "this.GetNum(\"UnitsPerRow\") < 2.0 ? VALIDATE(\"RA008: Standalone units must have at least 2 units per row\") : true",
+            "this.GetNum(\"RowLength\") > 30.0 ? VALIDATE(\"RA011: Cross aisle required every 15m\") : true",
+            "this.GetBool(\"IsDoubleSided\") ? ADD_BOM(\"GSS-RC-200\", this.Children.Count * 2.0, \"IBOM\") : true",
+            "this.GetBool(\"IsDoubleSided\") ? VALIDATE(\"RC006: Row connectors installed\") : true"
+        ]
+    },
+    "SPR_Rack": {
+        "ProductGroup": "SPR_V2",
+        "Rules": [
+            "this.GetNum(\"Height\") / this.GetNum(\"Depth\") > 6.0 ? VALIDATE(\"RH006: Stability Alerting\") : true",
+            "this.GetNum(\"Height\") / this.GetNum(\"Depth\") > 6.0 ? ADD_BOM(\"STABILITY-KIT-H6\", 1.0, \"EBOM\") : true",
+            "this.GetNum(\"Height\") > 12000.0 ? VALIDATE(\"NL001: Frame height limit\") : true",
+            "ADD_BOM(LOOKUP(\"BASEPLATE\", \"HeavyDuty\", this.GetNum(\"USL\") > 1750.0), 2.0, \"EBOM\")",
+            "this.GetNum(\"TotalFrameLoad\") > this.GetNum(\"MaxFrameCapacity\") ? VALIDATE(\"NL006: Load limit\") : true",
+            "this.Children.Count == 1 ? ADD_BOM(\"TIE-ROD-KIT\", 1.0, \"IBOM\") : true",
+            "this.GetNum(\"TopBracingDistance\") < 88.0 ? VALIDATE(\"HB001: Bracing proximity\") : true",
+            "ADD_BOM(GENERATE_SKU(\"GSS-UP-ST20\", \"G14\", this.GetNum(\"Height\")), 2.0, \"EBOM\")",
+            "ADD_BOM(\"STEEL-HC-3.0MM\", this.GetNum(\"Height\")/500.0, \"MBOM\")",
+            "this.GetBool(\"RearMeshRequired\") ? ADD_BOM(\"REAR-MESH-PANEL\", this.GetNum(\"Height\")/2000.0, \"EBOM\") : true"
+        ]
+    },
+    "SPR_BeamLevel": {
+        "ProductGroup": "SPR_V2",
+        "Rules": [
+            "this.GetNum(\"LevelPitch\") != 50.0 ? VALIDATE(\"LL001: Pitch error\") : true",
+            "this.GetNum(\"LevelLoad\") > this.GetNum(\"BeamCapacity\") ? VALIDATE(\"BS002: Overload\") : true",
+            "ADD_BOM(LOOKUP(\"BEAM\", \"MaxLoad\", this.GetNum(\"LevelLoad\")), 2.0, \"EBOM\")",
+            "this.GetNum(\"USL\") > 3500.0 ? VALIDATE(\"LLH001: USL limit\") : true",
+            "this.GetNum(\"PalletLoad\") > 1000.0 ? VALIDATE(\"PS005: Pallet load limit\") : true",
+            "this.GetNum(\"PalletClearance\") < 75.0 ? VALIDATE(\"RP001: Clearance error\") : true",
+            "this.GetNum(\"VerticalClearance\") < 75.0 ? VALIDATE(\"RP010: Vertical clearance error\") : true",
+            "ADD_BOM(\"BEAM-SAFETY-PIN\", 2.0, \"IBOM\")",
+            "ADD_BOM(\"RAL-2004-ORANGE\", 1.0, \"MBOM\")"
+        ]
+    },
+    "Aisle": {
+        "ProductGroup": "Shared",
+        "Rules": [
+            "this.GetNum(\"AisleWidth\") < this.GetNum(\"MHEWorkingAisle\") ? VALIDATE(\"MHE002: Aisle too narrow\") : true",
+            "this.GetNum(\"PalletLoad\") > this.GetNum(\"MHECapacity\") ? VALIDATE(\"MHE001: Load too heavy\") : true",
+            "REGISTER_LINK(\"Aisle-Link\")"
+        ]
+    }
+}
